@@ -29,9 +29,10 @@ function tooltip:ADDON_LOADED(addon)
         mousescroll = true,
         rotate = true,
         spin = false,
-        dressed = false, -- whether the model should be wearing your current outfit, or be naked
+        -- zoom = false,
+        dressed = true, -- whether the model should be wearing your current outfit, or be naked
         customModel = false,
-        modelRace = 1, -- raceid (1:human)
+        modelRace = 7, -- raceid (1:human)
         modelGender = 1, -- 0:male, 1:female
     })
     db = _G[myname.."DB"]
@@ -137,10 +138,14 @@ function ns:ShowItem(link)
     local slot = select(9, GetItemInfo(id))
     if (not db.modifier or self.modifiers[db.modifier]()) and tooltip.item ~= id then
         tooltip.item = id
-        -- TODO: preview from class-set tokens here? Would have to build a list
+        -- TODO: preview from class-set tokens here? Would have to build a list...
 
         if self.slot_facings[slot] and IsDressableItem(id) then
             tooltip.model:SetFacing(self.slot_facings[slot] - (db.rotate and 0.5 or 0))
+
+            -- TODO: zoom, which is tricky because it depends on race and gender
+            -- tooltip.model:SetPosition(unpack(db.zoom and self.slot_positions[slot] or self.slot_positions[DEFAULT]))
+            -- tooltip.model:SetModelScale(1)
 
             tooltip:Show()
             tooltip.owner = GameTooltip
@@ -168,17 +173,6 @@ end
 function ns:ResetModel(model)
     if db.customModel then
         model:SetCustomRace(db.modelRace, db.modelGender)
-        -- hack for hidden helm and cloak showing on models
-        local showingHelm, showingCloak = ShowingHelm(), ShowingCloak()
-        local helm, cloak = GetInventoryItemID("player", INVSLOT_HEAD), GetInventoryItemID("player", INVSLOT_BACK)
-        if not showingHelm and helm then
-            model:TryOn(helm)
-            model:UndressSlot(INVSLOT_HEAD)
-        end
-        if not showingCloak and cloak then
-            model:TryOn(cloak)
-            model:UndressSlot(INVSLOT_BACK)
-        end
         model:RefreshCamera()
     else
         model:Dress()
@@ -208,6 +202,21 @@ ns.slot_facings = {
     INVTYPE_WAIST = 0,
     INVTYPE_LEGS = 0,
     INVTYPE_FEET = 0,
+}
+
+-- /script AppearanceTooltipTooltip.model:SetPosition(0,0,0)
+-- x,y,z is effectively zoom, horizontal, vertical
+ns.slot_positions = {
+    INVTYPE_2HWEAPON = {0.8, -0.3, 0},
+    INVTYPE_WEAPON = {0.8, -0.3, 0},
+    INVTYPE_WEAPONMAINHAND = {0.8, -0.3, 0},
+    INVTYPE_WEAPONOFFHAND = {0.8, 0.3, 0},
+    INVTYPE_SHIELD = {0.8, 0, 0},
+    INVTYPE_HOLDABLE = {0.8, 0.3, 0},
+    INVTYPE_RANGED = {0.8, -0.3, 0},
+    INVTYPE_RANGEDRIGHT = {0.8, 0.3, 0},
+    INVTYPE_THROWN = {0.8, -0.3, 0},
+    [DEFAULT] = {0, 0, 0},
 }
 
 ns.modifiers = {
