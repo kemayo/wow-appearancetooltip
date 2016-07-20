@@ -34,6 +34,7 @@ function tooltip:ADDON_LOADED(addon)
         customModel = false,
         modelRace = 7, -- raceid (1:human)
         modelGender = 1, -- 0:male, 1:female
+        notifyKnown = true,
     })
     db = _G[myname.."DB"]
 
@@ -75,6 +76,12 @@ tooltip.model:SetPoint("BOTTOMRIGHT", tooltip, "BOTTOMRIGHT", -5, 5)
 tooltip.model:SetScript("OnShow", function(self)
     ns:ResetModel(self)
 end)
+
+local known = tooltip:CreateFontString(nil, "OVERLAY", "GameFontHighlightMedium");
+known:SetPoint("BOTTOMLEFT", tooltip, "BOTTOMLEFT", 6, 12)
+known:SetPoint("BOTTOMRIGHT", tooltip, "BOTTOMRIGHT", -6, 12)
+known:SetText("|TInterface\\RaidFrame\\ReadyCheck-Ready:0|t " .. TRANSMOGRIFY_TOOLTIP_APPEARANCE_KNOWN, 1, 1, 1)
+known:Show()
 
 -- Ye showing:
 GameTooltip:HookScript("OnTooltipSetItem", function(self)
@@ -160,10 +167,7 @@ function ns:ShowItem(link)
         end
     end
 
-    if C_TransmogCollection.PlayerHasTransmog(id) then
-        GameTooltip:AddLine(" ");
-        GameTooltip:AddLine("|TInterface\\RaidFrame\\ReadyCheck-Ready:0|t " .. TRANSMOGRIFY_TOOLTIP_APPEARANCE_KNOWN, 1, 1, 1)
-    end
+    known:SetShown(db.notifyKnown and C_TransmogCollection.PlayerHasTransmog(id))
 end
 
 function ns:HideItem()
