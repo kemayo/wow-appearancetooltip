@@ -37,6 +37,7 @@ function tooltip:ADDON_LOADED(addon)
         notifyKnown = true,
     })
     db = _G[myname.."DB"]
+    ns.db = db
 
     self:UnregisterEvent("ADDON_LOADED")
 end
@@ -117,7 +118,7 @@ positioner:SetScript("OnUpdate", function(self)
             our_point = "BOTTOM"
             owner_point = "TOP"
         end
-        if x / GetScreenWidth() > 0.5 then
+        if x / GetScreenWidth() > 0.5 and not ShoppingTooltip1:IsVisible() then
             our_point = our_point.."LEFT"
             owner_point = owner_point.."LEFT"
         else
