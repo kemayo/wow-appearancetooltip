@@ -81,7 +81,6 @@ end)
 local known = tooltip:CreateFontString(nil, "OVERLAY", "GameFontHighlightMedium");
 known:SetPoint("BOTTOMLEFT", tooltip, "BOTTOMLEFT", 6, 12)
 known:SetPoint("BOTTOMRIGHT", tooltip, "BOTTOMRIGHT", -6, 12)
-known:SetText("|TInterface\\RaidFrame\\ReadyCheck-Ready:0|t " .. TRANSMOGRIFY_TOOLTIP_APPEARANCE_KNOWN, 1, 1, 1)
 known:Show()
 
 -- Ye showing:
@@ -166,9 +165,24 @@ function ns:ShowItem(link)
         else
             tooltip:Hide()
         end
-    end
 
-    known:SetShown(db.notifyKnown and C_TransmogCollection.PlayerHasTransmog(id))
+        if db.notifyKnown and ns.CanTransmogItem(link) then
+            local appearance = ns.GetItemAppearance(link)
+
+            if ns.PlayerHasAppearance(appearance) then
+                if C_TransmogCollection.PlayerHasTransmog(id) then
+                    known:SetText("|TInterface\\RaidFrame\\ReadyCheck-Ready:0|t " .. TRANSMOGRIFY_TOOLTIP_APPEARANCE_KNOWN)
+                else
+                    known:SetText("|TInterface\\RaidFrame\\ReadyCheck-Ready:0|t " .. TRANSMOGRIFY_TOOLTIP_ITEM_UNKNOWN_APPEARANCE_KNOWN)
+                end
+            else
+                known:SetText("|TInterface\\RaidFrame\\ReadyCheck-NotReady:0|t |cffff0000" .. TRANSMOGRIFY_TOOLTIP_APPEARANCE_UNKNOWN)
+            end
+            known:Show()
+        else
+            known:Hide()
+        end
+    end
 end
 
 function ns:HideItem()

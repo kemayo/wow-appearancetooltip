@@ -10,3 +10,4 @@
 ## SavedVariablesPerCharacter: AppearanceTooltipDBPC
 
 addon.lua
+scanner.lua
