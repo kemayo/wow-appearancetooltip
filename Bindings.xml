@@ -1,0 +1,8 @@
+<Bindings>
+    <Binding name="AppearanceKnown_TooltipScrollUp" hidden="true">
+        AppearanceTooltipTooltip.model:SetFacing(AppearanceTooltipTooltip.model:GetFacing() + 0.3)
+    </Binding>
+    <Binding name="AppearanceKnown_TooltipScrollDown" hidden="true">
+        AppearanceTooltipTooltip.model:SetFacing(AppearanceTooltipTooltip.model:GetFacing() - 0.3)
+    </Binding>
+</Bindings>

@@ -1,0 +1,12 @@
+## Interface: 70000
+## Title: AppearanceTooltip
+## Author: Kemayo
+## Notes: Show the item your mouse is over on your character in a tooltip
+## Version: @project-version@
+## LoadOnDemand: 0
+## OptionalDeps: tekDebug
+
+## SavedVariables: AppearanceTooltipDB
+## SavedVariablesPerCharacter: AppearanceTooltipDBPC
+
+addon.lua
