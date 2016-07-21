@@ -225,6 +225,7 @@ ns.slot_removals = {
     INVTYPE_CHEST = {SLOT_TABARD},
     INVTYPE_ROBE = {SLOT_TABARD, SLOT_WAIST, SLOT_SHOULDER},
     INVTYPE_WRIST = {SLOT_HANDS},
+    INVTYPE_TABARD = {SLOT_WAIST},
 }
 ns.always_remove = {
     INVTYPE_WEAPON = true,
