@@ -11,3 +11,4 @@
 
 addon.lua
 appropriate.lua
+config.lua
