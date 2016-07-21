@@ -30,7 +30,8 @@ function tooltip:ADDON_LOADED(addon)
         rotate = true,
         spin = false,
         -- zoom = false,
-        dressed = false, -- whether the model should be wearing your current outfit, or be naked
+        dressed = true, -- whether the model should be wearing your current outfit, or be naked
+        uncover = true,
         customModel = false,
         modelRace = 7, -- raceid (1:human)
         modelGender = 1, -- 0:male, 1:female
@@ -162,6 +163,14 @@ function ns:ShowItem(link)
             spinner:SetShown(db.spin)
 
             self:ResetModel(tooltip.model)
+            if ns.slot_removals[slot] and (ns.always_remove[slot] or db.uncover) then
+                -- 1. If this is a weapon, force-remove the item in the main-hand slot! Otherwise it'll get dressed into the
+                --    off-hand, maybe, depending on things which are more hassle than it's worth to work out.
+                -- 2. Other slots will be entirely covered, making for a useless preview. e.g. shirts.
+                for _, slotid in ipairs(ns.slot_removals[slot]) do
+                    tooltip.model:UndressSlot(slotid)
+                end
+            end
             tooltip.model:TryOn(link)
         else
             tooltip:Hide()
@@ -201,6 +210,26 @@ function ns:ResetModel(model)
         model:Undress()
     end
 end
+
+local SLOT_MAINHAND = GetInventorySlotInfo("MainHandSlot")
+local SLOT_TABARD = GetInventorySlotInfo("TabardSlot")
+local SLOT_CHEST = GetInventorySlotInfo("ChestSlot")
+local SLOT_HANDS = GetInventorySlotInfo("HandsSlot")
+local SLOT_WAIST = GetInventorySlotInfo("WaistSlot")
+local SLOT_SHOULDER = GetInventorySlotInfo("ShoulderSlot")
+
+ns.slot_removals = {
+    INVTYPE_WEAPON = {SLOT_MAINHAND},
+    INVTYPE_2HWEAPON = {SLOT_MAINHAND},
+    INVTYPE_BODY = {SLOT_TABARD, SLOT_CHEST, SLOT_SHOULDER},
+    INVTYPE_CHEST = {SLOT_TABARD},
+    INVTYPE_ROBE = {SLOT_TABARD, SLOT_WAIST},
+    INVTYPE_WRIST = {SLOT_HANDS},
+}
+ns.always_remove = {
+    INVTYPE_WEAPON = true,
+    INVTYPE_2HWEAPON = true,
+}
 
 ns.slot_facings = {
     INVTYPE_HEAD = 0,
