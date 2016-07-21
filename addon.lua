@@ -166,14 +166,14 @@ function ns:ShowItem(link)
             tooltip:Hide()
         end
 
-        if db.notifyKnown and ns.CanTransmogItem(link) then
-            local appearance = ns.GetItemAppearance(link)
+        if db.notifyKnown then
+            local hasAppearance, appearanceFromOtherItem = ns.PlayerHasAppearance(link)
 
-            if ns.PlayerHasAppearance(appearance) then
-                if C_TransmogCollection.PlayerHasTransmog(id) then
-                    known:SetText("|TInterface\\RaidFrame\\ReadyCheck-Ready:0|t " .. TRANSMOGRIFY_TOOLTIP_APPEARANCE_KNOWN)
-                else
+            if hasAppearance then
+                if appearanceFromOtherItem then
                     known:SetText("|TInterface\\RaidFrame\\ReadyCheck-Ready:0|t " .. TRANSMOGRIFY_TOOLTIP_ITEM_UNKNOWN_APPEARANCE_KNOWN)
+                else
+                    known:SetText("|TInterface\\RaidFrame\\ReadyCheck-Ready:0|t " .. TRANSMOGRIFY_TOOLTIP_APPEARANCE_KNOWN)
                 end
             else
                 known:SetText("|TInterface\\RaidFrame\\ReadyCheck-NotReady:0|t |cffff0000" .. TRANSMOGRIFY_TOOLTIP_APPEARANCE_UNKNOWN)
@@ -245,6 +245,59 @@ ns.modifiers = {
 }
 
 -- Utility fun
+
+function ns.CanTransmogItem(itemLink)
+    local itemID = GetItemInfoInstant(itemLink)
+    if itemID then
+        local canBeChanged, noChangeReason, canBeSource, noSourceReason = C_Transmog.GetItemInfo(itemID)
+        return canBeSource, noSourceReason
+    end
+end
+
+function ns.PlayerHasAppearance(item)
+    if not ns.CanTransmogItem(item) then
+        return
+    end
+    local state = ns.CheckTooltipFor(item, TRANSMOGRIFY_TOOLTIP_APPEARANCE_UNKNOWN, TRANSMOGRIFY_TOOLTIP_ITEM_UNKNOWN_APPEARANCE_KNOWN)
+    if state == TRANSMOGRIFY_TOOLTIP_APPEARANCE_UNKNOWN then
+        return
+    end
+    return true, state == TRANSMOGRIFY_TOOLTIP_ITEM_UNKNOWN_APPEARANCE_KNOWN
+end
+
+do
+    local tooltip
+    function ns.CheckTooltipFor(link, ...)
+        if not tooltip then
+            tooltip = CreateFrame("GameTooltip", "AppearanceTooltipScanningTooltip", nil, "GameTooltipTemplate")
+            tooltip:SetOwner(WorldFrame, "ANCHOR_NONE")
+        end
+        tooltip:ClearLines()
+
+        -- just showing tooltip for an itemid
+        -- uses rather innocent checking so that slot can be a link or an itemid
+        local link = tostring(link) -- so that ":match" is guaranteed to be okay
+        if not link:match("item:") then
+            link = "item:"..link
+        end
+        tooltip:SetHyperlink(link)
+
+        for i=2, tooltip:NumLines() do
+            local left = _G["AppearanceTooltipScanningTooltipTextLeft"..i]
+            --local right = _G["AppearanceTooltipScanningTooltipTextRight"..i]
+            if left and left:IsShown() then
+                local text = left:GetText()
+                for ii=1, select('#', ...) do
+                    if string.match(text, (select(ii, ...))) then
+                        return text
+                    end
+                end
+            end
+            --if right and right:IsShown() and string.match(right:GetText(), text) then return true end
+        end
+        return false
+    end
+end
 
 function ns.Print(...) print("|cFF33FF99".. myfullname.. "|r:", ...) end
 
