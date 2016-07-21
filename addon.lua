@@ -44,6 +44,7 @@ end
 
 function tooltip:PLAYER_LOGIN()
     tooltip.model:SetUnit("player")
+    C_TransmogCollection.SetShowMissingSourceInItemTooltips(true)
 end
 
 function tooltip:PLAYER_REGEN_ENABLED()
