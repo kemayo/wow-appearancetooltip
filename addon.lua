@@ -36,6 +36,7 @@ function tooltip:ADDON_LOADED(addon)
         modelRace = 7, -- raceid (1:human)
         modelGender = 1, -- 0:male, 1:female
         notifyKnown = true,
+        currentClass = false,
     })
     db = _G[myname.."DB"]
     ns.db = db
@@ -149,7 +150,7 @@ function ns:ShowItem(link)
         tooltip.item = id
         -- TODO: preview from class-set tokens here? Would have to build a list...
 
-        if self.slot_facings[slot] and IsDressableItem(id) then
+        if self.slot_facings[slot] and IsDressableItem(id) and (not db.currentClass or ns.ItemIsAppropriateForPlayer(id)) then
             tooltip.model:SetFacing(self.slot_facings[slot] - (db.rotate and 0.5 or 0))
 
             -- TODO: zoom, which is tricky because it depends on race and gender
