@@ -30,7 +30,7 @@ function tooltip:ADDON_LOADED(addon)
         rotate = true,
         spin = false,
         -- zoom = false,
-        dressed = true, -- whether the model should be wearing your current outfit, or be naked
+        dressed = false, -- whether the model should be wearing your current outfit, or be naked
         customModel = false,
         modelRace = 7, -- raceid (1:human)
         modelGender = 1, -- 0:male, 1:female
