@@ -217,6 +217,7 @@ local SLOT_CHEST = GetInventorySlotInfo("ChestSlot")
 local SLOT_HANDS = GetInventorySlotInfo("HandsSlot")
 local SLOT_WAIST = GetInventorySlotInfo("WaistSlot")
 local SLOT_SHOULDER = GetInventorySlotInfo("ShoulderSlot")
+local SLOT_FEET = GetInventorySlotInfo("FeetSlot")
 
 ns.slot_removals = {
     INVTYPE_WEAPON = {SLOT_MAINHAND},
@@ -224,6 +225,7 @@ ns.slot_removals = {
     INVTYPE_BODY = {SLOT_TABARD, SLOT_CHEST, SLOT_SHOULDER},
     INVTYPE_CHEST = {SLOT_TABARD},
     INVTYPE_ROBE = {SLOT_TABARD, SLOT_WAIST, SLOT_SHOULDER},
+    INVTYPE_LEGS = {SLOT_TABARD, SLOT_WAIST, SLOT_FEET}, -- TODO: chest *if* robe
     INVTYPE_WRIST = {SLOT_HANDS},
     INVTYPE_TABARD = {SLOT_WAIST},
 }
