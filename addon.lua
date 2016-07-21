@@ -222,6 +222,7 @@ ns.slot_facings = {
     INVTYPE_WAIST = 0,
     INVTYPE_LEGS = 0,
     INVTYPE_FEET = 0,
+    INVTYPE_TABARD = 0,
 }
 
 -- /script AppearanceTooltipTooltip.model:SetPosition(0,0,0)
