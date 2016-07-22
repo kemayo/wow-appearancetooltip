@@ -183,7 +183,7 @@ function ns:ShowItem(link)
         end
 
         if db.notifyKnown then
-            local hasAppearance, appearanceFromOtherItem = ns.PlayerHasAppearance(link)
+            local hasAppearance, appearanceFromOtherItem, notTransmoggable = ns.PlayerHasAppearance(link)
 
             if hasAppearance then
                 if appearanceFromOtherItem then
@@ -191,6 +191,8 @@ function ns:ShowItem(link)
                 else
                     known:SetText("|TInterface\\RaidFrame\\ReadyCheck-Ready:0|t " .. TRANSMOGRIFY_TOOLTIP_APPEARANCE_KNOWN)
                 end
+            elseif notTransmoggable then
+                known:SetText("|c00ffff00" .. TRANSMOGRIFY_INVALID_DESTINATION)
             else
                 known:SetText("|TInterface\\RaidFrame\\ReadyCheck-NotReady:0|t |cffff0000" .. TRANSMOGRIFY_TOOLTIP_APPEARANCE_UNKNOWN)
             end
@@ -299,7 +301,7 @@ end
 
 function ns.PlayerHasAppearance(item)
     if not ns.CanTransmogItem(item) then
-        return
+        return false, false, true
     end
     local state = ns.CheckTooltipFor(item, TRANSMOGRIFY_TOOLTIP_APPEARANCE_UNKNOWN, TRANSMOGRIFY_TOOLTIP_ITEM_UNKNOWN_APPEARANCE_KNOWN)
     if state == TRANSMOGRIFY_TOOLTIP_APPEARANCE_UNKNOWN then
