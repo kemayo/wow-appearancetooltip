@@ -55,7 +55,7 @@ local function newDropdown(parent, key, description, values)
     return dropdown
 end
 
-local newFontString = function(parent, text, template,  ...)
+local function newFontString(parent, text, template,  ...)
     local label = parent:CreateFontString(nil, nil, template or 'GameFontHighlight')
     label:SetPoint(...)
     label:SetText(text)
@@ -116,6 +116,14 @@ local currentClass = newCheckbox(panel, 'currentClass', 'Current character only'
 -- local zoom = newCheckbox(panel, 'zoom', 'Zoom on item', "Zoom in on the item being previewed")
 -- local  = newCheckbox(panel, 'customModel', 'Use custom model', "Choose a custom model to use instead of your current character")
 
+local modifier = newDropdown(panel, 'modifier', "Show with modifier", {
+    Alt = "Alt",
+    Ctrl = "Ctrl",
+    Shift = "Shift",
+    None = "None",
+})
+UIDropDownMenu_SetWidth(modifier, 100)
+
 local modelBox = newBox(panel, "Custom player model", 48)
 local customModel = newCheckbox(modelBox, 'customModel', 'Use a different model', "Instead of your current character, use a specific race/gender")
 local customRaceDropdown = newDropdown(modelBox, 'modelRace', "Choose your custom race", {
@@ -149,7 +157,10 @@ currentClass:SetPoint("TOPLEFT", notifyKnown, "BOTTOMLEFT", 0, -4)
 mousescroll:SetPoint("TOPLEFT", currentClass, "BOTTOMLEFT", 0, -4)
 spin:SetPoint("TOPLEFT", mousescroll, "BOTTOMLEFT", 0, -4)
 
-modelBox:SetPoint("TOP", spin, "BOTTOM", 0, -20)
+local modifierLabel = newFontString(panel, "Show with modifier key:", nil, 'TOPLEFT', spin, 'BOTTOMLEFT', 0, -10)
+modifier:SetPoint("LEFT", modifierLabel, "RIGHT", 4, -2)
+
+modelBox:SetPoint("TOP", modifier, "BOTTOM", 0, -20)
 customModel:SetPoint("LEFT", modelBox, 12, 0)
 customRaceDropdown:SetPoint("LEFT", customModel.Text, "RIGHT", 12, -2)
 customGenderDropdown:SetPoint("TOPLEFT", customRaceDropdown, "TOPRIGHT", 4, 0)

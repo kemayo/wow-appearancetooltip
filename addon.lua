@@ -25,7 +25,7 @@ function tooltip:ADDON_LOADED(addon)
     if addon ~= myname then return end
 
     _G[myname.."DB"] = setDefaults(_G[myname.."DB"] or {}, {
-        modifier = false, -- or "Alt", "Ctrl", "Shift"
+        modifier = "None", -- or "Alt", "Ctrl", "Shift"
         mousescroll = true,
         rotate = true,
         spin = false,
@@ -278,6 +278,7 @@ ns.modifiers = {
     Shift = IsShiftKeyDown,
     Ctrl = IsControlKeyDown,
     Alt = IsAltKeyDown,
+    None = function() return true end,
 }
 
 -- Utility fun
