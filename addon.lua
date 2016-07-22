@@ -220,6 +220,7 @@ function ns:ResetModel(model)
 end
 
 ns.SLOT_MAINHAND = GetInventorySlotInfo("MainHandSlot")
+ns.SLOT_OFFHAND = GetInventorySlotInfo("SecondaryHandSlot")
 ns.SLOT_TABARD = GetInventorySlotInfo("TabardSlot")
 ns.SLOT_CHEST = GetInventorySlotInfo("ChestSlot")
 ns.SLOT_HANDS = GetInventorySlotInfo("HandsSlot")
@@ -231,12 +232,13 @@ ns.SLOT_ROBE = -99 -- Magic!
 ns.slot_removals = {
     INVTYPE_WEAPON = {ns.SLOT_MAINHAND},
     INVTYPE_2HWEAPON = {ns.SLOT_MAINHAND},
-    INVTYPE_BODY = {ns.SLOT_TABARD, ns.SLOT_CHEST, ns.SLOT_SHOULDER},
-    INVTYPE_CHEST = {ns.SLOT_TABARD},
-    INVTYPE_ROBE = {ns.SLOT_TABARD, ns.SLOT_WAIST, ns.SLOT_SHOULDER},
-    INVTYPE_LEGS = {ns.SLOT_TABARD, ns.SLOT_WAIST, ns.SLOT_FEET, ns.SLOT_ROBE},
+    INVTYPE_BODY = {ns.SLOT_TABARD, ns.SLOT_CHEST, ns.SLOT_SHOULDER, ns.SLOT_OFFHAND},
+    INVTYPE_CHEST = {ns.SLOT_TABARD, ns.SLOT_OFFHAND},
+    INVTYPE_ROBE = {ns.SLOT_TABARD, ns.SLOT_WAIST, ns.SLOT_SHOULDER, ns.SLOT_OFFHAND},
+    INVTYPE_LEGS = {ns.SLOT_TABARD, ns.SLOT_WAIST, ns.SLOT_FEET, ns.SLOT_ROBE, ns.SLOT_OFFHAND},
+    INVTYPE_WAIST = {ns.SLOT_OFFHAND},
     INVTYPE_WRIST = {ns.SLOT_HANDS},
-    INVTYPE_TABARD = {ns.SLOT_WAIST},
+    INVTYPE_TABARD = {ns.SLOT_WAIST, ns.SLOT_OFFHAND},
 }
 ns.always_remove = {
     INVTYPE_WEAPON = true,
@@ -291,6 +293,7 @@ ns.modifiers = {
 
 -- Utility fun
 
+--/dump C_Transmog.GetItemInfo(GetItemInfoInstant(""))
 function ns.CanTransmogItem(itemLink)
     local itemID = GetItemInfoInstant(itemLink)
     if itemID then
