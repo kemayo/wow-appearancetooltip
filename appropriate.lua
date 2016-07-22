@@ -130,6 +130,9 @@ local valid_classes = {
             [LE_ITEM_WEAPON_AXE1H] = true,
             [LE_ITEM_WEAPON_MACE1H] = true,
             [LE_ITEM_WEAPON_SWORD1H] = true,
+            [LE_ITEM_WEAPON_BOWS] = true,
+            [LE_ITEM_WEAPON_CROSSBOW] = true,
+            [LE_ITEM_WEAPON_GUNS] = true,
         },
         [LE_ITEM_CLASS_ARMOR] = {
             [LE_ITEM_ARMOR_LEATHER] = true,
