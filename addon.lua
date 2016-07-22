@@ -169,7 +169,12 @@ function ns:ShowItem(link)
                 --    off-hand, maybe, depending on things which are more hassle than it's worth to work out.
                 -- 2. Other slots will be entirely covered, making for a useless preview. e.g. shirts.
                 for _, slotid in ipairs(ns.slot_removals[slot]) do
-                    tooltip.model:UndressSlot(slotid)
+                    if slotid == ns.SLOT_ROBE and select(4, GetItemInfoInstant(GetInventoryItemID("player", ns.SLOT_CHEST))) == 'INVTYPE_ROBE' then
+                        slotid = ns.SLOT_CHEST
+                    end
+                    if slotid > 0 then
+                        tooltip.model:UndressSlot(slotid)
+                    end
                 end
             end
             tooltip.model:TryOn(link)
@@ -212,23 +217,24 @@ function ns:ResetModel(model)
     end
 end
 
-local SLOT_MAINHAND = GetInventorySlotInfo("MainHandSlot")
-local SLOT_TABARD = GetInventorySlotInfo("TabardSlot")
-local SLOT_CHEST = GetInventorySlotInfo("ChestSlot")
-local SLOT_HANDS = GetInventorySlotInfo("HandsSlot")
-local SLOT_WAIST = GetInventorySlotInfo("WaistSlot")
-local SLOT_SHOULDER = GetInventorySlotInfo("ShoulderSlot")
-local SLOT_FEET = GetInventorySlotInfo("FeetSlot")
+ns.SLOT_MAINHAND = GetInventorySlotInfo("MainHandSlot")
+ns.SLOT_TABARD = GetInventorySlotInfo("TabardSlot")
+ns.SLOT_CHEST = GetInventorySlotInfo("ChestSlot")
+ns.SLOT_HANDS = GetInventorySlotInfo("HandsSlot")
+ns.SLOT_WAIST = GetInventorySlotInfo("WaistSlot")
+ns.SLOT_SHOULDER = GetInventorySlotInfo("ShoulderSlot")
+ns.SLOT_FEET = GetInventorySlotInfo("FeetSlot")
+ns.SLOT_ROBE = -99 -- Magic!
 
 ns.slot_removals = {
-    INVTYPE_WEAPON = {SLOT_MAINHAND},
-    INVTYPE_2HWEAPON = {SLOT_MAINHAND},
-    INVTYPE_BODY = {SLOT_TABARD, SLOT_CHEST, SLOT_SHOULDER},
-    INVTYPE_CHEST = {SLOT_TABARD},
-    INVTYPE_ROBE = {SLOT_TABARD, SLOT_WAIST, SLOT_SHOULDER},
-    INVTYPE_LEGS = {SLOT_TABARD, SLOT_WAIST, SLOT_FEET}, -- TODO: chest *if* robe
-    INVTYPE_WRIST = {SLOT_HANDS},
-    INVTYPE_TABARD = {SLOT_WAIST},
+    INVTYPE_WEAPON = {ns.SLOT_MAINHAND},
+    INVTYPE_2HWEAPON = {ns.SLOT_MAINHAND},
+    INVTYPE_BODY = {ns.SLOT_TABARD, ns.SLOT_CHEST, ns.SLOT_SHOULDER},
+    INVTYPE_CHEST = {ns.SLOT_TABARD},
+    INVTYPE_ROBE = {ns.SLOT_TABARD, ns.SLOT_WAIST, ns.SLOT_SHOULDER},
+    INVTYPE_LEGS = {ns.SLOT_TABARD, ns.SLOT_WAIST, ns.SLOT_FEET, ns.SLOT_ROBE},
+    INVTYPE_WRIST = {ns.SLOT_HANDS},
+    INVTYPE_TABARD = {ns.SLOT_WAIST},
 }
 ns.always_remove = {
     INVTYPE_WEAPON = true,
