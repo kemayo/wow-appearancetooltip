@@ -110,13 +110,13 @@ local dressed = newCheckbox(panel, 'dressed', 'Wear your clothes', "Show the mod
 local uncover = newCheckbox(panel, 'uncover', 'Uncover previewed item', "Remove clothes that would hide the item you're trying to preview")
 local mousescroll = newCheckbox(panel, 'mousescroll', 'Rotate with mousewheel', "Use the mousewheel to rotate the model in the tooltip")
 local spin = newCheckbox(panel, 'spin', 'Spin model', "Constantly spin the model while it's displayed")
-local notifyKnown = newCheckbox(panel, 'notifyKnown', 'Display known', "Display a label showing whether you know the item appearance already")
+local notifyKnown = newCheckbox(panel, 'notifyKnown', 'Display transmog information', "Display a label showing whether you know the item appearance already")
 local currentClass = newCheckbox(panel, 'currentClass', 'Current character only', "Only show previews on items that the current character can collect")
 
 -- local zoom = newCheckbox(panel, 'zoom', 'Zoom on item', "Zoom in on the item being previewed")
 -- local  = newCheckbox(panel, 'customModel', 'Use custom model', "Choose a custom model to use instead of your current character")
 
-local modifier = newDropdown(panel, 'modifier', "Show with modifier", {
+local modifier = newDropdown(panel, 'modifier', "Show preview with modifier", {
     Alt = "Alt",
     Ctrl = "Ctrl",
     Shift = "Shift",
