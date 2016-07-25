@@ -10,7 +10,7 @@ local setDefaults, db
 local tooltip = CreateFrame("Frame", "AppearanceTooltipTooltip", UIParent, "TooltipBorderedFrameTemplate")
 tooltip:SetClampedToScreen(true)
 tooltip:SetFrameStrata("TOOLTIP")
-tooltip:SetSize(300, 300)
+tooltip:SetSize(300, 320)
 tooltip:Hide()
 
 tooltip:SetScript("OnEvent", function(self, event, ...)
@@ -81,10 +81,21 @@ tooltip.model:SetScript("OnShow", function(self)
     ns:ResetModel(self)
 end)
 
-local known = tooltip:CreateFontString(nil, "OVERLAY", "GameFontHighlightMedium");
+local known = tooltip:CreateFontString(nil, "OVERLAY", "GameFontNormal")
+known:SetWordWrap(true)
+known:SetTextColor(0.5333, 0.6666, 0.9999, 0.9999)
 known:SetPoint("BOTTOMLEFT", tooltip, "BOTTOMLEFT", 6, 12)
 known:SetPoint("BOTTOMRIGHT", tooltip, "BOTTOMRIGHT", -6, 12)
 known:Show()
+
+local classwarning = tooltip:CreateFontString(nil, "OVERLAY", "GameFontRed")
+classwarning:SetWordWrap(true)
+classwarning:SetPoint("TOPLEFT", tooltip, "TOPLEFT", 6, -12)
+classwarning:SetPoint("TOPRIGHT", tooltip, "TOPRIGHT", -6, -12)
+-- ITEM_WRONG_CLASS = "That item can't be used by players of your class!"
+-- STAT_USELESS_TOOLTIP = "|cff808080Provides no benefit for your class|r"
+classwarning:SetText("Your class can't transmogrify this item")
+classwarning:Show()
 
 -- Ye showing:
 GameTooltip:HookScript("OnTooltipSetItem", function(self)
@@ -150,7 +161,9 @@ function ns:ShowItem(link)
         tooltip.item = id
         -- TODO: preview from class-set tokens here? Would have to build a list...
 
-        if self.slot_facings[slot] and IsDressableItem(id) and (not db.currentClass or ns.ItemIsAppropriateForPlayer(id)) then
+        local appropriateItem = ns.ItemIsAppropriateForPlayer(id)
+
+        if self.slot_facings[slot] and IsDressableItem(id) and (not db.currentClass or appropriateItem) then
             tooltip.model:SetFacing(self.slot_facings[slot] - (db.rotate and 0.5 or 0))
 
             -- TODO: zoom, which is tricky because it depends on race and gender
@@ -182,23 +195,29 @@ function ns:ShowItem(link)
             tooltip:Hide()
         end
 
+        classwarning:Hide()
+        known:Hide()
+
         if db.notifyKnown then
             local hasAppearance, appearanceFromOtherItem, notTransmoggable = ns.PlayerHasAppearance(link)
 
-            if hasAppearance then
-                if appearanceFromOtherItem then
-                    known:SetText("|TInterface\\RaidFrame\\ReadyCheck-Ready:0|t " .. TRANSMOGRIFY_TOOLTIP_ITEM_UNKNOWN_APPEARANCE_KNOWN)
-                else
-                    known:SetText("|TInterface\\RaidFrame\\ReadyCheck-Ready:0|t " .. TRANSMOGRIFY_TOOLTIP_APPEARANCE_KNOWN)
-                end
-            elseif notTransmoggable then
-                known:SetText("|c00ffff00" .. TRANSMOGRIFY_INVALID_DESTINATION)
+            local label
+            if notTransmoggable then
+                label = "|c00ffff00" .. TRANSMOGRIFY_INVALID_DESTINATION
             else
-                known:SetText("|TInterface\\RaidFrame\\ReadyCheck-NotReady:0|t |cffff0000" .. TRANSMOGRIFY_TOOLTIP_APPEARANCE_UNKNOWN)
+                if hasAppearance then
+                    if appearanceFromOtherItem then
+                        label = "|TInterface\\RaidFrame\\ReadyCheck-Ready:0|t " .. (TRANSMOGRIFY_TOOLTIP_ITEM_UNKNOWN_APPEARANCE_KNOWN):gsub(', ', ',\n')
+                    else
+                        label = "|TInterface\\RaidFrame\\ReadyCheck-Ready:0|t " .. TRANSMOGRIFY_TOOLTIP_APPEARANCE_KNOWN
+                    end
+                else
+                    label = "|TInterface\\RaidFrame\\ReadyCheck-NotReady:0|t |cffff0000" .. TRANSMOGRIFY_TOOLTIP_APPEARANCE_UNKNOWN
+                end
+                classwarning:SetShown(not appropriateItem)
             end
+            known:SetText(label)
             known:Show()
-        else
-            known:Hide()
         end
     end
 end
