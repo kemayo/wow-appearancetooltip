@@ -116,7 +116,7 @@ local currentClass = newCheckbox(panel, 'currentClass', 'Current character only'
 -- local zoom = newCheckbox(panel, 'zoom', 'Zoom on item', "Zoom in on the item being previewed")
 -- local  = newCheckbox(panel, 'customModel', 'Use custom model', "Choose a custom model to use instead of your current character")
 
-local modifier = newDropdown(panel, 'modifier', "Show preview with modifier", {
+local modifier = newDropdown(panel, 'modifier', "Show preview with modifier key", {
     Alt = "Alt",
     Ctrl = "Ctrl",
     Shift = "Shift",
