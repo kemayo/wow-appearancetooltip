@@ -26,17 +26,17 @@ function tooltip:ADDON_LOADED(addon)
 
     _G[myname.."DB"] = setDefaults(_G[myname.."DB"] or {}, {
         modifier = "None", -- or "Alt", "Ctrl", "Shift"
-        mousescroll = true,
-        rotate = true,
-        spin = false,
-        -- zoom = false,
+        mousescroll = true, -- scrolling mouse rotates model
+        rotate = true, -- turn the model slightly, so it's not face-on to the camera
+        spin = false, -- constantly spin the model
+        -- zoom = false, -- zoom in on the item in question
         dressed = true, -- whether the model should be wearing your current outfit, or be naked
-        uncover = true,
-        customModel = false,
+        uncover = true, -- remove clothing to expose the previewed item
+        customModel = false, -- use a model other than your current class, and if so:
         modelRace = 7, -- raceid (1:human)
         modelGender = 1, -- 0:male, 1:female
-        notifyKnown = true,
-        currentClass = false,
+        notifyKnown = true, -- show text explaining the transmog state of the item previewed
+        currentClass = false, -- only show for items the current class can transmog
     })
     db = _G[myname.."DB"]
     ns.db = db
