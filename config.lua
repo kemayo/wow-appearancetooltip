@@ -113,8 +113,9 @@ local spin = newCheckbox(panel, 'spin', 'Spin model', "Constantly spin the model
 local notifyKnown = newCheckbox(panel, 'notifyKnown', 'Display transmog information', "Display a label showing whether you know the item appearance already")
 local currentClass = newCheckbox(panel, 'currentClass', 'Current character only', "Only show previews on items that the current character can collect")
 
--- local zoom = newCheckbox(panel, 'zoom', 'Zoom on item', "Zoom in on the item being previewed")
--- local  = newCheckbox(panel, 'customModel', 'Use custom model', "Choose a custom model to use instead of your current character")
+local zoomWorn = newCheckbox(panel, 'zoomWorn', 'Zoom on worn items', "Zoom in on the part of your model which wears the item")
+local zoomHeld = newCheckbox(panel, 'zoomHeld', 'Zoom on held items', "Zoom in on the held item being previewed, without seeing your character")
+local zoomMasked = newCheckbox(panel, 'zoomMasked', 'Mask out model while zoomed', "Hide the details of your player model while you're zoomed (like the transmog wardrobe does)")
 
 local modifier = newDropdown(panel, 'modifier', "Show preview with modifier key", {
     Alt = "Alt",
@@ -150,7 +151,11 @@ UIDropDownMenu_SetWidth(customGenderDropdown, 100)
 
 -- And put them together:
 
-dressed:SetPoint("TOPLEFT", subText, "BOTTOMLEFT", 0, -8)
+zoomWorn:SetPoint("TOPLEFT", subText, "BOTTOMLEFT", 0, -8)
+zoomHeld:SetPoint("TOPLEFT", zoomWorn, "BOTTOMLEFT", 0, -4)
+zoomMasked:SetPoint("TOPLEFT", zoomHeld, "BOTTOMLEFT", 0, -4)
+
+dressed:SetPoint("TOPLEFT", zoomMasked, "BOTTOMLEFT", 0, -4)
 uncover:SetPoint("TOPLEFT", dressed, "BOTTOMLEFT", 0, -4)
 notifyKnown:SetPoint("TOPLEFT", uncover, "BOTTOMLEFT", 0, -4)
 currentClass:SetPoint("TOPLEFT", notifyKnown, "BOTTOMLEFT", 0, -4)

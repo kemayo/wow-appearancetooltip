@@ -11,4 +11,5 @@
 
 addon.lua
 appropriate.lua
+cameraids.lua
 config.lua

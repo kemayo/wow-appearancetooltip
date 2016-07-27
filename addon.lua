@@ -10,7 +10,7 @@ local setDefaults, db
 local tooltip = CreateFrame("Frame", "AppearanceTooltipTooltip", UIParent, "TooltipBorderedFrameTemplate")
 tooltip:SetClampedToScreen(true)
 tooltip:SetFrameStrata("TOOLTIP")
-tooltip:SetSize(300, 320)
+tooltip:SetSize(280, 380)
 tooltip:Hide()
 
 tooltip:SetScript("OnEvent", function(self, event, ...)
@@ -29,7 +29,9 @@ function tooltip:ADDON_LOADED(addon)
         mousescroll = true, -- scrolling mouse rotates model
         rotate = true, -- turn the model slightly, so it's not face-on to the camera
         spin = false, -- constantly spin the model
-        -- zoom = false, -- zoom in on the item in question
+        zoomWorn = true, -- zoom in on the item in question
+        zoomHeld = true, -- zoom in on weapons
+        zoomMasked = false, -- use the transmog mask while zoomed
         dressed = true, -- whether the model should be wearing your current outfit, or be naked
         uncover = true, -- remove clothing to expose the previewed item
         customModel = false, -- use a model other than your current class, and if so:
@@ -46,6 +48,7 @@ end
 
 function tooltip:PLAYER_LOGIN()
     tooltip.model:SetUnit("player")
+    tooltip.modelZoomed:SetUnit("player")
     C_TransmogCollection.SetShowMissingSourceInItemTooltips(true)
 end
 
@@ -73,11 +76,30 @@ tooltip:SetScript("OnHide",function(self)
     end
 end)
 
-tooltip.model = CreateFrame("DressUpModel", nil, tooltip)
-tooltip.model:SetPoint("TOPLEFT", tooltip, "TOPLEFT", 5, -5)
-tooltip.model:SetPoint("BOTTOMRIGHT", tooltip, "BOTTOMRIGHT", -5, 5)
+local function makeModel()
+    local model = CreateFrame("DressUpModel", nil, tooltip)
+    model:SetFrameLevel(1)
+    model:SetPoint("TOPLEFT", tooltip, "TOPLEFT", 5, -5)
+    model:SetPoint("BOTTOMRIGHT", tooltip, "BOTTOMRIGHT", -5, 5)
+    model:SetKeepModelOnHide(true)
+    model:SetScript("OnModelLoaded", function(self, ...)
+        -- Makes sure the zoomed camera is correct, if the model isn't loaded right away
+        if self.cameraID then
+            Model_ApplyUICamera(self, self.cameraID)
+        end
+    end)
+    -- Use the blacked-out model:
+    -- model:SetUseTransmogSkin(true)
+    -- Display in combat pose:
+    -- model:FreezeAnimation(1)
+    return model
+end
+tooltip.model = makeModel()
+tooltip.modelZoomed = makeModel()
+tooltip.modelWeapon = makeModel()
 
 tooltip.model:SetScript("OnShow", function(self)
+    -- Initial display will be off-center without this
     ns:ResetModel(self)
 end)
 
@@ -146,7 +168,10 @@ end)
 local spinner = CreateFrame("Frame", nil, tooltip);
 spinner:Hide()
 spinner:SetScript("OnUpdate", function(self, elapsed)
-    tooltip.model:SetFacing(tooltip.model:GetFacing() + elapsed)
+    if not (tooltip.activeModel and tooltip.activeModel:IsVisible()) then
+        return self:Hide()
+    end
+    tooltip.activeModel:SetFacing(tooltip.activeModel:GetFacing() + elapsed)
 end)
 
 ----
@@ -164,11 +189,42 @@ function ns:ShowItem(link)
         local appropriateItem = ns.ItemIsAppropriateForPlayer(id)
 
         if self.slot_facings[slot] and IsDressableItem(id) and (not db.currentClass or appropriateItem) then
-            tooltip.model:SetFacing(self.slot_facings[slot] - (db.rotate and 0.5 or 0))
+            local model
+            local cameraID, itemCamera
+            if db.zoomWorn or db.zoomHeld then
+                cameraID, itemCamera = self:GetCameraID(id, db.customModel and db.modelRace, db.customModel and db.modelGender)
+            end
 
-            -- TODO: zoom, which is tricky because it depends on race and gender
-            -- tooltip.model:SetPosition(unpack(db.zoom and self.slot_positions[slot] or self.slot_positions[DEFAULT]))
-            -- tooltip.model:SetModelScale(1)
+            tooltip.model:Hide()
+            tooltip.modelZoomed:Hide()
+            tooltip.modelWeapon:Hide()
+
+            local shouldZoom = (db.zoomHeld and cameraID and itemCamera) or (db.zoomWorn and cameraID and not itemCamera)
+
+            if shouldZoom then
+                if itemCamera then
+                    model = tooltip.modelWeapon
+                    model:SetItem(id)
+                else
+                    model = tooltip.modelZoomed
+                    model:SetUseTransmogSkin(db.zoomMasked and slot ~= "INVTYPE_HEAD")
+                    self:ResetModel(model)
+                end
+                model.cameraID = cameraID
+                Model_ApplyUICamera(model, cameraID)
+                -- ApplyUICamera locks the animation, but...
+                model:SetAnimation(0, 0)
+            else
+                model = tooltip.model
+
+                self:ResetModel(model)
+            end
+            tooltip.activeModel = model
+            model:Show()
+
+            if not cameraID then
+                model:SetFacing(self.slot_facings[slot] - (db.rotate and 0.5 or 0))
+            end
 
             tooltip:Show()
             tooltip.owner = GameTooltip
@@ -176,7 +232,6 @@ function ns:ShowItem(link)
             positioner:Show()
             spinner:SetShown(db.spin)
 
-            self:ResetModel(tooltip.model)
             if ns.slot_removals[slot] and (ns.always_remove[slot] or db.uncover) then
                 -- 1. If this is a weapon, force-remove the item in the main-hand slot! Otherwise it'll get dressed into the
                 --    off-hand, maybe, depending on things which are more hassle than it's worth to work out.
@@ -186,11 +241,11 @@ function ns:ShowItem(link)
                         slotid = ns.SLOT_CHEST
                     end
                     if slotid > 0 then
-                        tooltip.model:UndressSlot(slotid)
+                        model:UndressSlot(slotid)
                     end
                 end
             end
-            tooltip.model:TryOn(link)
+            model:TryOn(link)
         else
             tooltip:Hide()
         end
@@ -227,12 +282,15 @@ function ns:HideItem()
 end
 
 function ns:ResetModel(model)
+    -- This sort of works, but with a custom model it keeps some items (shoulders, belt...)
+    -- model:SetAutoDress(db.dressed)
+    -- So instead, more complicated:
     if db.customModel then
         model:SetCustomRace(db.modelRace, db.modelGender)
-        model:RefreshCamera()
     else
         model:Dress()
     end
+    model:RefreshCamera()
     if not db.dressed then
         model:Undress()
     end
@@ -286,21 +344,6 @@ ns.slot_facings = {
     INVTYPE_FEET = 0,
     INVTYPE_TABARD = 0,
     INVTYPE_BODY = 0,
-}
-
--- /script AppearanceTooltipTooltip.model:SetPosition(0,0,0)
--- x,y,z is effectively zoom, horizontal, vertical
-ns.slot_positions = {
-    INVTYPE_2HWEAPON = {0.8, -0.3, 0},
-    INVTYPE_WEAPON = {0.8, -0.3, 0},
-    INVTYPE_WEAPONMAINHAND = {0.8, -0.3, 0},
-    INVTYPE_WEAPONOFFHAND = {0.8, 0.3, 0},
-    INVTYPE_SHIELD = {0.8, 0, 0},
-    INVTYPE_HOLDABLE = {0.8, 0.3, 0},
-    INVTYPE_RANGED = {0.8, -0.3, 0},
-    INVTYPE_RANGEDRIGHT = {0.8, 0.3, 0},
-    INVTYPE_THROWN = {0.8, -0.3, 0},
-    [DEFAULT] = {0, 0, 0},
 }
 
 ns.modifiers = {
