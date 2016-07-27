@@ -41,7 +41,10 @@ local valid_classes = {
             [LE_ITEM_WEAPON_SWORD2H] = true,
             [LE_ITEM_WEAPON_POLEARM] = true,
             [LE_ITEM_WEAPON_STAFF] = true,
-            [LE_ITEM_WEAPON_WARGLAIVE] = true,
+            -- [LE_ITEM_WEAPON_WARGLAIVE] = true,
+            [LE_ITEM_WEAPON_BOWS] = true,
+            [LE_ITEM_WEAPON_CROSSBOW] = true,
+            [LE_ITEM_WEAPON_GUNS] = true,
         },
         [LE_ITEM_CLASS_ARMOR] = {
             [LE_ITEM_ARMOR_SHIELD] = true,
