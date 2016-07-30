@@ -142,46 +142,72 @@ positioner:SetScript("OnUpdate", function(self, elapsed)
     end
     self.updateTooltip = TOOLTIP_UPDATE_TIME
 
-    local x, y = (tooltip.owner.overrideComparisonAnchorFrame or tooltip.owner):GetCenter()
-    if x and y then
+    local our_point, owner_point = ns:ComputeTooltipAnchors(tooltip.owner, tooltip, db.anchor)
+    if our_point and owner_point then
         tooltip:ClearAllPoints()
-        local ownerIsUp = y < GetScreenHeight() / 2
-        local ownerIsLeft = x < GetScreenWidth() / 2
-        local our_point, owner_point
-        if db.anchor == "vertical" then
-            if ownerIsUp then
-                our_point = "BOTTOM"
-                owner_point = "TOP"
-            else
-                our_point = "TOP"
-                owner_point = "BOTTOM"
-            end
-            if ownerIsLeft and not ShoppingTooltip1:IsVisible() then
-                our_point = our_point.."LEFT"
-                owner_point = owner_point.."LEFT"
-            else
-                our_point = our_point.."RIGHT"
-                owner_point = owner_point.."RIGHT"
-            end
-        else
-            if ownerIsUp then
-                our_point = "BOTTOM"
-                owner_point = "BOTTOM"
-            else
-                our_point = "TOP"
-                owner_point = "TOP"
-            end
-            if ownerIsLeft and not ShoppingTooltip1:IsVisible() then
-                our_point = our_point .. "LEFT"
-                owner_point = owner_point .. "RIGHT"
-            else
-                our_point = our_point .. "RIGHT"
-                owner_point = owner_point .. "LEFT"
-            end
-        end
         tooltip:SetPoint(our_point, tooltip.owner, owner_point)
     end
 end)
+
+do
+    local points = {
+        -- key is the direction our tooltip should be biased, with the first component being the primary (i.e. "on the top side, to the left")
+        -- these are [our point, owner point]
+        top = {
+            left = {"BOTTOMRIGHT", "TOPRIGHT"},
+            right = {"BOTTOMLEFT", "TOPLEFT"},
+        },
+        bottom = {
+            left = {"TOPRIGHT", "BOTTOMRIGHT"},
+            right = {"TOPLEFT", "BOTTOMLEFT"},
+        },
+        left = {
+            top = {"BOTTOMRIGHT", "BOTTOMLEFT"},
+            bottom = {"TOPRIGHT", "TOPLEFT"},
+        },
+        right = {
+            top = {"BOTTOMLEFT", "BOTTOMRIGHT"},
+            bottom = {"TOPLEFT", "TOPRIGHT"},
+        },
+    }
+    function ns:ComputeTooltipAnchors(owner, tooltip, anchor)
+        -- Because I always forget: x is left-right, y is bottom-top
+        -- Logic here: our tooltip should trend towards the center of the screen, unless something is stopping it.
+        local x, y = owner:GetCenter()
+        if not (x and y) then
+            return
+        end
+        -- Screen into quadrants: UL, UR, BL, BR
+        -- What side of the screen are we on
+        local ownerIsUp = y > GetScreenHeight() / 2
+        local ownerIsLeft = x < GetScreenWidth() / 2
+        local comparisonShown = ShoppingTooltip1:IsVisible()
+        --
+        local primary, secondary
+        if anchor == "vertical" then
+            primary = ownerIsUp and "bottom" or "top"
+        else
+            if comparisonShown then
+                primary = "left"
+            else
+                primary = ownerIsLeft and "right" or "left"
+            end
+        end
+        if primary == "left" and (owner:GetLeft() - tooltip:GetWidth()) < 0 then
+            return self:ComputeTooltipAnchors(owner, tooltip, "vertical")
+        end
+        if anchor == "vertical" then
+            if comparisonShown then
+                secondary = "left"
+            else
+                secondary = ownerIsLeft and "right" or "left"
+            end
+        else
+            secondary = ownerIsUp and "top" or "bottom"
+        end
+        return unpack(points[primary][secondary])
+    end
+end
 
 local spinner = CreateFrame("Frame", nil, tooltip);
 spinner:Hide()
