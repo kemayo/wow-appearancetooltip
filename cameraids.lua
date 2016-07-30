@@ -91,8 +91,18 @@ function ns:GetCameraID(itemid, race, gender)
             key = "Weapon-" .. item_slots[slot]
         end
     else
-        -- todo: worgen forms (fallback on human)
-        key = ("%s-%s-%s"):format(races[race] or playerRace, genders[gender] or playerSex, slots[slot] or "Default")
+        race = races[race]
+        gender = genders[gender]
+        if not race then
+            race = playerRace
+            if race == 'Worgen' and select(2, HasAlternateForm()) then
+                race = 'Human'
+            end
+        end
+        if not gender then
+            gender = playerSex
+        end
+        key = ("%s-%s-%s"):format(race, gender, slots[slot] or "Default")
     end
     -- ns.Debug("GetCameraID", key, slots_to_cameraids[key], itemcamera)
     return slots_to_cameraids[key], itemcamera
