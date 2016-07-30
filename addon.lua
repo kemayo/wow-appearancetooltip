@@ -39,6 +39,7 @@ function tooltip:ADDON_LOADED(addon)
         modelGender = 1, -- 0:male, 1:female
         notifyKnown = true, -- show text explaining the transmog state of the item previewed
         currentClass = false, -- only show for items the current class can transmog
+        anchor = "vertical", -- vertical / horizontal
     })
     db = _G[myname.."DB"]
     ns.db = db
@@ -129,39 +130,56 @@ end)
 
 ----
 
-local hider = CreateFrame("Frame")
-hider:Hide()
-hider:SetScript("OnUpdate", function(self)
-    if (tooltip.owner and not (tooltip.owner:IsShown() and tooltip.owner:GetItem())) or not tooltip.owner then
-        tooltip:Hide()
-        tooltip.item = nil
-    end
-    self:Hide()
-end)
-
 local positioner = CreateFrame("Frame")
 positioner:Hide()
-positioner:SetScript("OnUpdate", function(self)
-    local x, y = tooltip.owner:GetCenter()
+positioner:SetScript("OnShow", function(self)
+    self.updateTooltip = 0
+end)
+positioner:SetScript("OnUpdate", function(self, elapsed)
+    self.updateTooltip = self.updateTooltip - elapsed
+    if self.updateTooltip > 0 then
+        return
+    end
+    self.updateTooltip = TOOLTIP_UPDATE_TIME
+
+    local x, y = (tooltip.owner.overrideComparisonAnchorFrame or tooltip.owner):GetCenter()
     if x and y then
         tooltip:ClearAllPoints()
+        local ownerIsUp = y < GetScreenHeight() / 2
+        local ownerIsLeft = x < GetScreenWidth() / 2
         local our_point, owner_point
-        if y / GetScreenHeight() > 0.5 then
-            our_point = "TOP"
-            owner_point = "BOTTOM"
+        if db.anchor == "vertical" then
+            if ownerIsUp then
+                our_point = "BOTTOM"
+                owner_point = "TOP"
+            else
+                our_point = "TOP"
+                owner_point = "BOTTOM"
+            end
+            if ownerIsLeft and not ShoppingTooltip1:IsVisible() then
+                our_point = our_point.."LEFT"
+                owner_point = owner_point.."LEFT"
+            else
+                our_point = our_point.."RIGHT"
+                owner_point = owner_point.."RIGHT"
+            end
         else
-            our_point = "BOTTOM"
-            owner_point = "TOP"
-        end
-        if x / GetScreenWidth() > 0.5 and not ShoppingTooltip1:IsVisible() then
-            our_point = our_point.."LEFT"
-            owner_point = owner_point.."LEFT"
-        else
-            our_point = our_point.."RIGHT"
-            owner_point = owner_point.."RIGHT"
+            if ownerIsUp then
+                our_point = "BOTTOM"
+                owner_point = "BOTTOM"
+            else
+                our_point = "TOP"
+                owner_point = "TOP"
+            end
+            if ownerIsLeft and not ShoppingTooltip1:IsVisible() then
+                our_point = our_point .. "LEFT"
+                owner_point = owner_point .. "RIGHT"
+            else
+                our_point = our_point .. "RIGHT"
+                owner_point = owner_point .. "LEFT"
+            end
         end
         tooltip:SetPoint(our_point, tooltip.owner, owner_point)
-        self:Hide()
     end
 end)
 
@@ -172,6 +190,18 @@ spinner:SetScript("OnUpdate", function(self, elapsed)
         return self:Hide()
     end
     tooltip.activeModel:SetFacing(tooltip.activeModel:GetFacing() + elapsed)
+end)
+
+local hider = CreateFrame("Frame")
+hider:Hide()
+hider:SetScript("OnUpdate", function(self)
+    if (tooltip.owner and not (tooltip.owner:IsShown() and tooltip.owner:GetItem())) or not tooltip.owner then
+        spinner:Hide()
+        positioner:Hide()
+        tooltip:Hide()
+        tooltip.item = nil
+    end
+    self:Hide()
 end)
 
 ----

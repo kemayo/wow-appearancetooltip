@@ -125,6 +125,12 @@ local modifier = newDropdown(panel, 'modifier', "Show preview with modifier key"
 })
 UIDropDownMenu_SetWidth(modifier, 100)
 
+local anchor = newDropdown(panel, 'anchor', "Side of the tooltip to attach to, depending on where on the screen it's showing", {
+    vertical = "top / bottom",
+    horizontal = "left / right",
+})
+UIDropDownMenu_SetWidth(anchor, 100)
+
 local modelBox = newBox(panel, "Custom player model", 48)
 local customModel = newCheckbox(modelBox, 'customModel', 'Use a different model', "Instead of your current character, use a specific race/gender")
 local customRaceDropdown = newDropdown(modelBox, 'modelRace', "Choose your custom race", {
@@ -165,7 +171,10 @@ spin:SetPoint("TOPLEFT", mousescroll, "BOTTOMLEFT", 0, -4)
 local modifierLabel = newFontString(panel, "Show with modifier key:", nil, 'TOPLEFT', spin, 'BOTTOMLEFT', 0, -10)
 modifier:SetPoint("LEFT", modifierLabel, "RIGHT", 4, -2)
 
-modelBox:SetPoint("TOP", modifier, "BOTTOM", 0, -20)
+local anchorLabel = newFontString(panel, "Attach to the:", nil, 'TOPLEFT', modifierLabel, 'BOTTOMLEFT', 0, -16)
+anchor:SetPoint("LEFT", anchorLabel, "RIGHT", 4, -2)
+
+modelBox:SetPoint("TOP", anchor, "BOTTOM", 0, -20)
 customModel:SetPoint("LEFT", modelBox, 12, 0)
 customRaceDropdown:SetPoint("LEFT", customModel.Text, "RIGHT", 12, -2)
 customGenderDropdown:SetPoint("TOPLEFT", customRaceDropdown, "TOPRIGHT", 4, 0)
