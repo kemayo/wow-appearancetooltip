@@ -293,8 +293,11 @@ function ns:ShowItem(link)
                 --    off-hand, maybe, depending on things which are more hassle than it's worth to work out.
                 -- 2. Other slots will be entirely covered, making for a useless preview. e.g. shirts.
                 for _, slotid in ipairs(ns.slot_removals[slot]) do
-                    if slotid == ns.SLOT_ROBE and select(4, GetItemInfoInstant(GetInventoryItemID("player", ns.SLOT_CHEST))) == 'INVTYPE_ROBE' then
-                        slotid = ns.SLOT_CHEST
+                    if slotid == ns.SLOT_ROBE then
+                        local chest_itemid = GetInventoryItemID("player", ns.SLOT_CHEST)
+                        if chest_itemid and select(4, GetItemInfoInstant(chest_itemid)) == 'INVTYPE_ROBE' then
+                            slotid = ns.SLOT_CHEST
+                        end
                     end
                     if slotid > 0 then
                         model:UndressSlot(slotid)
