@@ -203,7 +203,7 @@ do
                 secondary = ownerIsLeft and "right" or "left"
             end
         else
-            secondary = ownerIsUp and "top" or "bottom"
+            secondary = ownerIsUp and "bottom" or "top"
         end
         return unpack(points[primary][secondary])
     end
