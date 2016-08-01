@@ -182,23 +182,27 @@ do
         local ownerIsUp = y > GetScreenHeight() / 2
         local ownerIsLeft = x < GetScreenWidth() / 2
         local comparisonShown = ShoppingTooltip1:IsVisible()
+        local comparisonOnRight = comparisonShown and ((ShoppingTooltip1:GetCenter()) > x)
         --
         local primary, secondary
         if anchor == "vertical" then
             primary = ownerIsUp and "bottom" or "top"
         else
             if comparisonShown then
-                primary = "left"
+                primary = comparisonOnRight and "left" or "right"
             else
                 primary = ownerIsLeft and "right" or "left"
             end
         end
-        if primary == "left" and (owner:GetLeft() - tooltip:GetWidth()) < 0 then
+        if
+            (comparisonOnRight and primary == "left" and (owner:GetLeft() - tooltip:GetWidth()) < 0)
+            or (not comparisonOnRight and primary == "right" and (owner:GetRight() + tooltip:GetWidth() > GetScreenWidth()))
+        then
             return self:ComputeTooltipAnchors(owner, tooltip, "vertical")
         end
         if anchor == "vertical" then
             if comparisonShown then
-                secondary = "left"
+                secondary = comparisonOnRight and "left" or "right"
             else
                 secondary = ownerIsLeft and "right" or "left"
             end
