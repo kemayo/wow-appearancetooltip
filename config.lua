@@ -112,6 +112,7 @@ local mousescroll = newCheckbox(panel, 'mousescroll', 'Rotate with mousewheel', 
 local spin = newCheckbox(panel, 'spin', 'Spin model', "Constantly spin the model while it's displayed")
 local notifyKnown = newCheckbox(panel, 'notifyKnown', 'Display transmog information', "Display a label showing whether you know the item appearance already")
 local currentClass = newCheckbox(panel, 'currentClass', 'Current character only', "Only show previews on items that the current character can collect")
+local byComparison = newCheckbox(panel, 'byComparison', 'Show by comparison tooltip', "If the comparison tooltip is shown where the preview would want to be, show next to it (this makes it *much* less likely you'll have the preview overlap your cursor)")
 
 local zoomWorn = newCheckbox(panel, 'zoomWorn', 'Zoom on worn items', "Zoom in on the part of your model which wears the item")
 local zoomHeld = newCheckbox(panel, 'zoomHeld', 'Zoom on held items', "Zoom in on the held item being previewed, without seeing your character")
@@ -174,7 +175,9 @@ modifier:SetPoint("LEFT", modifierLabel, "RIGHT", 4, -2)
 local anchorLabel = newFontString(panel, "Attach to the:", nil, 'TOPLEFT', modifierLabel, 'BOTTOMLEFT', 0, -16)
 anchor:SetPoint("LEFT", anchorLabel, "RIGHT", 4, -2)
 
-modelBox:SetPoint("TOP", anchor, "BOTTOM", 0, -20)
+byComparison:SetPoint("TOPLEFT", anchorLabel, "BOTTOMLEFT", 0, -10)
+
+modelBox:SetPoint("TOP", byComparison, "BOTTOM", 0, -20)
 customModel:SetPoint("LEFT", modelBox, 12, 0)
 customRaceDropdown:SetPoint("LEFT", customModel.Text, "RIGHT", 12, -2)
 customGenderDropdown:SetPoint("TOPLEFT", customRaceDropdown, "TOPRIGHT", 4, 0)

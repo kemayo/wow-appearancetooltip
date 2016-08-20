@@ -40,6 +40,7 @@ function tooltip:ADDON_LOADED(addon)
         notifyKnown = true, -- show text explaining the transmog state of the item previewed
         currentClass = false, -- only show for items the current class can transmog
         anchor = "vertical", -- vertical / horizontal
+        byComparison = true, -- whether to show by the comparison, or fall back to vertical if needed
     })
     db = _G[myname.."DB"]
     ns.db = db
@@ -142,10 +143,10 @@ positioner:SetScript("OnUpdate", function(self, elapsed)
     end
     self.updateTooltip = TOOLTIP_UPDATE_TIME
 
-    local our_point, owner_point = ns:ComputeTooltipAnchors(tooltip.owner, tooltip, db.anchor)
+    local owner, our_point, owner_point = ns:ComputeTooltipAnchors(tooltip.owner, tooltip, db.anchor)
     if our_point and owner_point then
         tooltip:ClearAllPoints()
-        tooltip:SetPoint(our_point, tooltip.owner, owner_point)
+        tooltip:SetPoint(our_point, owner, owner_point)
     end
 end)
 
@@ -173,6 +174,7 @@ do
     function ns:ComputeTooltipAnchors(owner, tooltip, anchor)
         -- Because I always forget: x is left-right, y is bottom-top
         -- Logic here: our tooltip should trend towards the center of the screen, unless something is stopping it.
+        local originalOwner = owner
         local x, y = owner:GetCenter()
         if not (x and y) then
             return
@@ -187,29 +189,32 @@ do
         local primary, secondary
         if anchor == "vertical" then
             primary = ownerIsUp and "bottom" or "top"
-        else
-            if comparisonShown then
-                primary = comparisonOnRight and "left" or "right"
-            else
-                primary = ownerIsLeft and "right" or "left"
-            end
-        end
-        if
-            (comparisonOnRight and primary == "left" and (owner:GetLeft() - tooltip:GetWidth()) < 0)
-            or (not comparisonOnRight and primary == "right" and (owner:GetRight() + tooltip:GetWidth() > GetScreenWidth()))
-        then
-            return self:ComputeTooltipAnchors(owner, tooltip, "vertical")
-        end
-        if anchor == "vertical" then
             if comparisonShown then
                 secondary = comparisonOnRight and "left" or "right"
             else
                 secondary = ownerIsLeft and "right" or "left"
             end
-        else
+        else -- horizontal
+            if comparisonShown then
+                if db.byComparison then
+                    primary = ownerIsLeft and "right" or "left"
+                    owner = ShoppingTooltip1
+                else
+                    primary = comparisonOnRight and "left" or "right"
+                end
+            else
+                primary = ownerIsLeft and "right" or "left"
+            end
             secondary = ownerIsUp and "bottom" or "top"
         end
-        return unpack(points[primary][secondary])
+        if
+            -- would we be pushing against the edge of the screen?
+            (primary == "left" and (owner:GetLeft() - tooltip:GetWidth()) < 0)
+            or (primary == "right" and (owner:GetRight() + tooltip:GetWidth() > GetScreenWidth()))
+        then
+            return self:ComputeTooltipAnchors(originalOwner, tooltip, "vertical")
+        end
+        return owner, unpack(points[primary][secondary])
     end
 end
 
