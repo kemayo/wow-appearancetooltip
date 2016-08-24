@@ -7,6 +7,8 @@ local IsDressableItem = IsDressableItem
 
 local setDefaults, db
 
+local LAT = LibStub("LibArmorToken-1.0")
+
 local tooltip = CreateFrame("Frame", "AppearanceTooltipTooltip", UIParent, "TooltipBorderedFrameTemplate")
 tooltip:SetClampedToScreen(true)
 tooltip:SetFrameStrata("TOOLTIP")
@@ -241,15 +243,43 @@ end)
 
 ----
 
+local _, class = UnitClass("player")
+
 function ns:ShowItem(link)
     if not link then return end
     local id = tonumber(link:match("item:(%d+)"))
     if not id or id == 0 then return end
+    local token = LAT:ItemIsToken(id)
+
+    if token then
+        -- It's a set token! Replace the id.
+        local found
+        for _, itemid in LAT:IterateItemsForTokenAndClass(id, class) do
+            found = true
+            id = itemid
+            _, link = GetItemInfo(id)
+            break
+        end
+        if not found then
+            for _, tokenclass in LAT:IterateClassesForToken(id) do
+                for _, itemid in LAT:IterateItemsForTokenAndClass(id, tokenclass) do
+                    found = true
+                    id = itemid
+                    _, link = GetItemInfo(id)
+                    break
+                end
+                break
+            end
+        end
+        if found then
+            GameTooltip:AddDoubleLine(ITEM_PURCHASED_COLON, link)
+            GameTooltip:Show()
+        end
+    end
 
     local slot = select(9, GetItemInfo(id))
     if (not db.modifier or self.modifiers[db.modifier]()) and tooltip.item ~= id then
         tooltip.item = id
-        -- TODO: preview from class-set tokens here? Would have to build a list...
 
         local appropriateItem = ns.ItemIsAppropriateForPlayer(id)
 

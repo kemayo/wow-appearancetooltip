@@ -1,0 +1,12 @@
+package-as: AppearanceTooltip
+
+externals:
+    lib/LibStub:
+        url: svn://svn.wowace.com/wow/libstub/mainline/trunk
+        tag: latest
+    lib/LibArmorToken-1.0: git://git.wowace.com/wow/libarmortoken-1-0/mainline.git
+
+ignore:
+    - lib/LibArmorToken-1.0/LibArmorToken-1.0.toc
+    - lib/LibArmorToken-1.0/LibStub.lua
+    - lib/LibArmorToken-1.0/tools
