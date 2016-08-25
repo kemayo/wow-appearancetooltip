@@ -256,7 +256,6 @@ function ns:ShowItem(link)
         -- It's a set token! Replace the id.
         local found
         for _, itemid in LAT:IterateItemsForTokenAndClass(id, class) do
-            
             _, maybelink = GetItemInfo(id)
             if maybelink then
                 id = itemid
@@ -268,7 +267,7 @@ function ns:ShowItem(link)
         if not found then
             for _, tokenclass in LAT:IterateClassesForToken(id) do
                 for _, itemid in LAT:IterateItemsForTokenAndClass(id, tokenclass) do
-                    _, maybelink = GetItemInfo(id)
+                    _, maybelink = GetItemInfo(itemid)
                     if maybelink then
                         id = itemid
                         link = maybelink
