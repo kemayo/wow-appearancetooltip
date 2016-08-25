@@ -250,23 +250,31 @@ function ns:ShowItem(link)
     local id = tonumber(link:match("item:(%d+)"))
     if not id or id == 0 then return end
     local token = LAT:ItemIsToken(id)
+    local maybelink
 
     if token then
         -- It's a set token! Replace the id.
         local found
         for _, itemid in LAT:IterateItemsForTokenAndClass(id, class) do
-            found = true
-            id = itemid
-            _, link = GetItemInfo(id)
-            break
+            
+            _, maybelink = GetItemInfo(id)
+            if maybelink then
+                id = itemid
+                link = maybelink
+                found = true
+                break
+            end
         end
         if not found then
             for _, tokenclass in LAT:IterateClassesForToken(id) do
                 for _, itemid in LAT:IterateItemsForTokenAndClass(id, tokenclass) do
-                    found = true
-                    id = itemid
-                    _, link = GetItemInfo(id)
-                    break
+                    _, maybelink = GetItemInfo(id)
+                    if maybelink then
+                        id = itemid
+                        link = maybelink
+                        found = true
+                        break
+                    end
                 end
                 break
             end
