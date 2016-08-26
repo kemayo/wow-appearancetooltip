@@ -5,6 +5,7 @@
 ## Version: @project-version@
 ## LoadOnDemand: 0
 ## OptionalDeps: tekDebug, LibStub, LibArmorToken-1.0
+## X-Embeds: LibStub, LibArmorToken-1.0
 
 ## SavedVariables: AppearanceTooltipDB
 ## SavedVariablesPerCharacter: AppearanceTooltipDBPC
