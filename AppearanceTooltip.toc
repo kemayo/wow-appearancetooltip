@@ -4,8 +4,8 @@
 ## Notes: Show the item your mouse is over on your character in a tooltip
 ## Version: @project-version@
 ## LoadOnDemand: 0
-## OptionalDeps: tekDebug, LibStub, LibArmorToken-1.0
-## X-Embeds: LibStub, LibArmorToken-1.0
+## OptionalDeps: tekDebug, LibStub, LibArmorToken-1.0, LibAppropriateItems-1.0
+## X-Embeds: LibStub, LibArmorToken-1.0, LibAppropriateItems-1.0
 
 ## SavedVariables: AppearanceTooltipDB
 ## SavedVariablesPerCharacter: AppearanceTooltipDBPC
@@ -13,9 +13,9 @@
 #@no-lib-strip@
 lib\LibStub\LibStub.lua
 lib\LibArmorToken-1.0\lib.xml
+lib\LibAppropriateItems-1.0\lib.xml
 #@end-no-lib-strip@
 
 addon.lua
-appropriate.lua
 cameraids.lua
 config.lua

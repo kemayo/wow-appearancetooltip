@@ -8,6 +8,7 @@ local IsDressableItem = IsDressableItem
 local setDefaults, db
 
 local LAT = LibStub("LibArmorToken-1.0")
+local LAI = LibStub("LibAppropriateItems-1.0")
 
 local tooltip = CreateFrame("Frame", "AppearanceTooltipTooltip", UIParent, "TooltipBorderedFrameTemplate")
 tooltip:SetClampedToScreen(true)
@@ -288,7 +289,7 @@ function ns:ShowItem(link)
     if (not db.modifier or self.modifiers[db.modifier]()) and tooltip.item ~= id then
         tooltip.item = id
 
-        local appropriateItem = ns.ItemIsAppropriateForPlayer(id)
+        local appropriateItem = LAI:IsAppropriate(id)
 
         if self.slot_facings[slot] and IsDressableItem(id) and (not db.currentClass or appropriateItem) then
             local model
