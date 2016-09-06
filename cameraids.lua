@@ -74,7 +74,7 @@ else
     playerSex = "Female";
 end
 
-local slots_to_cameraids
+local slots_to_cameraids, slot_override
 
 -- Get a cameraid for Model_ApplyUICamera which will focus a DressUpModel on a specific item
 -- itemid: number/string Anything that GetItemInfoInstant will accept
@@ -82,7 +82,7 @@ local slots_to_cameraids
 -- gender: number genderid (0: male, 1: female)
 function ns:GetCameraID(itemid, race, gender)
     local key, itemcamera
-    local slot, _, class, subclass = select(4, GetItemInfoInstant(itemid))
+    local itemid, _, _, slot, _, class, subclass = GetItemInfoInstant(itemid)
     if item_slots[slot] then
         itemcamera = true
         if item_slots[slot] == true then
@@ -102,7 +102,7 @@ function ns:GetCameraID(itemid, race, gender)
         if not gender then
             gender = playerSex
         end
-        key = ("%s-%s-%s"):format(race, gender, slots[slot] or "Default")
+        key = ("%s-%s-%s"):format(race, gender, slot_override[itemid] or slots[slot] or "Default")
     end
     -- ns.Debug("GetCameraID", key, slots_to_cameraids[key], itemcamera)
     return slots_to_cameraids[key], itemcamera
@@ -466,4 +466,31 @@ slots_to_cameraids = {
     ["Worgen-Male-Tabard"] = 314,
     ["Worgen-Male-Waist"] = 317,
     ["Worgen-Male-Wrist"] = 315,
+}
+
+slot_override = {
+    -- Cloth
+    -- appearance 21971
+    [106545] = "Shoulder-Alt", -- Orunai Shoulderpads
+    [106578] = "Shoulder-Alt", -- Gordunni Shoulderpads
+    [112610] = "Shoulder-Alt", -- Steamburst Mantle
+    [114271] = "Shoulder-Alt", -- Firefly mantle
+    -- appearance 21620
+    [106479] = "Shoulder-Alt", -- Iyun Shoulderpads
+    [106512] = "Shoulder-Alt", -- Mandragoran Shoulderpads
+    [107317] = "Shoulder-Alt", -- Karabor Sage Mantle
+    [112086] = "Shoulder-Alt", -- Windburnt Pauldrons
+    [106162] = "Shoulder-Alt", -- Frostwolf Wind-Talker Mantle
+    -- appearance 21962
+    [106413] = "Shoulder-Alt", -- Lunarglow Shoulderpads
+    [106446] = "Shoulder-Alt", -- Anchorite Shoulderpads
+    [112531] = "Shoulder-Alt", -- Auchenai Keeper Mantle
+    -- Leather
+    -- [] = "Shoulder-Alt", -- 
+    -- Mail
+    [7718] = "Shoulder-Alt", -- Herod's Shoulder
+    [122356] = "Shoulder-Alt", -- Champion Herod's Shoulder
+    [88271] = "Shoulder-Alt", -- Harlan's Shoulders
+    -- Plate
+    [140617] = "Shoulder-Alt", -- Rakeesh's Pauldron
 }
