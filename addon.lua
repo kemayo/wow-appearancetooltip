@@ -201,7 +201,7 @@ do
             if comparisonShown then
                 if db.byComparison then
                     primary = ownerIsLeft and "right" or "left"
-                    owner = ShoppingTooltip2:IsVisible() and ShoppingTooltip2 or ShoppingTooltip1
+                    owner = (not ownerIsLeft) and ShoppingTooltip2:IsVisible() and ShoppingTooltip2 or ShoppingTooltip1
                 else
                     primary = comparisonOnRight and "left" or "right"
                 end
