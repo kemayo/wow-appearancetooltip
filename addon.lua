@@ -137,14 +137,15 @@ end)
 local positioner = CreateFrame("Frame")
 positioner:Hide()
 positioner:SetScript("OnShow", function(self)
-    self.updateTooltip = 0
+    -- always run immediately
+    self.elapsed = TOOLTIP_UPDATE_TIME
 end)
 positioner:SetScript("OnUpdate", function(self, elapsed)
-    self.updateTooltip = self.updateTooltip - elapsed
-    if self.updateTooltip > 0 then
+    self.elapsed = self.elapsed + elapsed
+    if self.elapsed < TOOLTIP_UPDATE_TIME then
         return
     end
-    self.updateTooltip = TOOLTIP_UPDATE_TIME
+    self.elapsed = 0
 
     local owner, our_point, owner_point = ns:ComputeTooltipAnchors(tooltip.owner, tooltip, db.anchor)
     if our_point and owner_point then
@@ -177,38 +178,59 @@ do
     function ns:ComputeTooltipAnchors(owner, tooltip, anchor)
         -- Because I always forget: x is left-right, y is bottom-top
         -- Logic here: our tooltip should trend towards the center of the screen, unless something is stopping it.
+        -- If comparison tooltips are shown, we shouldn't overlap them
         local originalOwner = owner
         local x, y = owner:GetCenter()
         if not (x and y) then
             return
         end
-        -- Screen into quadrants: UL, UR, BL, BR
-        -- What side of the screen are we on
-        local ownerIsUp = y > GetScreenHeight() / 2
-        local ownerIsLeft = x < GetScreenWidth() / 2
-        local comparisonShown = ShoppingTooltip1:IsVisible()
-        local comparisonOnRight = comparisonShown and ((ShoppingTooltip1:GetCenter()) > x)
-        --
+
+        local biasLeft, biasDown
+        -- we want to follow the direction the tooltip is going, relative to the cursor
+        biasLeft = GetScaledCursorPosition() < x
+        biasDown = y > GetScreenHeight() / 2
+
+        local outermostComparisonShown
+        if owner.shoppingTooltips then
+            local comparisonTooltip1, comparisonTooltip2 = unpack( owner.shoppingTooltips )
+            if comparisonTooltip1:IsShown() or comparisonTooltip2:IsShown() then
+                if comparisonTooltip1:IsShown() and comparisonTooltip2:IsShown() then
+                    if comparisonTooltip1:GetCenter() > comparisonTooltip2:GetCenter() then
+                        -- 1 is right of 2
+                        outermostComparisonShown = biasLeft and comparisonTooltip2 or comparisonTooltip1
+                    else
+                        -- 1 is left of 2
+                        outermostComparisonShown = biasLeft and comparisonTooltip1 or comparisonTooltip2
+                    end
+                else
+                    outermostComparisonShown = comparisonTooltip1:IsShown() and comparisonTooltip1 or comparisonTooltip2
+                end
+            end
+        end
+
         local primary, secondary
         if anchor == "vertical" then
-            primary = ownerIsUp and "bottom" or "top"
-            if comparisonShown then
-                secondary = comparisonOnRight and "left" or "right"
+            -- attaching to the top/bottom of the tooltip
+            -- only care about comparisons to avoid overlapping them
+            primary = biasDown and "bottom" or "top"
+            if outermostComparisonShown then
+                -- secondary = biasLeft and "right" or "left"
+                secondary = biasLeft and "left" or "right"
             else
-                secondary = ownerIsLeft and "right" or "left"
+                secondary = biasLeft and "right" or "left"
             end
         else -- horizontal
-            if comparisonShown then
+            if outermostComparisonShown then
                 if db.byComparison then
-                    primary = ownerIsLeft and "right" or "left"
-                    owner = (not ownerIsLeft) and ShoppingTooltip2:IsVisible() and ShoppingTooltip2 or ShoppingTooltip1
+                    primary = biasLeft and "right" or "left"
+                    owner = outermostComparisonShown
                 else
-                    primary = comparisonOnRight and "left" or "right"
+                    primary = biasLeft and "right" or "left"
                 end
             else
-                primary = ownerIsLeft and "right" or "left"
+                primary = biasLeft and "right" or "left"
             end
-            secondary = ownerIsUp and "bottom" or "top"
+            secondary = biasDown and "bottom" or "top"
         end
         if
             -- would we be pushing against the edge of the screen?
