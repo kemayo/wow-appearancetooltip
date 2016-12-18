@@ -185,12 +185,15 @@ do
         if not (x and y) then
             return
         end
-        x = x / owner:GetEffectiveScale()
-        y = y / owner:GetEffectiveScale()
+        x = x * owner:GetEffectiveScale()
+        -- the y comparison doesn't need this:
+        -- y = y * owner:GetEffectiveScale()
 
         local biasLeft, biasDown
         -- we want to follow the direction the tooltip is going, relative to the cursor
-        biasLeft = GetScaledCursorPosition() < x
+        -- print("biasLeft check", x ,"<", GetCursorPosition())
+        -- print("biasDown check", y, ">", GetScreenHeight() / 2)
+        biasLeft = x < GetCursorPosition()
         biasDown = y > GetScreenHeight() / 2
 
         local outermostComparisonShown
@@ -208,8 +211,20 @@ do
                 else
                     outermostComparisonShown = comparisonTooltip1:IsShown() and comparisonTooltip1 or comparisonTooltip2
                 end
+                if
+                    -- outermost is right of owner while we're biasing left
+                    (biasLeft and outermostComparisonShown:GetCenter() > owner:GetCenter())
+                    or
+                    -- outermost is left of owner while we're biasing right
+                    ((not biasLeft) and outermostComparisonShown:GetCenter() < owner:GetCenter())
+                then
+                    -- the comparison won't be in the way, so ignore it
+                    outermostComparisonShown = nil
+                end
             end
         end
+
+        -- print("ApTip bias", biasLeft and "left" or "right", biasDown and "down" or "up")
 
         local primary, secondary
         if anchor == "vertical" then
@@ -217,23 +232,21 @@ do
             -- only care about comparisons to avoid overlapping them
             primary = biasDown and "bottom" or "top"
             if outermostComparisonShown then
-                -- secondary = biasLeft and "right" or "left"
-                secondary = biasLeft and "left" or "right"
-            else
                 secondary = biasLeft and "right" or "left"
+            else
+                secondary = biasLeft and "left" or "right"
             end
         else -- horizontal
+            primary = biasLeft and "left" or "right"
+            secondary = biasDown and "bottom" or "top"
             if outermostComparisonShown then
                 if db.byComparison then
-                    primary = biasLeft and "right" or "left"
                     owner = outermostComparisonShown
                 else
+                    -- show on the opposite side of the bias, probably overlapping the cursor, since that's better than overlapping the comparison
                     primary = biasLeft and "right" or "left"
                 end
-            else
-                primary = biasLeft and "right" or "left"
             end
-            secondary = biasDown and "bottom" or "top"
         end
         if
             -- would we be pushing against the edge of the screen?
