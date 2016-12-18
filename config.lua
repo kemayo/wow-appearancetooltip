@@ -113,6 +113,7 @@ local spin = newCheckbox(panel, 'spin', 'Spin model', "Constantly spin the model
 local notifyKnown = newCheckbox(panel, 'notifyKnown', 'Display transmog information', "Display a label showing whether you know the item appearance already")
 local currentClass = newCheckbox(panel, 'currentClass', 'Current character only', "Only show previews on items that the current character can collect")
 local byComparison = newCheckbox(panel, 'byComparison', 'Show by comparison tooltip', "If the comparison tooltip is shown where the preview would want to be, show next to it (this makes it *much* less likely you'll have the preview overlap your cursor)")
+local tokens = newCheckbox(panel, 'tokens', 'Previews for tokens', "Show previews for the items which various tokens can be turned in for when mousing over the token")
 
 local zoomWorn = newCheckbox(panel, 'zoomWorn', 'Zoom on worn items', "Zoom in on the part of your model which wears the item")
 local zoomHeld = newCheckbox(panel, 'zoomHeld', 'Zoom on held items', "Zoom in on the held item being previewed, without seeing your character")
@@ -164,7 +165,8 @@ zoomMasked:SetPoint("TOPLEFT", zoomHeld, "BOTTOMLEFT", 0, -4)
 
 dressed:SetPoint("TOPLEFT", zoomMasked, "BOTTOMLEFT", 0, -4)
 uncover:SetPoint("TOPLEFT", dressed, "BOTTOMLEFT", 0, -4)
-notifyKnown:SetPoint("TOPLEFT", uncover, "BOTTOMLEFT", 0, -4)
+tokens:SetPoint("TOPLEFT", uncover, "BOTTOMLEFT", 0, -4)
+notifyKnown:SetPoint("TOPLEFT", tokens, "BOTTOMLEFT", 0, -4)
 currentClass:SetPoint("TOPLEFT", notifyKnown, "BOTTOMLEFT", 0, -4)
 mousescroll:SetPoint("TOPLEFT", currentClass, "BOTTOMLEFT", 0, -4)
 spin:SetPoint("TOPLEFT", mousescroll, "BOTTOMLEFT", 0, -4)

@@ -44,6 +44,7 @@ function tooltip:ADDON_LOADED(addon)
         currentClass = false, -- only show for items the current class can transmog
         anchor = "vertical", -- vertical / horizontal
         byComparison = true, -- whether to show by the comparison, or fall back to vertical if needed
+        tokens = true, -- try to preview tokens?
     })
     db = _G[myname.."DB"]
     ns.db = db
@@ -274,7 +275,7 @@ function ns:ShowItem(link)
     if not link then return end
     local id = tonumber(link:match("item:(%d+)"))
     if not id or id == 0 then return end
-    local token = LAT:ItemIsToken(id)
+    local token = db.tokens and LAT:ItemIsToken(id)
     local maybelink, _
 
     if token then
