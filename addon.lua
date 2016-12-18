@@ -184,6 +184,8 @@ do
         if not (x and y) then
             return
         end
+        x = x / owner:GetEffectiveScale()
+        y = y / owner:GetEffectiveScale()
 
         local biasLeft, biasDown
         -- we want to follow the direction the tooltip is going, relative to the cursor
