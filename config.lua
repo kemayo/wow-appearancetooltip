@@ -6,7 +6,7 @@ local function checkboxSetChecked(self) self:SetChecked(self:GetValue()) end
 local function checkboxSetValue(self, checked) ns.db[self.key] = checked end
 local function checkboxOnClick(self)
     local checked = self:GetChecked()
-    PlaySound(checked and "igMainMenuOptionCheckBoxOn" or "igMainMenuOptionCheckBoxOff")
+    PlaySound(checked and SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON or SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_OFF)
     self:SetValue(checked)
 end
 
