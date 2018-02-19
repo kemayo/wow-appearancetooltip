@@ -14,10 +14,22 @@ local races = {
     [8] = "Troll",
     [6] = "Tauren",
     [9] = "Goblin",
+    -- Allied!
+    [27] = "BloodElf", -- "Nightborne",
+    [28] = "Tauren", -- "HighmountainTauren",
+    [29] = "BloodElf", -- "VoidElf",
+    [30] = "Draenei", -- "LightforgedDraenei",
 }
 local genders = {
     [0] = "Male",
     [1] = "Female",
+}
+
+local raceMap = {
+    ["Nightborne"] = "BloodElf",
+    ["HighmountainTauren"] = "Tauren",
+    ["VoidElf"] = "BloodElf",
+    ["LightforgedDraenei"] = "Draenei",
 }
 
 local slots = {
@@ -101,6 +113,9 @@ function ns:GetCameraID(itemid, race, gender)
         end
         if not gender then
             gender = playerSex
+        end
+        if raceMap[race] then
+            race = raceMap[race]
         end
         key = ("%s-%s-%s"):format(race, gender, slot_override[itemid] or slots[slot] or "Default")
     end
