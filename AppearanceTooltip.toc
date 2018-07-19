@@ -10,11 +10,7 @@
 ## SavedVariables: AppearanceTooltipDB
 ## SavedVariablesPerCharacter: AppearanceTooltipDBPC
 
-#@no-lib-strip@
-lib\LibStub\LibStub.lua
-lib\LibArmorToken-1.0\lib.xml
-lib\LibAppropriateItems-1.0\lib.xml
-#@end-no-lib-strip@
+embeds.xml
 
 addon.lua
 cameraids.lua
