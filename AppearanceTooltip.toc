@@ -10,7 +10,9 @@
 ## SavedVariables: AppearanceTooltipDB
 ## SavedVariablesPerCharacter: AppearanceTooltipDBPC
 
+#@no-lib-strip@
 embeds.xml
+#@end-no-lib-strip@
 
 addon.lua
 cameraids.lua
