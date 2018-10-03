@@ -154,6 +154,9 @@ local customRaceDropdown = newDropdown(modelBox, 'modelRace', "Choose your custo
     [28] = "Highmountain Tauren",
     [29] = "Void Elf",
     [30] = "Lightforged Draenei",
+    [34] = "Dark Iron Dwarf",
+    [36] = "Mag'har Orc",
+
 })
 UIDropDownMenu_SetWidth(customRaceDropdown, 100)
 local customGenderDropdown = newDropdown(modelBox, 'modelGender', "Choose your custom gender", {
