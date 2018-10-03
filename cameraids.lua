@@ -15,10 +15,12 @@ local races = {
     [6] = "Tauren",
     [9] = "Goblin",
     -- Allied!
-    [27] = "BloodElf", -- "Nightborne",
+    [27] = "Nightborne", -- "Nightborne",
     [28] = "Tauren", -- "HighmountainTauren",
     [29] = "BloodElf", -- "VoidElf",
     [30] = "Draenei", -- "LightforgedDraenei",
+    [34] = "Dwarf", -- "DarkIronDwarf",
+    [36] = "Orc", -- "MagharOrc",
 }
 local genders = {
     [0] = "Male",
@@ -26,10 +28,11 @@ local genders = {
 }
 
 local raceMap = {
-    ["Nightborne"] = "BloodElf",
     ["HighmountainTauren"] = "Tauren",
     ["VoidElf"] = "BloodElf",
     ["LightforgedDraenei"] = "Draenei",
+    ["DarkIronDwarf"] = "Dwarf",
+    ["MagharOrc"] = "Orc",
 }
 
 local slots = {
@@ -299,6 +302,32 @@ slots_to_cameraids = {
     ["Human-Male-Tabard"] = 230,
     ["Human-Male-Waist"] = 234,
     ["Human-Male-Wrist"] = 237,
+    ["Nightborne-Female-Back"] = 1099,
+    ["Nightborne-Female-Feet"] = 1106,
+    ["Nightborne-Female-Hands"] = 1103,
+    ["Nightborne-Female-Head"] = 1096,
+    ["Nightborne-Female-Legs"] = 1105,
+    ["Nightborne-Female-Robe"] = 1107,
+    ["Nightborne-Female-Chest"] = 1100,
+    ["Nightborne-Female-Shirt"] = 1100,
+    ["Nightborne-Female-Shoulder"] = 1097,
+    ["Nightborne-Female-Shoulder-Alt"] = 1098,
+    ["Nightborne-Female-Tabard"] = 1101,
+    ["Nightborne-Female-Waist"] = 1104,
+    ["Nightborne-Female-Wrist"] = 1102,
+    ["Nightborne-Male-Back"] = 412,
+    ["Nightborne-Male-Feet"] = 1095,
+    ["Nightborne-Male-Hands"] = 417,
+    ["Nightborne-Male-Head"] = 1090,
+    ["Nightborne-Male-Legs"] = 419,
+    ["Nightborne-Male-Robe"] = 1091,
+    ["Nightborne-Male-Chest"] = 1092,
+    ["Nightborne-Male-Shirt"] = 1092,
+    ["Nightborne-Male-Shoulder"] = 411,
+    ["Nightborne-Male-Shoulder-Alt"] = 734,
+    ["Nightborne-Male-Tabard"] = 415,
+    ["Nightborne-Male-Waist"] = 418,
+    ["Nightborne-Male-Wrist"] = 416,
     ["NightElf-Female-Back"] = 423,
     ["NightElf-Female-Feet"] = 431,
     ["NightElf-Female-Hands"] = 428,
