@@ -70,7 +70,7 @@ local function newBox(parent, title, height)
         insets = {left = 4, right = 4, top = 4, bottom = 4},
     }
 
-    local box = CreateFrame('Frame', nil, parent)
+    local box = CreateFrame('Frame', nil, parent, "BackdropTemplate")
     box:SetBackdrop(boxBackdrop)
     box:SetBackdropBorderColor(.3, .3, .3)
     box:SetBackdropColor(.1, .1, .1, .5)
