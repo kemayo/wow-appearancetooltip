@@ -133,37 +133,39 @@ local anchor = newDropdown(panel, 'anchor', "Side of the tooltip to attach to, d
 })
 UIDropDownMenu_SetWidth(anchor, 100)
 
-local modelBox = newBox(panel, "Custom player model", 48)
-local customModel = newCheckbox(modelBox, 'customModel', 'Use a different model', "Instead of your current character, use a specific race/gender")
-local customRaceDropdown = newDropdown(modelBox, 'modelRace', "Choose your custom race", {
-    [1] = "Human",
-    [3] = "Dwarf",
-    [4] = "Night Elf",
-    [11] = "Draenei",
-    [22] = "Worgen",
-    [7] = "Gnome",
-    [24] = "Pandaren",
-    [2] = "Orc",
-    [5] = "Undead",
-    [10] = "Blood Elf",
-    [8] = "Troll",
-    [6] = "Tauren",
-    [9] = "Goblin",
-    -- Allied!
-    [27] = "Nightborne Elf",
-    [28] = "Highmountain Tauren",
-    [29] = "Void Elf",
-    [30] = "Lightforged Draenei",
-    [34] = "Dark Iron Dwarf",
-    [36] = "Mag'har Orc",
+-- local modelBox = newBox(panel, "Custom player model", 48)
+-- local customModel = newCheckbox(modelBox, 'customModel', 'Use a different model', "Instead of your current character, use a specific race/gender")
+-- local customRaceDropdown = newDropdown(modelBox, 'modelRace', "Choose your custom race", {
+--     [1] = "Human",
+--     [3] = "Dwarf",
+--     [4] = "Night Elf",
+--     [11] = "Draenei",
+--     [22] = "Worgen",
+--     [7] = "Gnome",
+--     [24] = "Pandaren",
+--     [2] = "Orc",
+--     [5] = "Undead",
+--     [10] = "Blood Elf",
+--     [8] = "Troll",
+--     [6] = "Tauren",
+--     [9] = "Goblin",
+--     -- Allied!
+--     [27] = "Nightborne Elf",
+--     [28] = "Highmountain Tauren",
+--     [29] = "Void Elf",
+--     [30] = "Lightforged Draenei",
+--     [34] = "Dark Iron Dwarf",
+--     [35] = "Vulpera",
+--     [36] = "Mag'har Orc",
+--     [37] = "Mechagnome",
 
-})
-UIDropDownMenu_SetWidth(customRaceDropdown, 100)
-local customGenderDropdown = newDropdown(modelBox, 'modelGender', "Choose your custom gender", {
-    [0] = "Male",
-    [1] = "Female",
-})
-UIDropDownMenu_SetWidth(customGenderDropdown, 100)
+-- })
+-- UIDropDownMenu_SetWidth(customRaceDropdown, 100)
+-- local customGenderDropdown = newDropdown(modelBox, 'modelGender', "Choose your custom gender", {
+--     [0] = "Male",
+--     [1] = "Female",
+-- })
+-- UIDropDownMenu_SetWidth(customGenderDropdown, 100)
 
 -- And put them together:
 
@@ -187,10 +189,10 @@ anchor:SetPoint("LEFT", anchorLabel, "RIGHT", 4, -2)
 
 byComparison:SetPoint("TOPLEFT", anchorLabel, "BOTTOMLEFT", 0, -10)
 
-modelBox:SetPoint("TOP", byComparison, "BOTTOM", 0, -20)
-customModel:SetPoint("LEFT", modelBox, 12, 0)
-customRaceDropdown:SetPoint("LEFT", customModel.Text, "RIGHT", 12, -2)
-customGenderDropdown:SetPoint("TOPLEFT", customRaceDropdown, "TOPRIGHT", 4, 0)
+-- modelBox:SetPoint("TOP", byComparison, "BOTTOM", 0, -20)
+-- customModel:SetPoint("LEFT", modelBox, 12, 0)
+-- customRaceDropdown:SetPoint("LEFT", customModel.Text, "RIGHT", 12, -2)
+-- customGenderDropdown:SetPoint("TOPLEFT", customRaceDropdown, "TOPRIGHT", 4, 0)
 
 InterfaceOptions_AddCategory(panel)
 

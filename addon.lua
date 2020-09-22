@@ -50,6 +50,9 @@ function tooltip:ADDON_LOADED(addon)
     db = _G[myname.."DB"]
     ns.db = db
 
+    -- Dressing up custom models is broken currently, so force-disable this. Test it occasionally to see if it gets fixed.
+    db.customModel = false
+
     self:UnregisterEvent("ADDON_LOADED")
 end
 
