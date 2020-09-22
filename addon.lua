@@ -45,6 +45,7 @@ function tooltip:ADDON_LOADED(addon)
         anchor = "vertical", -- vertical / horizontal
         byComparison = true, -- whether to show by the comparison, or fall back to vertical if needed
         tokens = true, -- try to preview tokens?
+        appearances_known = {},
     })
     db = _G[myname.."DB"]
     ns.db = db
@@ -56,6 +57,8 @@ function tooltip:PLAYER_LOGIN()
     tooltip.model:SetUnit("player")
     tooltip.modelZoomed:SetUnit("player")
     C_TransmogCollection.SetShowMissingSourceInItemTooltips(true)
+
+    ns.UpdateSources()
 end
 
 function tooltip:PLAYER_REGEN_ENABLED()
@@ -500,6 +503,35 @@ ns.modifiers = {
     None = function() return true end,
 }
 
+---
+
+do
+    local scanned
+    function ns.UpdateSources()
+        if scanned then return end
+        for categoryID = 1, 28 do
+            local categoryAppearances = C_TransmogCollection.GetCategoryAppearances(categoryID)
+            for _, categoryAppearance in pairs(categoryAppearances) do
+                local appearanceSources = C_TransmogCollection.GetAppearanceSources(categoryAppearance.visualID)
+                local known_any
+                for _, source in pairs(appearanceSources) do
+                    if source.isCollected then
+                        -- it's only worth saving if we know the source
+                        known_any = true
+                    end
+                end
+                if known_any then
+                    ns.db.appearances_known[categoryAppearance.visualID] = true
+                else
+                    -- cleaning up after unlearned appearances:
+                    ns.db.appearances_known[categoryAppearance.visualID] = nil
+                end
+            end
+        end
+        scanned = true
+    end
+end
+
 -- Utility fun
 
 --/dump C_Transmog.GetItemInfo(GetItemInfoInstant(""))
@@ -518,9 +550,17 @@ function ns.PlayerHasAppearance(item)
     if not itemID then return end
     local appearanceID, sourceID = C_TransmogCollection.GetItemInfo(itemID)
     if not appearanceID then return end
+    if sourceID and ns.db.appearances_known[appearanceID] then
+        local _, _, _, _, sourceKnown = C_TransmogCollection.GetAppearanceSourceInfo(sourceID)
+        return true, not sourceKnown
+    end
+    -- Everything after this is a fallback. All know appearances *should* be in that table... but we run
+    -- this in case, we only know about unequippable items after you've logged in as a class which can use
+    -- them. (Also in case the scanning messed up somehow, I guess?)
     if not LAI:IsAppropriate(itemID) then
         -- This is a non-class item, so GetAppearanceSources won't work on it
         -- We can tell whether the specific source is collected, but not the overall appearance
+        -- Fallback if you've not logged in to a class that can use this item in a while
         local _, _, _, _, sourceKnown = C_TransmogCollection.GetAppearanceSourceInfo(sourceID)
         return sourceKnown, false
     end
