@@ -398,10 +398,10 @@ function ns:ShowItem(link)
         known:Hide()
 
         if db.notifyKnown then
-            local hasAppearance, appearanceFromOtherItem, notTransmoggable = ns.PlayerHasAppearance(link)
+            local hasAppearance, appearanceFromOtherItem = ns.PlayerHasAppearance(link)
 
             local label
-            if notTransmoggable then
+            if not ns.CanTransmogItem(link) then
                 label = "|c00ffff00" .. TRANSMOGRIFY_INVALID_DESTINATION
             else
                 if hasAppearance then
@@ -511,49 +511,33 @@ function ns.CanTransmogItem(itemLink)
     end
 end
 
+-- /dump C_TransmogCollection.GetAppearanceSourceInfo(select(2, C_TransmogCollection.GetItemInfo("")))
 function ns.PlayerHasAppearance(item)
-    if not ns.CanTransmogItem(item) then
-        return false, false, true
+    -- hasAppearance, appearanceFromOtherItem
+    local itemID = GetItemInfoInstant(item)
+    if not itemID then return end
+    local appearanceID, sourceID = C_TransmogCollection.GetItemInfo(itemID)
+    if not appearanceID then return end
+    if not LAI:IsAppropriate(itemID) then
+        -- This is a non-class item, so GetAppearanceSources won't work on it
+        -- We can tell whether the specific source is collected, but not the overall appearance
+        local _, _, _, _, sourceKnown = C_TransmogCollection.GetAppearanceSourceInfo(sourceID)
+        return sourceKnown, false
     end
-    local state = ns.CheckTooltipFor(item, TRANSMOGRIFY_TOOLTIP_APPEARANCE_UNKNOWN, TRANSMOGRIFY_TOOLTIP_ITEM_UNKNOWN_APPEARANCE_KNOWN)
-    if state == TRANSMOGRIFY_TOOLTIP_APPEARANCE_UNKNOWN then
-        return
-    end
-    return true, state == TRANSMOGRIFY_TOOLTIP_ITEM_UNKNOWN_APPEARANCE_KNOWN
-end
-
-do
-    local tooltip
-    function ns.CheckTooltipFor(link, ...)
-        if not tooltip then
-            tooltip = CreateFrame("GameTooltip", "AppearanceTooltipScanningTooltip", nil, "GameTooltipTemplate")
-            tooltip:SetOwner(WorldFrame, "ANCHOR_NONE")
-        end
-        tooltip:ClearLines()
-
-        -- just showing tooltip for an itemid
-        -- uses rather innocent checking so that slot can be a link or an itemid
-        local link = tostring(link) -- so that ":match" is guaranteed to be okay
-        if not link:match("item:") then
-            link = "item:"..link
-        end
-        tooltip:SetHyperlink(link)
-
-        for i=2, tooltip:NumLines() do
-            local left = _G["AppearanceTooltipScanningTooltipTextLeft"..i]
-            --local right = _G["AppearanceTooltipScanningTooltipTextRight"..i]
-            if left and left:IsShown() then
-                local text = left:GetText()
-                for ii=1, select('#', ...) do
-                    if string.match(text, (select(ii, ...))) then
-                        return text
-                    end
+    local sources = C_TransmogCollection.GetAppearanceSources(appearanceID)
+    if sources then
+        local known_any = false
+        for _, source in pairs(sources) do
+            if source.isCollected == true then
+                known_any = true
+                if itemID == source.itemID then
+                    return true, false
                 end
             end
-            --if right and right:IsShown() and string.match(right:GetText(), text) then return true end
         end
-        return false
+        return known_any, false
     end
+    return false
 end
 
 function ns.Print(...) print("|cFF33FF99".. myfullname.. "|r:", ...) end
