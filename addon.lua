@@ -433,8 +433,10 @@ function ns:ResetModel(model)
     -- model:SetAutoDress(db.dressed)
     -- So instead, more complicated:
     if db.customModel then
+        model:SetUnit("none")
         model:SetCustomRace(db.modelRace, db.modelGender)
     else
+        model:SetUnit("player")
         model:Dress()
     end
     model:RefreshCamera()
