@@ -6,6 +6,7 @@
 ## LoadOnDemand: 0
 ## OptionalDeps: tekDebug, Baggins, Bagnon, Inventorian, LibStub, LibArmorToken-1.0, LibAppropriateItems-1.0
 ## X-Embeds: LibStub, LibArmorToken-1.0, LibAppropriateItems-1.0
+## X-Curse-Project-ID: 101155
 
 ## SavedVariables: AppearanceTooltipDB
 ## SavedVariablesPerCharacter: AppearanceTooltipDBPC
