@@ -36,10 +36,11 @@ local function UpdateContainerButton(button, bag)
         local appropriateItem = LAI:IsAppropriate(link)
         -- ns.Debug("Considering item", link, hasAppearance, appearanceFromOtherItem)
         if
+            (not hasAppearance or appearanceFromOtherItem) and
+            (not ns.db.currentClass or appropriateItem) and
             IsDressableItem(link) and
             ns.CanTransmogItem(link) and
-            (not ns.db.currentClass or appropriateItem) and
-            (not hasAppearance or appearanceFromOtherItem)
+            (not ns.db.bags_unbound or not C_Item.IsBound(item:GetItemLocation()))
         then
             PrepareItemButton(button)
             if appropriateItem then

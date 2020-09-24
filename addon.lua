@@ -46,6 +46,7 @@ function tooltip:ADDON_LOADED(addon)
         byComparison = true, -- whether to show by the comparison, or fall back to vertical if needed
         tokens = true, -- try to preview tokens?
         bags = true,
+        bags_unbound = true,
         appearances_known = {},
     })
     db = _G[myname.."DB"]

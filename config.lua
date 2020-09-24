@@ -169,6 +169,7 @@ UIDropDownMenu_SetWidth(anchor, 100)
 
 local bagicon = CreateAtlasMarkup("transmog-icon-hidden")
 local bags = newCheckbox(panel, 'bags', ('Show %s icon in bags for unknown items'):format(bagicon), ("For items whose appearance you don't know, show the %s icon on the item in bags. Works with built-in bags, Baggins, Bagnon, and Inventorian."):format(bagicon))
+local bags_unbound = newCheckbox(panel, 'bags_unbound', '...for non-soulbound items only', "Soulbound items are either known already, or can't be sent to another character")
 
 -- And put them together:
 
@@ -198,6 +199,7 @@ byComparison:SetPoint("TOPLEFT", anchorLabel, "BOTTOMLEFT", 0, -10)
 -- customGenderDropdown:SetPoint("TOPLEFT", customRaceDropdown, "TOPRIGHT", 4, 0)
 
 bags:SetPoint("TOPLEFT", byComparison, "BOTTOMLEFT", 0, -4)
+bags_unbound:SetPoint("TOPLEFT", bags, "BOTTOMLEFT", 0, -4)
 
 InterfaceOptions_AddCategory(panel)
 
