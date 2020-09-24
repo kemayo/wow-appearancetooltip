@@ -351,7 +351,12 @@ function ns:ShowItem(link)
             if shouldZoom then
                 if itemCamera then
                     model = tooltip.modelWeapon
-                    model:SetItem(id)
+                    local appearanceID = C_TransmogCollection.GetItemInfo(link)
+                    if appearanceID then
+                        model:SetItemAppearance(appearanceID)
+                    else
+                        model:SetItem(id)
+                    end
                 else
                     model = tooltip.modelZoomed
                     model:SetUseTransmogSkin(db.zoomMasked and slot ~= "INVTYPE_HEAD")
@@ -549,11 +554,11 @@ function ns.CanTransmogItem(itemLink)
 end
 
 -- /dump C_TransmogCollection.GetAppearanceSourceInfo(select(2, C_TransmogCollection.GetItemInfo("")))
-function ns.PlayerHasAppearance(item)
+function ns.PlayerHasAppearance(itemLinkOrID)
     -- hasAppearance, appearanceFromOtherItem
-    local itemID = GetItemInfoInstant(item)
+    local itemID = GetItemInfoInstant(itemLinkOrID)
     if not itemID then return end
-    local appearanceID, sourceID = C_TransmogCollection.GetItemInfo(itemID)
+    local appearanceID, sourceID = C_TransmogCollection.GetItemInfo(itemLinkOrID)
     if not appearanceID then return end
     if sourceID and ns.db.appearances_known[appearanceID] then
         local _, _, _, _, sourceKnown = C_TransmogCollection.GetAppearanceSourceInfo(sourceID)
