@@ -51,8 +51,8 @@ local function UpdateContainerButton(button, bag)
                     button.appearancetooltipicon:SetVertexColor(1, 1, 1)
                 end
             else
-                -- red eye
-                button.appearancetooltipicon:SetVertexColor(1, 0, 0)
+                -- yellow eye
+                button.appearancetooltipicon:SetVertexColor(1, 1, 0)
             end
             button.appearancetooltipicon:Show()
         end
