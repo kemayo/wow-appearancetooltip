@@ -167,6 +167,9 @@ UIDropDownMenu_SetWidth(anchor, 100)
 -- })
 -- UIDropDownMenu_SetWidth(customGenderDropdown, 100)
 
+local bagicon = CreateAtlasMarkup("transmog-icon-hidden")
+local bags = newCheckbox(panel, 'bags', ('Show %s icon in bags for unknown items'):format(bagicon), ("For items whose appearance you don't know, show the %s icon on the item in bags. Works with built-in bags, Baggins, Bagnon, and Inventorian."):format(bagicon))
+
 -- And put them together:
 
 zoomWorn:SetPoint("TOPLEFT", subText, "BOTTOMLEFT", 0, -8)
@@ -193,6 +196,8 @@ byComparison:SetPoint("TOPLEFT", anchorLabel, "BOTTOMLEFT", 0, -10)
 -- customModel:SetPoint("LEFT", modelBox, 12, 0)
 -- customRaceDropdown:SetPoint("LEFT", customModel.Text, "RIGHT", 12, -2)
 -- customGenderDropdown:SetPoint("TOPLEFT", customRaceDropdown, "TOPRIGHT", 4, 0)
+
+bags:SetPoint("TOPLEFT", byComparison, "BOTTOMLEFT", 0, -4)
 
 InterfaceOptions_AddCategory(panel)
 
