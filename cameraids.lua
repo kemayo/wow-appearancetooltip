@@ -97,9 +97,9 @@ local slots_to_cameraids, slot_override
 -- itemid: number/string Anything that GetItemInfoInstant will accept
 -- race: number raceid
 -- gender: number genderid (0: male, 1: female)
-function ns:GetCameraID(itemid, race, gender)
+function ns:GetCameraID(itemLinkOrID, race, gender)
     local key, itemcamera
-    local itemid, _, _, slot, _, class, subclass = GetItemInfoInstant(itemid)
+    local itemid, _, _, slot, _, class, subclass = GetItemInfoInstant(itemLinkOrID)
     if item_slots[slot] then
         itemcamera = true
         if item_slots[slot] == true then
@@ -530,7 +530,7 @@ slot_override = {
     [106446] = "Shoulder-Alt", -- Anchorite Shoulderpads
     [112531] = "Shoulder-Alt", -- Auchenai Keeper Mantle
     -- Leather
-    -- [] = "Shoulder-Alt", -- 
+    -- [] = "Shoulder-Alt", --
     -- Mail
     [7718] = "Shoulder-Alt", -- Herod's Shoulder
     [122356] = "Shoulder-Alt", -- Champion Herod's Shoulder

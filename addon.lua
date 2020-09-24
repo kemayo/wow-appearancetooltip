@@ -155,7 +155,7 @@ positioner:SetScript("OnUpdate", function(self, elapsed)
     end
     self.elapsed = 0
 
-    local owner, our_point, owner_point = ns:ComputeTooltipAnchors(tooltip.owner, tooltip, db.anchor)
+    local owner, our_point, owner_point = ns:ComputeTooltipAnchors(tooltip.owner, db.anchor)
     if our_point and owner_point then
         tooltip:ClearAllPoints()
         tooltip:SetPoint(our_point, owner, owner_point)
@@ -183,7 +183,7 @@ do
             bottom = {"TOPLEFT", "TOPRIGHT"},
         },
     }
-    function ns:ComputeTooltipAnchors(owner, tooltip, anchor)
+    function ns:ComputeTooltipAnchors(owner, anchor)
         -- Because I always forget: x is left-right, y is bottom-top
         -- Logic here: our tooltip should trend towards the center of the screen, unless something is stopping it.
         -- If comparison tooltips are shown, we shouldn't overlap them
@@ -260,7 +260,7 @@ do
             (primary == "left" and (owner:GetLeft() - tooltip:GetWidth()) < 0)
             or (primary == "right" and (owner:GetRight() + tooltip:GetWidth() > GetScreenWidth()))
         then
-            return self:ComputeTooltipAnchors(originalOwner, tooltip, "vertical")
+            return self:ComputeTooltipAnchors(originalOwner, "vertical")
         end
         return owner, unpack(points[primary][secondary])
     end
