@@ -38,6 +38,9 @@ read_globals = {
     "GetAuctionBuyout",
 
     -- API functions
+    "C_Item",
+    "C_Transmog",
+    "C_TransmogCollection",
     "hooksecurefunc",
     "BankButtonIDToInvSlotID",
     "ContainerIDToInventoryID",
@@ -113,8 +116,6 @@ read_globals = {
     "InterfaceOptionsFramePanelContainer",
 
     -- FrameXML API
-    "C_Transmog",
-    "C_TransmogCollection",
     "CreateAtlasMarkup",
     "CreateFrame",
     "InterfaceOptionsFrame_OpenToCategory",
