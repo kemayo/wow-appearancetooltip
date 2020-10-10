@@ -3,6 +3,9 @@ local myfullname = GetAddOnMetadata(myname, "Title")
 
 local LAI = LibStub("LibAppropriateItems-1.0")
 
+local f = CreateFrame("Frame")
+f:SetScript("OnEvent", function(self, event, ...) if f[event] then return f[event](f, event, ...) end end)
+
 local function PrepareItemButton(button)
     if button.appearancetooltipicon then
         return
@@ -19,6 +22,32 @@ local function PrepareItemButton(button)
     button.appearancetooltipicon:SetAtlas("transmog-icon-hidden")
     button.appearancetooltipicon:Hide()
 end
+local function UpdateOverlay(button, link)
+    local hasAppearance, appearanceFromOtherItem = ns.PlayerHasAppearance(link)
+    local appropriateItem = LAI:IsAppropriate(link)
+    -- ns.Debug("Considering item", link, hasAppearance, appearanceFromOtherItem)
+    if
+        (not hasAppearance or appearanceFromOtherItem) and
+        (not ns.db.currentClass or appropriateItem) and
+        IsDressableItem(link) and
+        ns.CanTransmogItem(link)
+    then
+        PrepareItemButton(button)
+        if appropriateItem then
+            if appearanceFromOtherItem then
+                -- blue eye
+                button.appearancetooltipicon:SetVertexColor(0, 1, 1)
+            else
+                -- regular purple trasmog-eye
+                button.appearancetooltipicon:SetVertexColor(1, 1, 1)
+            end
+        else
+            -- yellow eye
+            button.appearancetooltipicon:SetVertexColor(1, 1, 0)
+        end
+        button.appearancetooltipicon:Show()
+    end
+end
 
 local function UpdateContainerButton(button, bag)
     if button.appearancetooltipicon then button.appearancetooltipicon:Hide() end
@@ -32,30 +61,8 @@ local function UpdateContainerButton(button, bag)
     end
     item:ContinueOnItemLoad(function()
         local link = item:GetItemLink()
-        local hasAppearance, appearanceFromOtherItem = ns.PlayerHasAppearance(link)
-        local appropriateItem = LAI:IsAppropriate(link)
-        -- ns.Debug("Considering item", link, hasAppearance, appearanceFromOtherItem)
-        if
-            (not hasAppearance or appearanceFromOtherItem) and
-            (not ns.db.currentClass or appropriateItem) and
-            IsDressableItem(link) and
-            ns.CanTransmogItem(link) and
-            (not ns.db.bags_unbound or not C_Item.IsBound(item:GetItemLocation()))
-        then
-            PrepareItemButton(button)
-            if appropriateItem then
-                if appearanceFromOtherItem then
-                    -- blue eye
-                    button.appearancetooltipicon:SetVertexColor(0, 1, 1)
-                else
-                    -- regular purple trasmog-eye
-                    button.appearancetooltipicon:SetVertexColor(1, 1, 1)
-                end
-            else
-                -- yellow eye
-                button.appearancetooltipicon:SetVertexColor(1, 1, 0)
-            end
-            button.appearancetooltipicon:Show()
+        if not ns.db.bags_unbound or not C_Item.IsBound(item:GetItemLocation()) then
+            UpdateOverlay(button, link)
         end
     end)
 end
@@ -74,6 +81,25 @@ hooksecurefunc("BankFrameItemButton_Update", function(button)
         UpdateContainerButton(button, -1)
     end
 end)
+
+-- Merchant frame
+
+hooksecurefunc("MerchantFrame_Update", function()
+    for i = 1, MERCHANT_ITEMS_PER_PAGE do
+        local frame = _G["MerchantItem"..i.."ItemButton"]
+        if frame then
+            if frame.appearancetooltipicon then frame.appearancetooltipicon:Hide() end
+            if not ns.db.merchant then
+                return
+            end
+            if frame.link then
+                UpdateOverlay(frame, frame.link)
+            end
+        end
+    end
+end)
+
+-- Other addons:
 
 -- Inventorian
 local inv = LibStub("AceAddon-3.0"):GetAddon("Inventorian", true)

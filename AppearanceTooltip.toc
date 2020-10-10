@@ -19,4 +19,4 @@ addon.lua
 cameraids.lua
 config.lua
 
-bags.lua
+overlays.lua

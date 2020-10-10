@@ -47,6 +47,7 @@ function tooltip:ADDON_LOADED(addon)
         tokens = true, -- try to preview tokens?
         bags = true,
         bags_unbound = true,
+        merchant = true,
         appearances_known = {},
     })
     db = _G[myname.."DB"]
