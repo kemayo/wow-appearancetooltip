@@ -564,6 +564,11 @@ function ns.PlayerHasAppearance(itemLinkOrID)
     local itemID = GetItemInfoInstant(itemLinkOrID)
     if not itemID then return end
     local appearanceID, sourceID = C_TransmogCollection.GetItemInfo(itemLinkOrID)
+    if not appearanceID then
+        -- sometimes the link won't actually give us an appearance, but itemID will
+        -- e.g. mythic Drape of Iron Sutures from Shadowmoon Burial Grounds
+        appearanceID, sourceID = C_TransmogCollection.GetItemInfo(itemID)
+    end
     if not appearanceID then return end
     if sourceID and ns.db.appearances_known[appearanceID] then
         local _, _, _, _, sourceKnown = C_TransmogCollection.GetAppearanceSourceInfo(sourceID)
