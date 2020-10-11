@@ -76,6 +76,7 @@ read_globals = {
     "GetItemInfo",
     "GetItemInfoInstant",
     "GetItemQualityColor",
+    "GetLootSlotLink",
     "GetScreenHeight",
     "GetScreenWidth",
     "GetTime",

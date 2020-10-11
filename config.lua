@@ -228,11 +228,13 @@ do
     local bags = newCheckbox(panel, 'bags', 'in bags', ("For items whose appearance you don't know, show the %s icon on the item in bags. Works with built-in bags, Baggins, Bagnon, and Inventorian."):format(bagicon))
     local bags_unbound = newCheckbox(panel, 'bags_unbound', '...for non-soulbound items only', "Soulbound items are either known already, or can't be sent to another character")
     local merchant = newCheckbox(panel, 'merchant', 'at merchants', ("For items whose appearance you don't know, show the %s icon on the item in the merchant frame."):format(bagicon))
+    local loot = newCheckbox(panel, 'loot', 'in loot', ("For items whose appearance you don't know, show the %s icon on the item in the loot frame."):format(bagicon))
 
     show:SetPoint("TOPLEFT", subText, "BOTTOMLEFT", 0, -8)
     bags:SetPoint("TOPLEFT", show, "BOTTOMLEFT", 0, -8)
-    bags_unbound:SetPoint("TOPLEFT", bags, "BOTTOMLEFT", 0, -4)
-    merchant:SetPoint("TOPLEFT", bags_unbound, "BOTTOMLEFT", 0, -4)
+    bags_unbound:SetPoint("TOPLEFT", bags, "BOTTOMLEFT", 8, -4)
+    merchant:SetPoint("TOPLEFT", bags_unbound, "BOTTOMLEFT", -8, -4)
+    loot:SetPoint("TOPLEFT", merchant, "BOTTOMLEFT", 0, -4)
 
     InterfaceOptions_AddCategory(panel)
 end

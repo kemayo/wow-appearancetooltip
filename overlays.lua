@@ -99,6 +99,22 @@ hooksecurefunc("MerchantFrame_Update", function()
     end
 end)
 
+-- Loot frame
+
+hooksecurefunc("LootFrame_UpdateButton", function(index)
+    local button = _G["LootButton"..index]
+    if not button then return end
+    if button.appearancetooltipicon then button.appearancetooltipicon:Hide() end
+    if not ns.db.loot then return end
+    -- ns.Debug("LootFrame_UpdateButton", button:IsEnabled(), button.slot, button.slot and GetLootSlotLink(button.slot))
+    if button:IsEnabled() and button.slot then
+        local link = GetLootSlotLink(button.slot)
+        if link then
+            UpdateOverlay(button, link)
+        end
+    end
+end)
+
 -- Other addons:
 
 -- Inventorian

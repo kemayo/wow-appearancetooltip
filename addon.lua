@@ -48,6 +48,7 @@ function tooltip:ADDON_LOADED(addon)
         bags = true,
         bags_unbound = true,
         merchant = true,
+        loot = true,
         appearances_known = {},
     })
     db = _G[myname.."DB"]
