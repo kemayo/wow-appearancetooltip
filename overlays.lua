@@ -148,7 +148,8 @@ end
 -- Other addons:
 
 -- Inventorian
-local inv = LibStub("AceAddon-3.0"):GetAddon("Inventorian", true)
+local AA = LibStub("AceAddon-3.0", true)
+local inv = AA and AA:GetAddon("Inventorian", true)
 if inv then
     hooksecurefunc(inv.Item.prototype, "Update", function(self, ...)
         UpdateContainerButton(self, self.bag)
