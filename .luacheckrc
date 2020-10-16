@@ -39,6 +39,7 @@ read_globals = {
 
     -- API functions
     "C_Item",
+    "C_Timer",
     "C_Transmog",
     "C_TransmogCollection",
     "hooksecurefunc",

@@ -51,6 +51,7 @@ function tooltip:ADDON_LOADED(addon)
         loot = true,
         encounterjournal = true,
         appearances_known = {},
+        scan_delay = 0.2,
     })
     db = _G[myname.."DB"]
     ns.db = db
@@ -521,29 +522,32 @@ ns.modifiers = {
 ---
 
 do
-    local scanned
+    local categoryID = 1
     function ns.UpdateSources()
-        if scanned then return end
-        for categoryID = 1, 28 do
-            local categoryAppearances = C_TransmogCollection.GetCategoryAppearances(categoryID)
-            for _, categoryAppearance in pairs(categoryAppearances) do
-                local appearanceSources = C_TransmogCollection.GetAppearanceSources(categoryAppearance.visualID)
-                local known_any
-                for _, source in pairs(appearanceSources) do
-                    if source.isCollected then
-                        -- it's only worth saving if we know the source
-                        known_any = true
-                    end
-                end
-                if known_any then
-                    ns.db.appearances_known[categoryAppearance.visualID] = true
-                else
-                    -- cleaning up after unlearned appearances:
-                    ns.db.appearances_known[categoryAppearance.visualID] = nil
+        if categoryID > 28 then return ns.Debug("Done updating") end
+        local categoryAppearances = C_TransmogCollection.GetCategoryAppearances(categoryID)
+        local acount, scount = 0, 0
+        for _, categoryAppearance in pairs(categoryAppearances) do
+            acount = acount + 1
+            local appearanceSources = C_TransmogCollection.GetAppearanceSources(categoryAppearance.visualID)
+            local known_any
+            for _, source in pairs(appearanceSources) do
+                if source.isCollected then
+                    scount = scount + 1
+                    -- it's only worth saving if we know the source
+                    known_any = true
                 end
             end
+            if known_any then
+                ns.db.appearances_known[categoryAppearance.visualID] = true
+            else
+                -- cleaning up after unlearned appearances:
+                ns.db.appearances_known[categoryAppearance.visualID] = nil
+            end
         end
-        scanned = true
+        ns.Debug("Updating sources in category", categoryID, "appearances", acount, "sources known", scount)
+        categoryID = categoryID + 1
+        C_Timer.After(db.scan_delay, ns.UpdateSources)
     end
 end
 
