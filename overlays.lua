@@ -185,9 +185,11 @@ f:RegisterAddonHook("Butsu", function()
             for i=1, items do
                 local slot = _G["ButsuSlot" .. i]
                 if slot and slot.appearancetooltipoverlay then slot.appearancetooltipoverlay:Hide() end
-                local link = GetLootSlotLink(i)
-                if slot and link then
-                    UpdateOverlay(slot, link, "RIGHT", -6)
+                if ns.db.loot then
+                    local link = GetLootSlotLink(i)
+                    if slot and link then
+                        UpdateOverlay(slot, link, "RIGHT", -6)
+                    end
                 end
             end
         end
