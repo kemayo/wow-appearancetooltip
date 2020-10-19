@@ -5,6 +5,21 @@ local LAI = LibStub("LibAppropriateItems-1.0")
 
 local f = CreateFrame("Frame")
 f:SetScript("OnEvent", function(self, event, ...) if f[event] then return f[event](f, ...) end end)
+local hooks = {}
+function f:RegisterAddonHook(addon, callback)
+    if IsAddOnLoaded(addon) then
+        callback()
+    else
+        hooks[addon] = callback
+    end
+end
+function f:ADDON_LOADED(addon)
+    if hooks[addon] then
+        hooks[addon]()
+        hooks[addon] = nil
+    end
+end
+f:RegisterEvent("ADDON_LOADED")
 
 local function PrepareItemButton(button, point, offsetx, offsety)
     if button.appearancetooltipoverlay then
@@ -124,7 +139,7 @@ end)
 
 -- Encounter Journal frame
 
-local function HookEncounterJournal()
+f:RegisterAddonHook("Blizzard_EncounterJournal", function()
     hooksecurefunc("EncounterJournal_SetLootButton", function(item)
         if item.appearancetooltipoverlay then item.appearancetooltipoverlay:Hide() end
         if not ns.db.encounterjournal then return end
@@ -132,41 +147,32 @@ local function HookEncounterJournal()
             UpdateOverlay(item, item.link, "TOPLEFT", 4, -4)
         end
     end)
-end
-if IsAddOnLoaded("Blizzard_EncounterJournal") then
-    HookEncounterJournal()
-else
-    function f:ADDON_LOADED(addon)
-        if addon == "Blizzard_EncounterJournal" then
-            HookEncounterJournal()
-            self:UnregisterEvent("ADDON_LOADED")
-        end
-    end
-    f:RegisterEvent("ADDON_LOADED")
-end
+end)
 
 -- Other addons:
 
 -- Inventorian
-local AA = LibStub("AceAddon-3.0", true)
-local inv = AA and AA:GetAddon("Inventorian", true)
-if inv then
-    hooksecurefunc(inv.Item.prototype, "Update", function(self, ...)
-        UpdateContainerButton(self, self.bag)
-    end)
-end
+f:RegisterAddonHook("Inventorian", function()
+    local AA = LibStub("AceAddon-3.0", true)
+    local inv = AA and AA:GetAddon("Inventorian", true)
+    if inv then
+        hooksecurefunc(inv.Item.prototype, "Update", function(self, ...)
+            UpdateContainerButton(self, self.bag)
+        end)
+    end
+end)
 
 --Baggins:
-if Baggins then
+f:RegisterAddonHook("Baggins", function()
     hooksecurefunc(Baggins, "UpdateItemButton", function(baggins, bagframe, button, bag, slot)
         UpdateContainerButton(button, bag)
     end)
-end
+end)
 
 --Bagnon:
-if Bagnon then
+f:RegisterAddonHook("Bagnon", function()
     hooksecurefunc(Bagnon.Item, "Update", function(frame)
         local bag = frame:GetBag()
         UpdateContainerButton(frame, bag)
     end)
-end
+end)
