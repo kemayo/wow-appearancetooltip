@@ -176,3 +176,20 @@ f:RegisterAddonHook("Bagnon", function()
         UpdateContainerButton(frame, bag)
     end)
 end)
+
+f:RegisterAddonHook("Butsu", function()
+    hooksecurefunc(Butsu, "LOOT_OPENED", function(self, event, autoloot)
+        if not self:IsShown() then return end
+        local items = GetNumLootItems()
+        if items > 0 then
+            for i=1, items do
+                local slot = _G["ButsuSlot" .. i]
+                if slot and slot.appearancetooltipoverlay then slot.appearancetooltipoverlay:Hide() end
+                local link = GetLootSlotLink(i)
+                if slot and link then
+                    UpdateOverlay(slot, link, "RIGHT", -6)
+                end
+            end
+        end
+    end)
+end)

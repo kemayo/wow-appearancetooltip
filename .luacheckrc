@@ -33,7 +33,7 @@ read_globals = {
     -- our own globals
 
     -- misc custom, third party libraries
-    "Baggins", "Bagnon",
+    "Baggins", "Bagnon", "Butsu",
     "LibStub", "tekDebug",
     "GetAuctionBuyout",
 
@@ -78,6 +78,7 @@ read_globals = {
     "GetItemInfoInstant",
     "GetItemQualityColor",
     "GetLootSlotLink",
+    "GetNumLootItems",
     "GetScreenHeight",
     "GetScreenWidth",
     "GetTime",
