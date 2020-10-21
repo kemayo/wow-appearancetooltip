@@ -230,6 +230,7 @@ do
     local merchant = newCheckbox(panel, 'merchant', 'at merchants', ("For items whose appearance you don't know, show the %s icon on the item in the merchant frame."):format(bagicon))
     local loot = newCheckbox(panel, 'loot', 'in loot', ("For items whose appearance you don't know, show the %s icon on the item in the loot frame."):format(bagicon))
     local encounterjournal = newCheckbox(panel, 'encounterjournal', 'in Encounter Journal', ("For items whose appearance you don't know, show the %s icon on the item in the loot section of the Encounter Journal."):format(bagicon))
+    local setjournal = newCheckbox(panel, 'setjournal', 'in Appearance Sets', ("Show a count of set items known / needed in the sets list"))
 
     show:SetPoint("TOPLEFT", subText, "BOTTOMLEFT", 0, -8)
     bags:SetPoint("TOPLEFT", show, "BOTTOMLEFT", 0, -8)
@@ -237,6 +238,7 @@ do
     merchant:SetPoint("TOPLEFT", bags_unbound, "BOTTOMLEFT", -8, -4)
     loot:SetPoint("TOPLEFT", merchant, "BOTTOMLEFT", 0, -4)
     encounterjournal:SetPoint("TOPLEFT", loot, "BOTTOMLEFT", 0, -4)
+    setjournal:SetPoint("TOPLEFT", encounterjournal, "BOTTOMLEFT", 0, -4)
 
     InterfaceOptions_AddCategory(panel)
 end

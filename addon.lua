@@ -50,6 +50,7 @@ function tooltip:ADDON_LOADED(addon)
         merchant = true,
         loot = true,
         encounterjournal = true,
+        setjournal = true,
         appearances_known = {},
         scan_delay = 0.2,
     })
@@ -602,6 +603,36 @@ function ns.PlayerHasAppearance(itemLinkOrID)
         return known_any, false
     end
     return false
+end
+
+do
+    local function ColorGradient(perc, ...)
+        if perc >= 1 then
+            local r, g, b = select(select("#", ...) - 2, ...)
+            return r, g, b
+        elseif perc <= 0 then
+            local r, g, b = ...
+            return r, g, b
+        end
+
+        local num = select("#", ...) / 3
+
+        local segment, relperc = math.modf(perc*(num-1))
+        local r1, g1, b1, r2, g2, b2 = select((segment*3)+1, ...)
+
+        return r1 + (r2-r1)*relperc, g1 + (g2-g1)*relperc, b1 + (b2-b1)*relperc
+    end
+    local function rgb2hex(r, g, b)
+        if type(r) == "table" then
+            g = r.g
+            b = r.b
+            r = r.r
+        end
+        return format("%02x%02x%02x", r*255, g*255, b*255)
+    end
+    function ns.ColorTextByCompletion(text, perc)
+        return ("|cff%s%s|r"):format(rgb2hex(ColorGradient(perc, 1,0,0, 1,1,0, 0,1,0)), text)
+    end
 end
 
 function ns.Print(...) print("|cFF33FF99".. myfullname.. "|r:", ...) end

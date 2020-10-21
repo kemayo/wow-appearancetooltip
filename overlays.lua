@@ -149,6 +149,58 @@ f:RegisterAddonHook("Blizzard_EncounterJournal", function()
     end)
 end)
 
+-- Sets list
+
+f:RegisterAddonHook("Blizzard_Collections", function()
+    local function setCompletion(setID)
+        local have, need = 0, 0
+        for _, known in pairs(C_TransmogSets.GetSetSources(setID)) do
+            need = need + 1
+            if known then
+                have = have + 1
+            end
+        end
+        return have, need
+    end
+    local function setSort(a, b)
+        return a.uiOrder < b.uiOrder
+    end
+    local function buildSetText(setID)
+        local variants = C_TransmogSets.GetVariantSets(setID)
+        if type(variants) ~= "table" then return "" end
+        table.insert(variants, C_TransmogSets.GetSetInfo(setID))
+        table.sort(variants, setSort)
+        -- local text = setID -- debug
+        local text = ""
+        for _,set in ipairs(variants) do
+            local have, need = setCompletion(set.setID)
+            text = text .. ns.ColorTextByCompletion((GENERIC_FRACTION_STRING):format(have, need), have / need) .. " \n"
+        end
+        return string.sub(text, 1, -2)
+    end
+    local function update(self)
+        local offset = HybridScrollFrame_GetOffset(self)
+        local buttons = self.buttons
+        for i = 1, #buttons do
+            local button = buttons[i]
+            if button.appearancetooltipoverlay then button.appearancetooltipoverlay.text:SetText("") end
+            if ns.db.setjournal and button:IsShown() then
+                local setID = button.setID
+                if not button.appearancetooltipoverlay then
+                    button.appearancetooltipoverlay = CreateFrame("Frame", nil, button)
+                    button.appearancetooltipoverlay.text = button.appearancetooltipoverlay:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
+                    button.appearancetooltipoverlay:SetAllPoints()
+                    button.appearancetooltipoverlay.text:SetPoint("BOTTOMRIGHT", -2, 2)
+                    button.appearancetooltipoverlay:Show()
+                end
+                button.appearancetooltipoverlay.text:SetText(buildSetText(setID))
+            end
+        end
+    end
+    hooksecurefunc(WardrobeCollectionFrame.SetsCollectionFrame.ScrollFrame, "Update", update)
+    hooksecurefunc(WardrobeCollectionFrame.SetsCollectionFrame.ScrollFrame, "update", update)
+end)
+
 -- Other addons:
 
 -- Inventorian

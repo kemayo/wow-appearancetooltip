@@ -42,6 +42,7 @@ read_globals = {
     "C_Timer",
     "C_Transmog",
     "C_TransmogCollection",
+    "C_TransmogSets",
     "hooksecurefunc",
     "BankButtonIDToInvSlotID",
     "ContainerIDToInventoryID",
@@ -117,6 +118,7 @@ read_globals = {
     "GameFontHighlightSmall",
     "NumberFontNormal",
     "InterfaceOptionsFramePanelContainer",
+    "WardrobeCollectionFrame",
 
     -- FrameXML API
     "CreateAtlasMarkup",
@@ -135,6 +137,7 @@ read_globals = {
     "ScrollingEdit_OnUpdate",
     "InspectPaperDollFrame_OnShow",
     "Model_ApplyUICamera",
+    "HybridScrollFrame_GetOffset",
 
     -- FrameXML Constants
     "BACKPACK_CONTAINER",
@@ -149,6 +152,7 @@ read_globals = {
     "CONFIRM_BUY_BANK_SLOT",
     "DEFAULT",
     "EQUIP_CONTAINER",
+    "GENERIC_FRACTION_STRING",
     "INSPECT",
     "INVSLOT_FIRST_EQUIPPED",
     "INVSLOT_LAST_EQUIPPED",
