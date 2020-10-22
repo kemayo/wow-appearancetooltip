@@ -628,7 +628,7 @@ do
             b = r.b
             r = r.r
         end
-        return format("%02x%02x%02x", r*255, g*255, b*255)
+        return ("%02x%02x%02x"):format(r*255, g*255, b*255)
     end
     function ns.ColorTextByCompletion(text, perc)
         return ("|cff%s%s|r"):format(rgb2hex(ColorGradient(perc, 1,0,0, 1,1,0, 0,1,0)), text)
