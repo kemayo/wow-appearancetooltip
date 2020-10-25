@@ -56,6 +56,7 @@ local function UpdateOverlay(button, link, ...)
     then
         PrepareItemButton(button, ...)
         if appropriateItem then
+            button.appearancetooltipoverlay.icon:SetAtlas("transmog-icon-hidden")
             if appearanceFromOtherItem then
                 -- blue eye
                 button.appearancetooltipoverlay.icon:SetVertexColor(0, 1, 1)
@@ -65,6 +66,7 @@ local function UpdateOverlay(button, link, ...)
             end
         else
             -- yellow eye
+            button.appearancetooltipoverlay.icon:SetAtlas("transmog-icon-revert")
             button.appearancetooltipoverlay.icon:SetVertexColor(1, 1, 0)
         end
         button.appearancetooltipoverlay:Show()

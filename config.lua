@@ -221,9 +221,10 @@ do
     subText:SetText("These options let you control how transmog availability is shown in various places in the UI")
 
     local bagicon = CreateAtlasMarkup("transmog-icon-hidden")
+    local reverticon = CreateAtlasMarkup("transmog-icon-revert")
 
     local show = panel:CreateFontString(nil, 'ARTWORK', 'GameFontHighlight')
-    show:SetText(("Show %s icon for unknown items:"):format(bagicon))
+    show:SetText(("Show %s icon for unknown items, and %s icon for unknown items you can't learn on this character:"):format(bagicon, reverticon))
 
     local bags = newCheckbox(panel, 'bags', 'in bags', ("For items whose appearance you don't know, show the %s icon on the item in bags. Works with built-in bags, Baggins, Bagnon, and Inventorian."):format(bagicon))
     local bags_unbound = newCheckbox(panel, 'bags_unbound', '...for non-soulbound items only', "Soulbound items are either known already, or can't be sent to another character")
