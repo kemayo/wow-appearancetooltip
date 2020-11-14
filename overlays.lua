@@ -42,6 +42,12 @@ local function PrepareItemButton(button, point, offsetx, offsety)
     button.appearancetooltipoverlay.icon:SetPoint("CENTER", background, "CENTER")
     button.appearancetooltipoverlay.icon:SetAtlas("transmog-icon-hidden")
 
+    button.appearancetooltipoverlay.iconInappropriate = overlayFrame:CreateTexture(nil, "OVERLAY", nil, 4)
+    button.appearancetooltipoverlay.iconInappropriate:SetSize(14, 14)
+    button.appearancetooltipoverlay.iconInappropriate:SetPoint("CENTER", background, "CENTER")
+    button.appearancetooltipoverlay.iconInappropriate:SetAtlas("mailbox")
+    button.appearancetooltipoverlay.iconInappropriate:SetRotation(1.7 * math.pi)
+
     overlayFrame:Hide()
 end
 local function UpdateOverlay(button, link, ...)
@@ -55,8 +61,10 @@ local function UpdateOverlay(button, link, ...)
         ns.CanTransmogItem(link)
     then
         PrepareItemButton(button, ...)
+        button.appearancetooltipoverlay.icon:Hide()
+        button.appearancetooltipoverlay.iconInappropriate:Hide()
         if appropriateItem then
-            button.appearancetooltipoverlay.icon:SetAtlas("transmog-icon-hidden")
+            button.appearancetooltipoverlay.icon:Show()
             if appearanceFromOtherItem then
                 -- blue eye
                 button.appearancetooltipoverlay.icon:SetVertexColor(0, 1, 1)
@@ -65,9 +73,8 @@ local function UpdateOverlay(button, link, ...)
                 button.appearancetooltipoverlay.icon:SetVertexColor(1, 1, 1)
             end
         else
-            -- yellow eye
-            button.appearancetooltipoverlay.icon:SetAtlas("transmog-icon-revert")
-            button.appearancetooltipoverlay.icon:SetVertexColor(1, 1, 0)
+            -- mail icon
+            button.appearancetooltipoverlay.iconInappropriate:Show()
         end
         button.appearancetooltipoverlay:Show()
     end
