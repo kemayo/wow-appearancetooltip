@@ -47,6 +47,7 @@ local function PrepareItemButton(button, point, offsetx, offsety)
     button.appearancetooltipoverlay.iconInappropriate:SetPoint("CENTER", background, "CENTER")
     button.appearancetooltipoverlay.iconInappropriate:SetAtlas("mailbox")
     button.appearancetooltipoverlay.iconInappropriate:SetRotation(1.7 * math.pi)
+    -- button.appearancetooltipoverlay.iconInappropriate:SetVertexColor(0, 1, 1)
 
     overlayFrame:Hide()
 end
