@@ -280,4 +280,13 @@ f:RegisterAddonHook("SilverDragon", function()
             end
         end
     end)
+    local tooltip = _G["SilverDragonLootTooltip"]
+    if tooltip then
+        tooltip:HookScript("OnTooltipSetItem", function(self)
+            ns:ShowItem(select(2, self:GetItem()), self)
+        end)
+        tooltip:HookScript("OnHide", function()
+            ns:HideItem()
+        end)
+    end
 end)
