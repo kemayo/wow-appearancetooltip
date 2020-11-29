@@ -22,3 +22,11 @@ You can choose whether to:
 * Strategically remove some items from your character to show the previewed item (e.g. for shirts, remove your chest and tabard)
 * Only show for items your current character can actually transmog to
 * Spin the model / move it with the mousewheel
+
+Addons integrated with:
+
+* [SilverDragon](https://www.curseforge.com/wow/addons/silver-dragon)
+* [Inventorian](https://www.curseforge.com/wow/addons/inventorian)
+* [Butsu](https://www.wowinterface.com/downloads/info7976-Butsu.html)
+* [Bagnon](https://www.curseforge.com/wow/addons/bagnon)
+* [Baggins](https://www.curseforge.com/wow/addons/baggins)
