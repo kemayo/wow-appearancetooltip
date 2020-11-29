@@ -56,6 +56,12 @@ local function PrepareItemButton(button, point, offsetx, offsety)
     overlayFrame:Hide()
 end
 local function UpdateOverlay(button, link, ...)
+    if not link then
+        if button.appearancetooltipoverlay then
+            button.appearancetooltipoverlay:Hide()
+        end
+        return
+    end
     local hasAppearance, appearanceFromOtherItem = ns.PlayerHasAppearance(link)
     local appropriateItem = LAI:IsAppropriate(link)
     -- ns.Debug("Considering item", link, hasAppearance, appearanceFromOtherItem)
@@ -82,6 +88,8 @@ local function UpdateOverlay(button, link, ...)
             button.appearancetooltipoverlay.iconInappropriate:Show()
         end
         button.appearancetooltipoverlay:Show()
+    elseif button.appearancetooltipoverlay then
+        button.appearancetooltipoverlay:Hide()
     end
 end
 
@@ -243,6 +251,7 @@ f:RegisterAddonHook("Bagnon", function()
     end)
 end)
 
+-- Butsu
 f:RegisterAddonHook("Butsu", function()
     hooksecurefunc(Butsu, "LOOT_OPENED", function(self, event, autoloot)
         if not self:IsShown() then return end
@@ -257,6 +266,17 @@ f:RegisterAddonHook("Butsu", function()
                         UpdateOverlay(slot, link, "RIGHT", -6)
                     end
                 end
+            end
+        end
+    end)
+end)
+
+-- SilverDragon
+f:RegisterAddonHook("SilverDragon", function()
+    SilverDragon.RegisterCallback("AppearanceTooltip", "LootWindowOpened", function(_, window)
+        if window and window.buttons and #window.buttons then
+            for i, button in ipairs(window.buttons) do
+                UpdateOverlay(button, button:GetItem())
             end
         end
     end)

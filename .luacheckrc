@@ -33,7 +33,7 @@ read_globals = {
     -- our own globals
 
     -- misc custom, third party libraries
-    "Baggins", "Bagnon", "Butsu",
+    "Baggins", "Bagnon", "Butsu", "SilverDragon",
     "LibStub", "tekDebug",
     "GetAuctionBuyout",
 
