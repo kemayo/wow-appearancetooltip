@@ -140,14 +140,14 @@ classwarning:Show()
 
 -- Ye showing:
 GameTooltip:HookScript("OnTooltipSetItem", function(self)
-    ns:ShowItem(select(2, self:GetItem()))
+    ns:ShowItem(select(2, self:GetItem()), self)
 end)
 GameTooltip:HookScript("OnHide", function()
     ns:HideItem()
 end)
 -- This is mostly world quest rewards:
 GameTooltip.ItemTooltip.Tooltip:HookScript("OnTooltipSetItem", function(self)
-    ns:ShowItem(select(2, self:GetItem()))
+    ns:ShowItem(select(2, self:GetItem()), self)
 end)
 GameTooltip.ItemTooltip.Tooltip:HookScript("OnHide", function()
     ns:HideItem()
@@ -231,12 +231,14 @@ do
                 else
                     outermostComparisonShown = comparisonTooltip1:IsShown() and comparisonTooltip1 or comparisonTooltip2
                 end
+                local outerx = outermostComparisonShown:GetCenter() * outermostComparisonShown:GetEffectiveScale()
+                local ownerx = owner:GetCenter() * owner:GetEffectiveScale()
                 if
                     -- outermost is right of owner while we're biasing left
-                    (biasLeft and outermostComparisonShown:GetCenter() > owner:GetCenter())
+                    (biasLeft and outerx > ownerx)
                     or
                     -- outermost is left of owner while we're biasing right
-                    ((not biasLeft) and outermostComparisonShown:GetCenter() < owner:GetCenter())
+                    ((not biasLeft) and outerx < ownerx)
                 then
                     -- the comparison won't be in the way, so ignore it
                     outermostComparisonShown = nil
@@ -275,6 +277,7 @@ do
         then
             return self:ComputeTooltipAnchors(originalOwner, "vertical")
         end
+        -- ns.Debug("ComputeTooltipAnchors", owner:GetName(), primary, secondary)
         return owner, unpack(points[primary][secondary])
     end
 end
@@ -304,8 +307,9 @@ end)
 
 local _, class = UnitClass("player")
 
-function ns:ShowItem(link)
+function ns:ShowItem(link, for_tooltip)
     if not link then return end
+    for_tooltip = for_tooltip or GameTooltip
     local id = tonumber(link:match("item:(%d+)"))
     if not id or id == 0 then return end
     local token = db.tokens and LAT:ItemIsToken(id)
@@ -338,8 +342,8 @@ function ns:ShowItem(link)
             end
         end
         if found then
-            GameTooltip:AddDoubleLine(ITEM_PURCHASED_COLON, link)
-            GameTooltip:Show()
+            for_tooltip:AddDoubleLine(ITEM_PURCHASED_COLON, link)
+            for_tooltip:Show()
         end
     end
 
@@ -393,7 +397,7 @@ function ns:ShowItem(link)
             end
 
             tooltip:Show()
-            tooltip.owner = GameTooltip
+            tooltip.owner = for_tooltip
 
             positioner:Show()
             spinner:SetShown(db.spin)
