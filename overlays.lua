@@ -27,22 +27,26 @@ local function PrepareItemButton(button, point, offsetx, offsety)
     end
 
     local overlayFrame = CreateFrame("FRAME", nil, button)
-    overlayFrame:SetFrameLevel(4) -- Azerite overlay must be overlaid itself...
     overlayFrame:SetAllPoints()
     button.appearancetooltipoverlay = overlayFrame
 
     -- need the sublevel to make sure we're above overlays for e.g. azerite gear
-    local background = overlayFrame:CreateTexture(nil, "OVERLAY", nil, 3)
+    local sublevel = 4
+    if button.IconOverlay then
+        sublevel = select(2, button.IconOverlay:GetDrawLayer())
+    end
+
+    local background = overlayFrame:CreateTexture(nil, "OVERLAY", nil, sublevel)
     background:SetSize(12, 12)
     background:SetPoint(point or 'BOTTOMLEFT', offsetx or 0, offsety or 0)
     background:SetColorTexture(0, 0, 0, 0.4)
 
-    button.appearancetooltipoverlay.icon = overlayFrame:CreateTexture(nil, "OVERLAY", nil, 4)
+    button.appearancetooltipoverlay.icon = overlayFrame:CreateTexture(nil, "OVERLAY", nil, sublevel + 1)
     button.appearancetooltipoverlay.icon:SetSize(16, 16)
     button.appearancetooltipoverlay.icon:SetPoint("CENTER", background, "CENTER")
     button.appearancetooltipoverlay.icon:SetAtlas("transmog-icon-hidden")
 
-    button.appearancetooltipoverlay.iconInappropriate = overlayFrame:CreateTexture(nil, "OVERLAY", nil, 4)
+    button.appearancetooltipoverlay.iconInappropriate = overlayFrame:CreateTexture(nil, "OVERLAY", nil, sublevel + 1)
     button.appearancetooltipoverlay.iconInappropriate:SetSize(14, 14)
     button.appearancetooltipoverlay.iconInappropriate:SetPoint("CENTER", background, "CENTER")
     button.appearancetooltipoverlay.iconInappropriate:SetAtlas("mailbox")
