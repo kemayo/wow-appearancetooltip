@@ -570,6 +570,10 @@ function ns.CanTransmogItem(itemLink)
     end
 end
 
+local brokenItems = {
+    -- itemid : {appearanceid, sourceid}
+    [153268] = {25124, 90807}, -- Enclave Aspirant's Axe
+}
 -- /dump C_TransmogCollection.GetAppearanceSourceInfo(select(2, C_TransmogCollection.GetItemInfo("")))
 function ns.PlayerHasAppearance(itemLinkOrID)
     -- hasAppearance, appearanceFromOtherItem
@@ -580,6 +584,10 @@ function ns.PlayerHasAppearance(itemLinkOrID)
         -- sometimes the link won't actually give us an appearance, but itemID will
         -- e.g. mythic Drape of Iron Sutures from Shadowmoon Burial Grounds
         appearanceID, sourceID = C_TransmogCollection.GetItemInfo(itemID)
+    end
+    if not appearanceID and brokenItems[itemID] then
+        -- ...and there's a few that just need to be hardcoded
+        appearanceID, sourceID = unpack(brokenItems[itemID])
     end
     if not appearanceID then return end
     if sourceID and ns.db.appearances_known[appearanceID] then
