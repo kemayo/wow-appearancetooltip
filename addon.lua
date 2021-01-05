@@ -463,10 +463,11 @@ function ns:ResetModel(model)
         model:SetCustomRace(db.modelRace, db.modelGender)
     else
         model:SetUnit("player")
-        model:Dress()
     end
     model:RefreshCamera()
-    if not db.dressed then
+    if db.dressed then
+        model:Dress()
+    else
         model:Undress()
     end
 end
