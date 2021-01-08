@@ -578,6 +578,7 @@ end
 local brokenItems = {
     -- itemid : {appearanceid, sourceid}
     [153268] = {25124, 90807}, -- Enclave Aspirant's Axe
+    [153316] = {25123, 90885}, -- Praetor's Ornamental Edge
 }
 -- /dump C_TransmogCollection.GetAppearanceSourceInfo(select(2, C_TransmogCollection.GetItemInfo("")))
 function ns.PlayerHasAppearance(itemLinkOrID)
