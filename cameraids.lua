@@ -21,7 +21,7 @@ local races = {
     [30] = "LightforgedDraenei", -- "LightforgedDraenei",
     [31] = "ZandalariTroll",
     [32] = "KulTiran",
-    [34] = "DarkIronDwarf", -- "DarkIronDwarf",
+    [34] = "Dwarf", -- "DarkIronDwarf",
     [35] = "Vulpera",
     [36] = "MagharOrc", -- "MagharOrc",
     [37] = "Mechagnome",
@@ -77,7 +77,7 @@ local subclasses = {
     [LE_ITEM_WEAPON_GENERIC] = "1HSword",
 }
 
-local _, playerRace = UnitRace("player")
+local _, _, playerRaceID = UnitRace("player")
 local playerSex
 if UnitSex("player") == 2 then
     playerSex = "Male"
@@ -91,7 +91,7 @@ local slots_to_cameraids, slot_override
 -- itemid: number/string Anything that GetItemInfoInstant will accept
 -- race: number raceid
 -- gender: number genderid (0: male, 1: female)
-function ns:GetCameraID(itemLinkOrID, race, gender)
+function ns:GetCameraID(itemLinkOrID, raceID, genderID)
     local key, itemcamera
     local itemid, _, _, slot, _, class, subclass = GetItemInfoInstant(itemLinkOrID)
     if item_slots[slot] then
@@ -102,16 +102,10 @@ function ns:GetCameraID(itemLinkOrID, race, gender)
             key = "Weapon-" .. item_slots[slot]
         end
     else
-        race = races[race]
-        gender = genders[gender]
-        if not race then
-            race = playerRace
-            if race == 'Worgen' and select(2, HasAlternateForm()) then
-                race = 'Human'
-            end
-        end
-        if not gender then
-            gender = playerSex
+        local race = races[raceID or playerRaceID]
+        local gender = genderID and genders[genderID] or playerSex
+        if not raceID and race == 'Worgen' and select(2, HasAlternateForm()) then
+            race = 'Human'
         end
         key = ("%s-%s-%s"):format(race, gender, slot_override[itemid] or slots[slot] or "Default")
     end
