@@ -570,7 +570,7 @@ end
 function ns.CanTransmogItem(itemLink)
     local itemID = GetItemInfoInstant(itemLink)
     if itemID then
-        local canBeChanged, noChangeReason, canBeSource, noSourceReason = C_Transmog.GetItemInfo(itemID)
+        local canBeChanged, noChangeReason, canBeSource, noSourceReason = C_Transmog.CanTransmogItem(itemID)
         return canBeSource, noSourceReason
     end
 end
