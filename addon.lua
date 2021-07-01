@@ -66,7 +66,7 @@ end
 function tooltip:PLAYER_LOGIN()
     tooltip.model:SetUnit("player")
     tooltip.modelZoomed:SetUnit("player")
-    C_TransmogCollection.SetShowMissingSourceInItemTooltips(true)
+    C_CVar.SetCVar("missingTransmogSourceInItemTooltips", "1")
 
     ns.UpdateSources()
 end

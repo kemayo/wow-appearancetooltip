@@ -38,6 +38,7 @@ read_globals = {
     "GetAuctionBuyout",
 
     -- API functions
+    "C_CVar",
     "C_Item",
     "C_Timer",
     "C_Transmog",
