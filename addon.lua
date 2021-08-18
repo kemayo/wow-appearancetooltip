@@ -669,5 +669,11 @@ function setDefaults(options, defaults)
         end
         return defaults[k]
     end, })
+    -- and add defaults to existing tables
+    for k, v in pairs(options) do
+        if defaults[k] and type(v) == "table" then
+            setDefaults(v, defaults[k])
+        end
+    end
     return options
 end
