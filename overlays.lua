@@ -93,12 +93,12 @@ local function UpdateOverlay(button, link, ...)
     end
 end
 
-local function UpdateContainerButton(button, bag)
+local function UpdateContainerButton(button, bag, slot)
     if button.appearancetooltipoverlay then button.appearancetooltipoverlay:Hide() end
     if not ns.db.bags then
         return
     end
-    local slot = button:GetID()
+    local slot = slot or button:GetID()
     local item = Item:CreateFromBagAndSlot(bag, slot)
     if item:IsItemEmpty() then
         return
@@ -269,6 +269,56 @@ f:RegisterAddonHook("Butsu", function()
             end
         end
     end)
+end)
+
+-- Adibags
+f:RegisterAddonHook("AdiBags", function()
+    local AA = LibStub("AceAddon-3.0", true)
+    local AdiBags = AA and AA:GetAddon("AdiBags", true)
+    if not AdiBags then return end
+    local filter = AdiBags:RegisterFilter("Appearance Unknown", 86, "ABEvent-1.0")
+    filter.uiName = "Unknown appearance"
+    filter.uiDesc = TRANSMOGRIFY_TOOLTIP_APPEARANCE_UNKNOWN
+
+    function filter:OnInitialize()
+        self.db = AdiBags.db:RegisterNamespace(myname, {
+            profile = {
+                other = true,
+            }
+        })
+    end
+    function filter:Update() self:SendMessage("AdiBags_FiltersChanged") end
+    function filter:OnEnable()
+        self:RegisterMessage("AdiBags_UpdateButton", "UpdateButton")
+        self:SendMessage("AdiBags_UpdateAllButtons")
+        AdiBags:UpdateFilters()
+    end
+    function filter:OnDisable() AdiBags:UpdateFilters() end
+    function filter:Filter(slotData)
+        local hasAppearance, appearanceFromOtherItem = ns.PlayerHasAppearance(slotData.link)
+        local appropriateItem = LAI:IsAppropriate(slotData.link)
+        if
+            (not hasAppearance or appearanceFromOtherItem) and
+            (self.db.profile.other or appropriateItem) and
+            IsDressableItem(slotData.link) and
+            ns.CanTransmogItem(slotData.link)
+        then
+            return appropriateItem and "Appearance Unknown" or "Appearance Unknown (other class)"
+        end
+    end
+    function filter:GetOptions()
+        return {
+            other = {
+                name = "Unlearnable items",
+                desc = "Include items that the current character can't learn",
+                type = "toggle",
+                order = 60,
+            },
+        }, AdiBags:GetOptionHandler(self, true, function() return self:Update() end)
+    end
+    function filter:UpdateButton(event, button)
+        UpdateContainerButton(button, button.bag, button.slot)
+    end
 end)
 
 -- SilverDragon
