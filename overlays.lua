@@ -98,7 +98,7 @@ local function UpdateContainerButton(button, bag, slot)
     if not ns.db.bags then
         return
     end
-    local slot = slot or button:GetID()
+    slot = slot or button:GetID()
     local item = Item:CreateFromBagAndSlot(bag, slot)
     if item:IsItemEmpty() then
         return
