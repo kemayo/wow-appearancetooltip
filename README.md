@@ -30,3 +30,4 @@ Addons integrated with:
 * [Butsu](https://www.wowinterface.com/downloads/info7976-Butsu.html)
 * [Bagnon](https://www.curseforge.com/wow/addons/bagnon)
 * [Baggins](https://www.curseforge.com/wow/addons/baggins)
+* [AdiBags](https://www.curseforge.com/wow/addons/adibags) - showing icons and offering a filter for unknown appearances
