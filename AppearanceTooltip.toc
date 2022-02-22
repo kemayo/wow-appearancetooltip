@@ -7,6 +7,7 @@
 ## OptionalDeps: tekDebug, LibStub, LibArmorToken-1.0, LibAppropriateItems-1.0
 ## X-Embeds: LibStub, LibArmorToken-1.0, LibAppropriateItems-1.0
 ## X-Curse-Project-ID: 101155
+## X-Wago-ID: JZKbYO61
 
 ## SavedVariables: AppearanceTooltipDB
 ## SavedVariablesPerCharacter: AppearanceTooltipDBPC
