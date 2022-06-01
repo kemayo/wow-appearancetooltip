@@ -23,6 +23,8 @@ jobs:
     steps:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - uses: actions/checkout@v2
+        with:
+          fetch-depth: 0 # reads history for commit changelog
 
       - name: Create Retail Package
         uses: BigWigsMods/packager@master
