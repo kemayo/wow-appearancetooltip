@@ -613,40 +613,6 @@ local brokenItems = {
     [153268] = {25124, 90807}, -- Enclave Aspirant's Axe
     [153316] = {25123, 90885}, -- Praetor's Ornamental Edge
 }
-local itemSlots = {
-    INVTYPE_HEAD = "HEADSLOT",
-    INVTYPE_SHOULDER = "SHOULDERSLOT",
-    INVTYPE_CLOAK = "BACKSLOT",
-    INVTYPE_CHEST = "CHESTSLOT",
-    INVTYPE_ROBE = "CHESTSLOT",
-    INVTYPE_TABARD = "TABARDSLOT",
-    INVTYPE_BODY = "SHIRTSLOT",
-    INVTYPE_WRIST = "WRISTSLOT",
-    INVTYPE_HAND = "HANDSSLOT",
-    INVTYPE_WAIST = "WAISTSLOT",
-    INVTYPE_LEGS = "LEGSSLOT",
-    INVTYPE_FEET = "FEETSLOT",
-    INVTYPE_WEAPON = "MAINHANDSLOT",
-    INVTYPE_RANGED = "MAINHANDSLOT",
-    INVTYPE_RANGEDRIGHT = "MAINHANDSLOT",
-    INVTYPE_THROWN = "MAINHANDSLOT",
-    INVTYPE_SHIELD = "SECONDARYHANDSLOT",
-    INVTYPE_2HWEAPON = "MAINHANDSLOT",
-    INVTYPE_WEAPONMAINHAND = "MAINHANDSLOT",
-    INVTYPE_WEAPONOFFHAND = "SECONDARYHANDSLOT",
-    INVTYPE_HOLDABLE = "SECONDARYHANDSLOT",
-}
-local function GetItemSlot(itemLinkOrID)
-    local _, _, _, slot = GetItemInfoInstant(itemLinkOrID)
-    if not slot then return end
-    return itemSlots[slot]
-end
-local function GetItemCategory(appearanceID, sourceID)
-    return C_TransmogCollection.GetCategoryForItem(appearanceID) or C_TransmogCollection.GetCategoryForItem(sourceID)
-end
-local function GetTransmogLocation(itemLinkOrID)
-    return TransmogUtil.GetTransmogLocation(GetItemSlot(itemLinkOrID), Enum.TransmogType.Appearance, Enum.TransmogModification.Main)
-end
 -- /dump C_TransmogCollection.GetAppearanceSourceInfo(select(2, C_TransmogCollection.GetItemInfo("")))
 function ns.PlayerHasAppearance(itemLinkOrID)
     -- hasAppearance, appearanceFromOtherItem
@@ -664,8 +630,7 @@ function ns.PlayerHasAppearance(itemLinkOrID)
     end
     if not appearanceID then return end
     if sourceID and ns.db.appearances_known[appearanceID] then
-        local _, _, _, _, sourceKnown = C_TransmogCollection.GetAppearanceSourceInfo(sourceID)
-        return true, not sourceKnown
+        return true, not C_TransmogCollection.PlayerHasTransmogItemModifiedAppearance(sourceID)
     end
     -- Everything after this is a fallback. All know appearances *should* be in that table... but we run
     -- this in case, we only know about unequippable items after you've logged in as a class which can use
@@ -674,16 +639,16 @@ function ns.PlayerHasAppearance(itemLinkOrID)
         -- This is a non-class item, so GetAppearanceSources won't work on it
         -- We can tell whether the specific source is collected, but not the overall appearance
         -- Fallback if you've not logged in to a class that can use this item in a while
-        local _, _, _, _, sourceKnown = C_TransmogCollection.GetAppearanceSourceInfo(sourceID)
-        return sourceKnown, false
+        -- TODO: check whether this is still true with GetAllAppearanceSources
+        return C_TransmogCollection.PlayerHasTransmogItemModifiedAppearance(sourceID), false
     end
-    local sources = C_TransmogCollection.GetAppearanceSources(appearanceID, GetItemCategory(appearanceID, sourceID), GetTransmogLocation(itemLinkOrID))
+    local sources = C_TransmogCollection.GetAllAppearanceSources(appearanceID)
     if sources then
         local known_any = false
-        for _, source in pairs(sources) do
-            if source.isCollected == true then
+        for _, sourceID2 in pairs(sources) do
+            if C_TransmogCollection.PlayerHasTransmogItemModifiedAppearance(sourceID2) then
                 known_any = true
-                if itemID == source.itemID then
+                if itemID == C_TransmogCollection.GetSourceItemID(sourceID2) then
                     return true, false
                 end
             end
