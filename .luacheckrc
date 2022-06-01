@@ -45,6 +45,7 @@ read_globals = {
     "C_TransmogCollection",
     "C_TransmogSets",
     "TransmogUtil",
+    "Enum",
     "hooksecurefunc",
     "BankButtonIDToInvSlotID",
     "ContainerIDToInventoryID",
