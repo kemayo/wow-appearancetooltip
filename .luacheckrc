@@ -122,6 +122,7 @@ read_globals = {
     "NumberFontNormal",
     "InterfaceOptionsFramePanelContainer",
     "WardrobeCollectionFrame",
+    "ContainerFrameCombinedBags",
 
     -- FrameXML API
     "CreateAtlasMarkup",
