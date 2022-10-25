@@ -114,6 +114,7 @@ read_globals = {
     "BankFrame",
     "InspectFrame",
     "MerchantFrame",
+    "LootFrame",
     "GameTooltip",
     "UIParent",
     "WorldFrame",

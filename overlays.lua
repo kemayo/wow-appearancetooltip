@@ -158,19 +158,36 @@ end)
 
 -- Loot frame
 
-hooksecurefunc("LootFrame_UpdateButton", function(index)
-    local button = _G["LootButton"..index]
-    if not button then return end
-    if button.appearancetooltipoverlay then button.appearancetooltipoverlay:Hide() end
-    if not ns.db.loot then return end
-    -- ns.Debug("LootFrame_UpdateButton", button:IsEnabled(), button.slot, button.slot and GetLootSlotLink(button.slot))
-    if button:IsEnabled() and button.slot then
-        local link = GetLootSlotLink(button.slot)
+if _G.LootFrame_UpdateButton then
+    hooksecurefunc("LootFrame_UpdateButton", function(index)
+        local button = _G["LootButton"..index]
+        if not button then return end
+        if button.appearancetooltipoverlay then button.appearancetooltipoverlay:Hide() end
+        if not ns.db.loot then return end
+        -- ns.Debug("LootFrame_UpdateButton", button:IsEnabled(), button.slot, button.slot and GetLootSlotLink(button.slot))
+        if button:IsEnabled() and button.slot then
+            local link = GetLootSlotLink(button.slot)
+            if link then
+                UpdateOverlay(button, link)
+            end
+        end
+    end)
+else
+    local function handleSlot(frame)
+        if not frame.Item then return end
+        if frame.Item.appearancetooltipoverlay then frame.Item.appearancetooltipoverlay:Hide() end
+        if not ns.db.loot then return end
+        local data = frame:GetElementData()
+        if not (data and data.slotIndex) then return end
+        local link = GetLootSlotLink(data.slotIndex)
         if link then
-            UpdateOverlay(button, link)
+            UpdateOverlay(frame.Item, link)
         end
     end
-end)
+    LootFrame.ScrollBox:RegisterCallback("OnUpdate", function(...)
+        LootFrame.ScrollBox:ForEachFrame(handleSlot)
+    end)
+end
 
 -- Encounter Journal frame
 
