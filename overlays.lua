@@ -230,27 +230,48 @@ f:RegisterAddonHook("Blizzard_Collections", function()
         end
         return string.sub(text, 1, -2)
     end
-    local function update(self)
-        local offset = HybridScrollFrame_GetOffset(self)
-        local buttons = self.buttons
-        for i = 1, #buttons do
-            local button = buttons[i]
-            if button.appearancetooltipoverlay then button.appearancetooltipoverlay.text:SetText("") end
-            if ns.db.setjournal and button:IsShown() then
-                local setID = button.setID
-                if not button.appearancetooltipoverlay then
-                    button.appearancetooltipoverlay = CreateFrame("Frame", nil, button)
-                    button.appearancetooltipoverlay.text = button.appearancetooltipoverlay:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
-                    button.appearancetooltipoverlay:SetAllPoints()
-                    button.appearancetooltipoverlay.text:SetPoint("BOTTOMRIGHT", -2, 2)
-                    button.appearancetooltipoverlay:Show()
+    if WardrobeCollectionFrame.SetsCollectionFrame.ScrollFrame then
+        local function update(self)
+            local offset = HybridScrollFrame_GetOffset(self)
+            local buttons = self.buttons
+            for i = 1, #buttons do
+                local button = buttons[i]
+                if button.appearancetooltipoverlay then button.appearancetooltipoverlay.text:SetText("") end
+                if ns.db.setjournal and button:IsShown() then
+                    local setID = button.setID
+                    if not button.appearancetooltipoverlay then
+                        button.appearancetooltipoverlay = CreateFrame("Frame", nil, button)
+                        button.appearancetooltipoverlay.text = button.appearancetooltipoverlay:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
+                        button.appearancetooltipoverlay:SetAllPoints()
+                        button.appearancetooltipoverlay.text:SetPoint("BOTTOMRIGHT", -2, 2)
+                        button.appearancetooltipoverlay:Show()
+                    end
+                    button.appearancetooltipoverlay.text:SetText(buildSetText(setID))
                 end
-                button.appearancetooltipoverlay.text:SetText(buildSetText(setID))
             end
         end
+        hooksecurefunc(WardrobeCollectionFrame.SetsCollectionFrame.ScrollFrame, "Update", update)
+        hooksecurefunc(WardrobeCollectionFrame.SetsCollectionFrame.ScrollFrame, "update", update)
+    else
+        local function handleSlot(frame)
+            if frame.appearancetooltipoverlay then frame.appearancetooltipoverlay.text:SetText("") end
+            if ns.db.setjournal and frame:IsShown() then
+                local data = frame:GetElementData()
+                local setID = data.setID
+                if not frame.appearancetooltipoverlay then
+                    frame.appearancetooltipoverlay = CreateFrame("Frame", nil, frame)
+                    frame.appearancetooltipoverlay.text = frame.appearancetooltipoverlay:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
+                    frame.appearancetooltipoverlay:SetAllPoints()
+                    frame.appearancetooltipoverlay.text:SetPoint("BOTTOMRIGHT", -2, 2)
+                    frame.appearancetooltipoverlay:Show()
+                end
+                frame.appearancetooltipoverlay.text:SetText(buildSetText(setID))
+            end
+        end
+        WardrobeCollectionFrame.SetsCollectionFrame.ListContainer.ScrollBox:RegisterCallback("OnUpdate", function(...)
+            WardrobeCollectionFrame.SetsCollectionFrame.ListContainer.ScrollBox:ForEachFrame(handleSlot)
+        end)
     end
-    hooksecurefunc(WardrobeCollectionFrame.SetsCollectionFrame.ScrollFrame, "Update", update)
-    hooksecurefunc(WardrobeCollectionFrame.SetsCollectionFrame.ScrollFrame, "update", update)
 end)
 
 -- Other addons:
