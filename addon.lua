@@ -3,7 +3,6 @@ local myfullname = GetAddOnMetadata(myname, "Title")
 
 local GetScreenWidth = GetScreenWidth
 local GetScreenHeight = GetScreenHeight
-local IsDressableItem = IsDressableItem
 
 local setDefaults, db
 
