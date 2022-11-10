@@ -389,6 +389,10 @@ end)
 
 -- SilverDragon
 f:RegisterAddonHook("SilverDragon", function()
+    if not (SilverDragon and SilverDragon.RegisterCallback) then
+        -- Geniunely unsure what'd cause this, but see #11 on github
+        return
+    end
     SilverDragon.RegisterCallback("AppearanceTooltip", "LootWindowOpened", function(_, window)
         if window and window.buttons and #window.buttons then
             for i, button in ipairs(window.buttons) do
