@@ -143,6 +143,8 @@ read_globals = {
     "InspectPaperDollFrame_OnShow",
     "Model_ApplyUICamera",
     "HybridScrollFrame_GetOffset",
+    "TooltipDataProcessor",
+    "TooltipUtil",
 
     -- FrameXML Constants
     "BACKPACK_CONTAINER",

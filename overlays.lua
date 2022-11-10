@@ -3,6 +3,9 @@ local myfullname = GetAddOnMetadata(myname, "Title")
 
 local LAI = LibStub("LibAppropriateItems-1.0")
 
+-- minor compat:
+local IsDressableItem = _G.IsDressableItem or C_Item.IsDressableItemByID
+
 local f = CreateFrame("Frame")
 f:SetScript("OnEvent", function(self, event, ...) if f[event] then return f[event](f, ...) end end)
 local hooks = {}
@@ -402,9 +405,11 @@ f:RegisterAddonHook("SilverDragon", function()
     end)
     local tooltip = _G["SilverDragonLootTooltip"]
     if tooltip then
-        tooltip:HookScript("OnTooltipSetItem", function(self)
-            ns:ShowItem(select(2, self:GetItem()), self)
-        end)
+        if not _G.TooltipDataProcessor then
+            tooltip:HookScript("OnTooltipSetItem", function(self)
+                ns:ShowItem(select(2, self:GetItem()), self)
+            end)
+        end
         tooltip:HookScript("OnHide", function()
             ns:HideItem()
         end)

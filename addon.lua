@@ -10,6 +10,9 @@ local setDefaults, db
 local LAT = LibStub("LibArmorToken-1.0")
 local LAI = LibStub("LibAppropriateItems-1.0")
 
+-- minor compat:
+local IsDressableItem = _G.IsDressableItem or C_Item.IsDressableItemByID
+
 local tooltip = CreateFrame("Frame", "AppearanceTooltipTooltip", UIParent, "TooltipBorderedFrameTemplate")
 tooltip:SetClampedToScreen(true)
 tooltip:SetFrameStrata("TOOLTIP")
@@ -139,15 +142,21 @@ classwarning:SetText("Your class can't transmogrify this item")
 classwarning:Show()
 
 -- Ye showing:
-GameTooltip:HookScript("OnTooltipSetItem", function(self)
-    ns:ShowItem(select(2, self:GetItem()), self)
-end)
+if _G.TooltipDataProcessor then
+    TooltipDataProcessor.AddTooltipPostCall(Enum.TooltipDataType.Item, function(self, data)
+        ns:ShowItem(select(2, TooltipUtil.GetDisplayedItem(self)), self)
+    end)
+else
+    GameTooltip:HookScript("OnTooltipSetItem", function(self)
+        ns:ShowItem(select(2, self:GetItem()), self)
+    end)
+    -- This is mostly world quest rewards:
+    GameTooltip.ItemTooltip.Tooltip:HookScript("OnTooltipSetItem", function(self)
+        ns:ShowItem(select(2, self:GetItem()), self)
+    end)
+end
 GameTooltip:HookScript("OnHide", function()
     ns:HideItem()
-end)
--- This is mostly world quest rewards:
-GameTooltip.ItemTooltip.Tooltip:HookScript("OnTooltipSetItem", function(self)
-    ns:ShowItem(select(2, self:GetItem()), self)
 end)
 GameTooltip.ItemTooltip.Tooltip:HookScript("OnHide", function()
     ns:HideItem()
