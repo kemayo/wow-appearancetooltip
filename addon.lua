@@ -302,8 +302,18 @@ end)
 
 local hider = CreateFrame("Frame")
 hider:Hide()
+local shouldHide = function(owner)
+    if not owner then return true end
+    if not owner:IsShown() then return true end
+    if _G.TooltipDataProcessor then
+        if not TooltipUtil.GetDisplayedItem(owner) then return true end
+    else
+        if not owner:GetItem() then return true end
+    end
+    return false
+end
 hider:SetScript("OnUpdate", function(self)
-    if (tooltip.owner and not (tooltip.owner:IsShown() and tooltip.owner:GetItem())) or not tooltip.owner then
+    if shouldHide(tooltip.owner) then
         spinner:Hide()
         positioner:Hide()
         tooltip:Hide()
