@@ -92,7 +92,7 @@ function ns:GetCameraID(itemLinkOrID, raceID, genderID)
     else
         local race = races[raceID or playerRaceID]
         local gender = genderID and genders[genderID] or playerSex
-        if not raceID and race == 'Worgen' and select(2, HasAlternateForm()) then
+        if not raceID and race == 'Worgen' and select(2, C_PlayerInfo.GetAlternateFormInfo()) then
             race = 'Human'
         end
         key = ("%s-%s-%s"):format(race, gender, slot_override[itemid] or slots[slot] or "Default")
