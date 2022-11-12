@@ -141,25 +141,43 @@ classwarning:SetText("Your class can't transmogrify this item")
 classwarning:Show()
 
 -- Ye showing:
-if _G.TooltipDataProcessor then
-    TooltipDataProcessor.AddTooltipPostCall(Enum.TooltipDataType.Item, function(self, data)
-        ns:ShowItem(select(2, TooltipUtil.GetDisplayedItem(self)), self)
-    end)
-else
-    GameTooltip:HookScript("OnTooltipSetItem", function(self)
-        ns:ShowItem(select(2, self:GetItem()), self)
-    end)
-    -- This is mostly world quest rewards:
-    GameTooltip.ItemTooltip.Tooltip:HookScript("OnTooltipSetItem", function(self)
-        ns:ShowItem(select(2, self:GetItem()), self)
-    end)
+do
+    local function GetTooltipItem(tooltip)
+        if _G.TooltipDataProcessor then
+            return TooltipUtil.GetDisplayedItem(tooltip)
+        end
+        return tooltip:GetItem()
+    end
+    local function OnTooltipSetItem(self)
+        ns:ShowItem(select(2, GetTooltipItem(self)), self)
+    end
+    local function OnHide(self)
+        ns:HideItem()
+    end
+
+    local tooltips = {}
+    function ns.RegisterTooltip(tooltip)
+        if (not tooltip) or tooltips[tooltip] then
+            return
+        end
+        if not _G.TooltipDataProcessor then
+            tooltip:HookScript("OnTooltipSetItem", OnTooltipSetItem)
+        end
+        tooltip:HookScript("OnHide", OnHide)
+        tooltips[tooltip] = tooltip
+    end
+
+    if _G.TooltipDataProcessor then
+        TooltipDataProcessor.AddTooltipPostCall(Enum.TooltipDataType.Item, function(self, data)
+            if tooltips[self] then
+                ns:ShowItem(select(2, TooltipUtil.GetDisplayedItem(self)), self)
+            end
+        end)
+    end
+
+    ns.RegisterTooltip(GameTooltip)
+    ns.RegisterTooltip(GameTooltip.ItemTooltip.Tooltip)
 end
-GameTooltip:HookScript("OnHide", function()
-    ns:HideItem()
-end)
-GameTooltip.ItemTooltip.Tooltip:HookScript("OnHide", function()
-    ns:HideItem()
-end)
 
 ----
 
