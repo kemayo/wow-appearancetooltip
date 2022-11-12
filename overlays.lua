@@ -397,21 +397,11 @@ f:RegisterAddonHook("SilverDragon", function()
         return
     end
     SilverDragon.RegisterCallback("AppearanceTooltip", "LootWindowOpened", function(_, window)
+        ns.RegisterTooltip(_G["SilverDragonLootTooltip"])
         if window and window.buttons and #window.buttons then
             for i, button in ipairs(window.buttons) do
                 UpdateOverlay(button, button:GetItem())
             end
         end
     end)
-    local tooltip = _G["SilverDragonLootTooltip"]
-    if tooltip then
-        if not _G.TooltipDataProcessor then
-            tooltip:HookScript("OnTooltipSetItem", function(self)
-                ns:ShowItem(select(2, self:GetItem()), self)
-            end)
-        end
-        tooltip:HookScript("OnHide", function()
-            ns:HideItem()
-        end)
-    end
 end)
