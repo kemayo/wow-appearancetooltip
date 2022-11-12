@@ -40,6 +40,7 @@ read_globals = {
     -- API functions
     "C_CVar",
     "C_Item",
+    "C_PlayerInfo",
     "C_Timer",
     "C_Transmog",
     "C_TransmogCollection",

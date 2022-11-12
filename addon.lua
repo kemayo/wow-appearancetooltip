@@ -142,11 +142,11 @@ classwarning:Show()
 
 -- Ye showing:
 do
-    local function GetTooltipItem(tooltip)
+    local function GetTooltipItem(tip)
         if _G.TooltipDataProcessor then
-            return TooltipUtil.GetDisplayedItem(tooltip)
+            return TooltipUtil.GetDisplayedItem(tip)
         end
-        return tooltip:GetItem()
+        return tip:GetItem()
     end
     local function OnTooltipSetItem(self)
         ns:ShowItem(select(2, GetTooltipItem(self)), self)
@@ -156,15 +156,15 @@ do
     end
 
     local tooltips = {}
-    function ns.RegisterTooltip(tooltip)
-        if (not tooltip) or tooltips[tooltip] then
+    function ns.RegisterTooltip(tip)
+        if (not tip) or tooltips[tip] then
             return
         end
         if not _G.TooltipDataProcessor then
-            tooltip:HookScript("OnTooltipSetItem", OnTooltipSetItem)
+            tip:HookScript("OnTooltipSetItem", OnTooltipSetItem)
         end
-        tooltip:HookScript("OnHide", OnHide)
-        tooltips[tooltip] = tooltip
+        tip:HookScript("OnHide", OnHide)
+        tooltips[tip] = tip
     end
 
     if _G.TooltipDataProcessor then
