@@ -125,6 +125,7 @@ read_globals = {
     "InterfaceOptionsFramePanelContainer",
     "WardrobeCollectionFrame",
     "ContainerFrameCombinedBags",
+    "EncounterJournal",
 
     -- FrameXML API
     "CreateAtlasMarkup",

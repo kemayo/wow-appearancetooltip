@@ -195,11 +195,13 @@ end
 -- Encounter Journal frame
 
 f:RegisterAddonHook("Blizzard_EncounterJournal", function()
-    hooksecurefunc("EncounterJournal_SetLootButton", function(item)
-        if item.appearancetooltipoverlay then item.appearancetooltipoverlay:Hide() end
-        if not ns.db.encounterjournal then return end
-        if item.link then
-            UpdateOverlay(item, item.link, "TOPLEFT", 4, -4)
+    hooksecurefunc("EncounterJournal_LootCallback", function(itemID)
+        local scrollBox = EncounterJournal.encounter.info.LootContainer.ScrollBox
+        local button = scrollBox:FindFrameByPredicate(function(button)
+            return button.itemID == itemID
+        end);
+        if button then
+            UpdateOverlay(button, button.link, "TOPLEFT", 5, -4)
         end
     end)
 end)
