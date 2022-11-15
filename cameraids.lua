@@ -30,7 +30,7 @@ local races = {
     [37] = "Mechagnome",
 }
 local fallback_races = {
-    Nightborne = {"BloodElf", "NightElf"}, -- Nightborne -> male Blood Elf / female Night Elf
+    Nightborne = "NightElf", -- Nightborne -> male Blood Elf / female Night Elf
     MagharOrc = "Orc", -- Maghar -> Orc
     LightforgedDraenei = "Draenei", -- Lightforged -> Draenei
     KulTiran = "Human", -- Kul'Tiran -> Human
@@ -40,7 +40,7 @@ local fallback_races = {
     Vulpera = "Goblin", -- Vulpera -> Goblin
     ZandalariTroll = "Troll", -- Zandalari -> Troll
     DarkIronDwarf = "Dwarf", -- Dark Iron -> Dwarf
-    Dracthyr = {"Draenei", "Human"}, -- Dracthyr -> male Draenei / female Human
+    Dracthyr = {"BloodElf", "Human"}, -- Dracthyr -> male Draenei / female Human
 }
 local genders = {
     [0] = "Male",
