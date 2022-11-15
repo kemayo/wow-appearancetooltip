@@ -16,6 +16,7 @@ local races = {
     [8] = "Troll",
     [6] = "Tauren",
     [9] = "Goblin",
+    [52] = "Dracthyr",
     -- Allied!
     [27] = "Nightborne", -- "Nightborne",
     [28] = "HighmountainTauren", -- "HighmountainTauren",
@@ -23,10 +24,23 @@ local races = {
     [30] = "LightforgedDraenei", -- "LightforgedDraenei",
     [31] = "ZandalariTroll",
     [32] = "KulTiran",
-    [34] = "Dwarf", -- "DarkIronDwarf",
+    [34] = "DarkIronDwarf",
     [35] = "Vulpera",
     [36] = "MagharOrc", -- "MagharOrc",
     [37] = "Mechagnome",
+}
+local fallback_races = {
+    Nightborne = {"BloodElf", "NightElf"}, -- Nightborne -> male Blood Elf / female Night Elf
+    MagharOrc = "Orc", -- Maghar -> Orc
+    LightforgedDraenei = "Draenei", -- Lightforged -> Draenei
+    KulTiran = "Human", -- Kul'Tiran -> Human
+    HighmountainTauren = "Tauren", -- Highmountain -> Tauren
+    VoidElf = "BloodElf", -- Void Elf -> Blood Elf
+    Mechagnome = "Gnome", -- Mechagnome -> Gnome
+    Vulpera = "Goblin", -- Vulpera -> Goblin
+    ZandalariTroll = "Troll", -- Zandalari -> Troll
+    DarkIronDwarf = "Dwarf", -- Dark Iron -> Dwarf
+    Dracthyr = {"Draenei", "Human"}, -- Dracthyr -> male Draenei / female Human
 }
 local genders = {
     [0] = "Male",
@@ -92,10 +106,23 @@ function ns:GetCameraID(itemLinkOrID, raceID, genderID)
     else
         local race = races[raceID or playerRaceID]
         local gender = genderID and genders[genderID] or playerSex
-        if not raceID and race == 'Worgen' and select(2, C_PlayerInfo.GetAlternateFormInfo()) then
-            race = 'Human'
+        if not raceID then
+            -- alt form races need special handling:
+            if race == 'Worgen' and select(2, C_PlayerInfo.GetAlternateFormInfo()) then
+                race = 'Human'
+            end
+            if race == 'Dracthyr' and not select(2, C_PlayerInfo.GetAlternateFormInfo()) then
+                gender = 'Male'
+            end
         end
         key = ("%s-%s-%s"):format(race, gender, slot_override[itemid] or slots[slot] or "Default")
+        if not slots_to_cameraids[key] and fallback_races[race] then
+            local fallback = fallback_races[race]
+            if type(fallback) == "table" then
+                fallback = fallback[genderID == 0 and 1 or 2]
+            end
+            key = ("%s-%s-%s"):format(fallback, gender, slot_override[itemid] or slots[slot] or "Default")
+        end
     end
     -- ns.Debug("GetCameraID", key, slots_to_cameraids[key], itemcamera)
     return slots_to_cameraids[key], itemcamera
@@ -149,6 +176,19 @@ slots_to_cameraids = {
     ["BloodElf-Male-Tabard"] = 459,
     ["BloodElf-Male-Waist"] = 462,
     ["BloodElf-Male-Wrist"] = 460,
+    ["Dracthyr-Male-Back"] = 1706,
+    ["Dracthyr-Male-Back-Backpack"] = 1699,
+    ["Dracthyr-Male-Feet"] = 1705,
+    ["Dracthyr-Male-Hands"] = 1708,
+    ["Dracthyr-Male-Head"] = 1702,
+    ["Dracthyr-Male-Legs"] = 1701,
+    ["Dracthyr-Male-Robe"] = 1698,
+    ["Dracthyr-Male-Shirt"] = 1709,
+    ["Dracthyr-Male-Shoulder"] = 1704,
+    ["Dracthyr-Male-Shoulder-Alt"] = 1703,
+    ["Dracthyr-Male-Tabard"] = 1707,
+    ["Dracthyr-Male-Waist"] = 1700,
+    ["Dracthyr-Male-Wrist"] = 1711,
     ["Draenei-Female-Back"] = 345,
     ["Draenei-Female-Back-Backpack"] = 1492,
     ["Draenei-Female-Feet"] = 358,
