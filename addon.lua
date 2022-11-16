@@ -432,6 +432,7 @@ function ns:ShowItem(link, for_tooltip)
                 model:SetFacing(self.slot_facings[slot] - (db.rotate and 0.5 or 0))
             end
 
+            tooltip:SetParent(for_tooltip)
             tooltip:Show()
             tooltip.owner = for_tooltip
 
