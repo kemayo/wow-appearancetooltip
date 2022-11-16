@@ -211,9 +211,9 @@ end)
 f:RegisterAddonHook("Blizzard_Collections", function()
     local function setCompletion(setID)
         local have, need = 0, 0
-        for _, known in pairs(C_TransmogSets.GetSetSources(setID)) do
+        for _, appearance in pairs(C_TransmogSets.GetSetPrimaryAppearances(setID)) do
             need = need + 1
-            if known then
+            if appearance.collected then
                 have = have + 1
             end
         end
