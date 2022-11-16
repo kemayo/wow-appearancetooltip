@@ -17,6 +17,7 @@ local races = {
     [6] = "Tauren",
     [9] = "Goblin",
     [52] = "Dracthyr",
+    [70] = "Dracthyr",
     -- Allied!
     [27] = "Nightborne", -- "Nightborne",
     [28] = "HighmountainTauren", -- "HighmountainTauren",
