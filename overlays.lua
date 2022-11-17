@@ -222,18 +222,28 @@ f:RegisterAddonHook("Blizzard_Collections", function()
     local function setSort(a, b)
         return a.uiOrder < b.uiOrder
     end
-    local function buildSetText(setID)
+    local function buildSetText(setID, separator)
+        separator = separator or "\n"
         local variants = C_TransmogSets.GetVariantSets(setID)
         if type(variants) ~= "table" then return "" end
         table.insert(variants, C_TransmogSets.GetSetInfo(setID))
         table.sort(variants, setSort)
         -- local text = setID -- debug
         local text = ""
-        for _,set in ipairs(variants) do
+        for _, set in ipairs(variants) do
             local have, need = setCompletion(set.setID)
-            text = text .. ns.ColorTextByCompletion((GENERIC_FRACTION_STRING):format(have, need), have / need) .. " \n"
+            text = text .. ns.ColorTextByCompletion((GENERIC_FRACTION_STRING):format(have, need), have / need) .. separator
         end
-        return string.sub(text, 1, -2)
+        return string.sub(text, 1, -#separator)
+    end
+    local function makeOverlay(parent)
+       local overlay = CreateFrame("Frame", nil, parent)
+       overlay.text = overlay:CreateFontString(nil, "OVERLAY", "GameFontNormalTiny")
+       overlay:SetAllPoints()
+       -- overlay.text:SetPoint("TOPRIGHT", -2, -2)
+       overlay.text:SetPoint("BOTTOMRIGHT", -2, 2)
+       overlay:Show()
+       return overlay
     end
     if WardrobeCollectionFrame.SetsCollectionFrame.ScrollFrame then
         local function update(self)
@@ -245,11 +255,7 @@ f:RegisterAddonHook("Blizzard_Collections", function()
                 if ns.db.setjournal and button:IsShown() then
                     local setID = button.setID
                     if not button.appearancetooltipoverlay then
-                        button.appearancetooltipoverlay = CreateFrame("Frame", nil, button)
-                        button.appearancetooltipoverlay.text = button.appearancetooltipoverlay:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
-                        button.appearancetooltipoverlay:SetAllPoints()
-                        button.appearancetooltipoverlay.text:SetPoint("BOTTOMRIGHT", -2, 2)
-                        button.appearancetooltipoverlay:Show()
+                        button.appearancetooltipoverlay = makeOverlay(button)
                     end
                     button.appearancetooltipoverlay.text:SetText(buildSetText(setID))
                 end
@@ -264,11 +270,7 @@ f:RegisterAddonHook("Blizzard_Collections", function()
                 local data = frame:GetElementData()
                 local setID = data.setID
                 if not frame.appearancetooltipoverlay then
-                    frame.appearancetooltipoverlay = CreateFrame("Frame", nil, frame)
-                    frame.appearancetooltipoverlay.text = frame.appearancetooltipoverlay:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
-                    frame.appearancetooltipoverlay:SetAllPoints()
-                    frame.appearancetooltipoverlay.text:SetPoint("BOTTOMRIGHT", -2, 2)
-                    frame.appearancetooltipoverlay:Show()
+                    frame.appearancetooltipoverlay = makeOverlay(frame)
                 end
                 frame.appearancetooltipoverlay.text:SetText(buildSetText(setID))
             end
