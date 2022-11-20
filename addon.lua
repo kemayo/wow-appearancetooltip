@@ -455,7 +455,9 @@ function ns:ShowItem(link, for_tooltip)
                     end
                 end
             end
-            model:TryOn(link)
+            C_Timer.After(0, function()
+                model:TryOn(link)
+            end)
         else
             tooltip:Hide()
         end
