@@ -9,6 +9,16 @@ local function checkboxOnClick(self)
     PlaySound(checked and SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON or SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_OFF)
     self:SetValue(checked)
 end
+local function checkboxOnEnter(self)
+    if ( self.tooltipText ) then
+        GameTooltip:SetOwner(self, self.tooltipOwnerPoint or "ANCHOR_RIGHT")
+        GameTooltip:SetText(self.tooltipText, nil, nil, nil, nil, true)
+    end
+    if ( self.tooltipRequirement ) then
+        GameTooltip:AddLine(self.tooltipRequirement, 1.0, 1.0, 1.0, true)
+        GameTooltip:Show()
+    end
+end
 
 local function newCheckbox(parent, key, label, description, getValue, setValue)
     local check = CreateFrame("CheckButton", "AppearanceTooltipOptionsCheck" .. key, parent, "InterfaceOptionsCheckButtonTemplate")
@@ -18,6 +28,8 @@ local function newCheckbox(parent, key, label, description, getValue, setValue)
     check.SetValue = setValue or checkboxSetValue
     check:SetScript('OnShow', checkboxSetChecked)
     check:SetScript("OnClick", checkboxOnClick)
+    check:SetScript("OnEnter", checkboxOnEnter)
+    check:SetScript("OnLeave", GameTooltip_Hide)
     check.label = _G[check:GetName() .. "Text"]
     check.label:SetText(label)
     check.tooltipText = label
