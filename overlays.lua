@@ -339,6 +339,7 @@ end)
 --Bagnon:
 f:RegisterAddonHook("Bagnon", function()
     hooksecurefunc(Bagnon.Item, "Update", function(frame)
+        if frame and frame.appearancetooltipoverlay then frame.appearancetooltipoverlay:Hide() end
         local itemLink = frame:GetItem()
         if itemLink then
             UpdateButtonFromItem(frame, Item:CreateFromItemLink(itemLink))
