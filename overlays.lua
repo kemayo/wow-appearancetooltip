@@ -199,13 +199,29 @@ end
 -- Encounter Journal frame
 
 f:RegisterAddonHook("Blizzard_EncounterJournal", function()
+    local function handleSlot(frame)
+        if frame.appearancetooltipoverlay then frame.appearancetooltipoverlay:Hide() end
+        if not ns.db.encounterjournal then return end
+        if frame:IsShown() then
+            local data = frame:GetElementData()
+            local itemInfo = data.index and C_EncounterJournal.GetLootInfoByIndex(data.index)
+            -- DevTools_Dump(itemInfo)
+            if itemInfo then
+                UpdateOverlay(frame, itemInfo.link, "TOPLEFT", 5, -4)
+            end
+        end
+    end
+    EncounterJournal.encounter.info.LootContainer.ScrollBox:RegisterCallback("OnUpdate", function(...)
+        EncounterJournal.encounter.info.LootContainer.ScrollBox:ForEachFrame(handleSlot)
+    end)
+    -- initial load:
     hooksecurefunc("EncounterJournal_LootCallback", function(itemID)
         local scrollBox = EncounterJournal.encounter.info.LootContainer.ScrollBox
         local button = scrollBox:FindFrameByPredicate(function(button)
             return button.itemID == itemID
         end);
         if button then
-            UpdateOverlay(button, button.link, "TOPLEFT", 5, -4)
+            handleSlot(button)
         end
     end)
 end)
