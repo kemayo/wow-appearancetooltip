@@ -34,6 +34,7 @@ read_globals = {
 
     -- misc custom, third party libraries
     "Baggins", "Bagnon", "Butsu", "SilverDragon",
+    "Baganator", "Baganator_MainViewFrame", "Baganator_BankOnlyViewFrame",
     "LibStub", "tekDebug",
     "GetAuctionBuyout",
 

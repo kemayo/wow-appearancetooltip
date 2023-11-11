@@ -432,3 +432,23 @@ f:RegisterAddonHook("SilverDragon", function()
         end
     end)
 end)
+
+-- Baganator
+f:RegisterAddonHook("Baganator", function()
+    local function baganator_setitemdetails(button, details)
+        UpdateOverlay(button, details.itemLink)
+    end
+    local function baganator_rebuildlayout(frame)
+        for _, button in ipairs(frame.buttons) do
+            if not button.____AppearanceTooltipHooked then
+                button.____AppearanceTooltipHooked = true
+                hooksecurefunc(button, "SetItemDetails", baganator_setitemdetails)
+            end
+        end
+    end
+    hooksecurefunc(Baganator_MainViewFrame.BagLive, "RebuildLayout", baganator_rebuildlayout)
+    hooksecurefunc(Baganator_MainViewFrame.BagCached, "RebuildLayout", baganator_rebuildlayout)
+    hooksecurefunc(Baganator_BankOnlyViewFrame.BankLive, "RebuildLayout", baganator_rebuildlayout)
+    -- Doesn't currently show cached bank contents:
+    -- hooksecurefunc(Baganator_BankOnlyViewFrame.BankCached, "RebuildLayout", baganator_rebuildlayout)
+end)
