@@ -436,7 +436,15 @@ end)
 -- Baganator
 f:RegisterAddonHook("Baganator", function()
     local function baganator_setitemdetails(button, details)
-        UpdateOverlay(button, details.itemLink)
+        -- If we have a container-item, we should use that because it's needed for soulbound detection
+        local bag = button.GetBagID and button:GetBagID() or button:GetParent():GetID()
+        local slot = button:GetID()
+        -- print("SetItemDetails", details.itemLink, bag, slot)
+        if bag and slot and bag ~= 0 and slot ~= 0 then
+            UpdateContainerButton(button, bag, slot)
+        elseif details.itemLink then
+            UpdateOverlay(button, details.itemLink)
+        end
     end
     local function baganator_rebuildlayout(frame)
         for _, button in ipairs(frame.buttons) do
@@ -447,8 +455,15 @@ f:RegisterAddonHook("Baganator", function()
         end
     end
     hooksecurefunc(Baganator_MainViewFrame.BagLive, "RebuildLayout", baganator_rebuildlayout)
+    hooksecurefunc(Baganator_MainViewFrame.ReagentBagLive, "RebuildLayout", baganator_rebuildlayout)
+    hooksecurefunc(Baganator_MainViewFrame.BankLive, "RebuildLayout", baganator_rebuildlayout)
+    hooksecurefunc(Baganator_MainViewFrame.ReagentBankLive, "RebuildLayout", baganator_rebuildlayout)
     hooksecurefunc(Baganator_MainViewFrame.BagCached, "RebuildLayout", baganator_rebuildlayout)
+    hooksecurefunc(Baganator_MainViewFrame.ReagentBagCached, "RebuildLayout", baganator_rebuildlayout)
+    hooksecurefunc(Baganator_MainViewFrame.BankCached, "RebuildLayout", baganator_rebuildlayout)
+    hooksecurefunc(Baganator_MainViewFrame.ReagentBankCached, "RebuildLayout", baganator_rebuildlayout)
     hooksecurefunc(Baganator_BankOnlyViewFrame.BankLive, "RebuildLayout", baganator_rebuildlayout)
     -- Doesn't currently show cached bank contents:
     -- hooksecurefunc(Baganator_BankOnlyViewFrame.BankCached, "RebuildLayout", baganator_rebuildlayout)
+    hooksecurefunc(Baganator_BankOnlyViewFrame.ReagentBankLive, "RebuildLayout", baganator_rebuildlayout)
 end)
