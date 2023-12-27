@@ -440,7 +440,7 @@ f:RegisterAddonHook("Baganator", function()
         local bag = button.GetBagID and button:GetBagID() or button:GetParent():GetID()
         local slot = button:GetID()
         -- print("SetItemDetails", details.itemLink, bag, slot)
-        if bag and slot and bag ~= 0 and slot ~= 0 then
+        if bag and slot and slot ~= 0 then
             UpdateContainerButton(button, bag, slot)
         elseif details.itemLink then
             UpdateOverlay(button, details.itemLink)
