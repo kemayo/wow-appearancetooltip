@@ -126,6 +126,7 @@ read_globals = {
     "NumberFontNormal",
     "InterfaceOptionsFramePanelContainer",
     "WardrobeCollectionFrame",
+    "ContainerFrameContainer",
     "ContainerFrameCombinedBags",
     "EncounterJournal",
 
