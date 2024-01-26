@@ -91,6 +91,7 @@ local function UpdateOverlay(button, link, ...)
             button.appearancetooltipoverlay.iconInappropriate:Show()
         end
         button.appearancetooltipoverlay:Show()
+        return true
     elseif button.appearancetooltipoverlay then
         button.appearancetooltipoverlay:Hide()
     end
@@ -435,41 +436,20 @@ end)
 
 -- Baganator
 f:RegisterAddonHook("Baganator", function()
-    local function baganator_setitemdetails(button, details)
-        -- If we have a container-item, we should use that because it's needed for soulbound detection
-        local bag = button.GetBagID and button:GetBagID() or button:GetParent():GetID()
-        local slot = button:GetID()
-        -- print("SetItemDetails", details.itemLink, bag, slot)
-        if bag and slot and slot ~= 0 then
-            UpdateContainerButton(button, bag, slot)
-        elseif details.itemLink then
-            UpdateOverlay(button, details.itemLink)
-        end
-    end
-    local function baganator_rebuildlayout(frame)
-        for _, button in ipairs(frame.buttons) do
-            if not button.____AppearanceTooltipHooked then
-                button.____AppearanceTooltipHooked = true
-                hooksecurefunc(button, "SetItemDetails", baganator_setitemdetails)
+    Baganator.API.RegisterCornerWidget(myfullname, "appearancetooltip",
+        -- onUpdate
+        function(cornerFrame, details)
+            if details.itemLink and (not ns.db.bags_unbound or not details.isBound) then
+                return UpdateOverlay(cornerFrame, details.itemLink)
             end
-        end
-    end
-    local function baganator_hookmain()
-        hooksecurefunc(Baganator_MainViewFrame.BagLive, "RebuildLayout", baganator_rebuildlayout)
-        hooksecurefunc(Baganator_MainViewFrame.BankLive, "RebuildLayout", baganator_rebuildlayout)
-        hooksecurefunc(Baganator_MainViewFrame.ReagentBankLive, "RebuildLayout", baganator_rebuildlayout)
-        hooksecurefunc(Baganator_MainViewFrame.BagCached, "RebuildLayout", baganator_rebuildlayout)
-        hooksecurefunc(Baganator_MainViewFrame.BankCached, "RebuildLayout", baganator_rebuildlayout)
-        hooksecurefunc(Baganator_MainViewFrame.ReagentBankCached, "RebuildLayout", baganator_rebuildlayout)
-        hooksecurefunc(Baganator_BankOnlyViewFrame.BankLive, "RebuildLayout", baganator_rebuildlayout)
-        -- Doesn't currently show cached bank contents:
-        -- hooksecurefunc(Baganator_BankOnlyViewFrame.BankCached, "RebuildLayout", baganator_rebuildlayout)
-        hooksecurefunc(Baganator_BankOnlyViewFrame.ReagentBankLive, "RebuildLayout", baganator_rebuildlayout)
-    end
-    -- Depending on whether we were loaded before or after Baganator, this might or might not have already been created...
-    if Baganator_MainViewFrame then
-        baganator_hookmain()
-    elseif Baganator and Baganator.UnifiedBags.Initialize then
-        hooksecurefunc(Baganator.UnifiedBags, "Initialize", baganator_hookmain)
-    end
+        end,
+        -- onInit
+        function(itemButton)
+            local frame = CreateFrame("Frame", nil, itemButton)
+            frame:SetSize(6, 6)
+            PrepareItemButton(frame, "CENTER", 0, 0)
+            return frame
+        end,
+        {default_position = "bottom_left", priority = 1}
+    )
 end)
