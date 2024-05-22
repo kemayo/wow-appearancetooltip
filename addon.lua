@@ -563,6 +563,8 @@ ns.slot_facings = {
     INVTYPE_FEET = 0,
     INVTYPE_TABARD = 0,
     INVTYPE_BODY = 0,
+    -- for ensembles, which are dressable but non-equipable
+    INVTYPE_NON_EQUIP_IGNORE = 0,
 }
 
 ns.modifiers = {
