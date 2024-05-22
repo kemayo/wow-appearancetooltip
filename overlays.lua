@@ -5,6 +5,7 @@ local LAI = LibStub("LibAppropriateItems-1.0")
 
 -- minor compat:
 local IsDressableItem = _G.IsDressableItem or C_Item.IsDressableItemByID
+local IsUsableItem = _G.IsUsableItem or C_Item.IsUsableItem
 
 local f = CreateFrame("Frame")
 f:SetScript("OnEvent", function(self, event, ...) if f[event] then return f[event](f, ...) end end)
@@ -65,14 +66,14 @@ local function UpdateOverlay(button, link, ...)
         end
         return
     end
-    local hasAppearance, appearanceFromOtherItem = ns.PlayerHasAppearance(link)
-    local appropriateItem = LAI:IsAppropriate(link)
-    -- ns.Debug("Considering item", link, hasAppearance, appearanceFromOtherItem)
+    local hasAppearance, appearanceFromOtherItem, probablyEnsemble = ns.PlayerHasAppearance(link)
+    local appropriateItem = LAI:IsAppropriate(link) or probablyEnsemble
+    -- ns.Debug("Considering item", link, hasAppearance, appearanceFromOtherItem, appropriateItem, probablyEnsemble)
     if
         (not hasAppearance or appearanceFromOtherItem) and
         (not ns.db.currentClass or appropriateItem) and
         IsDressableItem(link) and
-        ns.CanTransmogItem(link)
+        (ns.CanTransmogItem(link) or probablyEnsemble)
     then
         PrepareItemButton(button, ...)
         button.appearancetooltipoverlay.icon:Hide()
@@ -440,6 +441,7 @@ f:RegisterAddonHook("Baganator", function()
         -- onUpdate
         function(cornerFrame, details)
             if details.itemLink and (not ns.db.bags_unbound or not details.isBound) then
+                -- todo: a puchased ensemble will be bound and so won't show here...
                 return UpdateOverlay(cornerFrame, details.itemLink)
             end
         end,

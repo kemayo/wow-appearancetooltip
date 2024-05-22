@@ -466,10 +466,10 @@ function ns:ShowItem(link, for_tooltip)
         known:Hide()
 
         if db.notifyKnown then
-            local hasAppearance, appearanceFromOtherItem = ns.PlayerHasAppearance(link)
+            local hasAppearance, appearanceFromOtherItem, probablyEnsemble = ns.PlayerHasAppearance(link)
 
             local label
-            if not ns.CanTransmogItem(link) then
+            if not ns.CanTransmogItem(link) and not probablyEnsemble then
                 label = "|c00ffff00" .. TRANSMOGRIFY_INVALID_DESTINATION
             else
                 if hasAppearance then
@@ -481,7 +481,7 @@ function ns:ShowItem(link, for_tooltip)
                 else
                     label = "|TInterface\\RaidFrame\\ReadyCheck-NotReady:0|t |cffff0000" .. TRANSMOGRIFY_TOOLTIP_APPEARANCE_UNKNOWN
                 end
-                classwarning:SetShown(not appropriateItem)
+                classwarning:SetShown(not appropriateItem and not probablyEnsemble)
             end
             known:SetText(label)
             known:Show()
@@ -660,6 +660,11 @@ function ns.PlayerHasAppearance(itemLinkOrID)
     -- hasAppearance, appearanceFromOtherItem
     local itemID = GetItemInfoInstant(itemLinkOrID)
     if not itemID then return end
+    local probablyEnsemble = IsDressableItem(itemID) and not IsEquippableItem(itemID)
+    if probablyEnsemble then
+        -- *not* ERR_COSMETIC_KNOWN which is "Item Known"
+        return ns.CheckTooltipFor(itemID, ITEM_SPELL_KNOWN), false, true
+    end
     local appearanceID, sourceID = C_TransmogCollection.GetItemInfo(itemLinkOrID)
     if not appearanceID then
         -- sometimes the link won't actually give us an appearance, but itemID will
@@ -696,6 +701,19 @@ function ns.PlayerHasAppearance(itemLinkOrID)
             end
         end
         return known_any, false
+    end
+    return false
+end
+
+function ns.CheckTooltipFor(itemInfo, text)
+    if not _G.C_TooltipInfo then return false end
+    local info = C_TooltipInfo[ type(itemInfo) == "number" and "GetItemByID" or "GetHyperlink" ](itemInfo)
+    if not info then return false end
+    for _, line in ipairs(info.lines) do
+        -- print("line", line, line.leftText, line.rightText)
+        if line.leftText and string.match(line.leftText, text) then
+            return true
+        end
     end
     return false
 end
