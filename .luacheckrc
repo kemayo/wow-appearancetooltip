@@ -39,6 +39,7 @@ read_globals = {
     "GetAuctionBuyout",
 
     -- API functions
+    "C_AddOns",
     "C_CVar",
     "C_EncounterJournal",
     "C_Item",
@@ -57,7 +58,6 @@ read_globals = {
     "ClearOverrideBindings",
     "CursorHasItem",
     "DeleteCursorItem",
-    "GetAddOnMetadata",
     "GetAuctionItemSubClasses",
     "GetBuildInfo",
     "GetBackpackAutosortDisabled",
@@ -84,7 +84,6 @@ read_globals = {
     "GetItemFamily",
     "GetItemInfo",
     "GetItemInfoInstant",
-    "GetItemQualityColor",
     "GetLootSlotLink",
     "GetNumLootItems",
     "GetScreenHeight",
@@ -92,7 +91,6 @@ read_globals = {
     "GetTime",
     "HasAlternateForm",
     "InCombatLockdown",
-    "IsAddOnLoaded",
     "IsAltKeyDown",
     "IsControlKeyDown",
     "IsDressableItem",

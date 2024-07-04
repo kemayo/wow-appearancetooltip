@@ -1,5 +1,5 @@
 local myname, ns = ...
-local myfullname = GetAddOnMetadata(myname, "Title")
+local myfullname = C_AddOns.GetAddOnMetadata(myname, "Title")
 
 local LAI = LibStub("LibAppropriateItems-1.0")
 
@@ -11,7 +11,7 @@ local f = CreateFrame("Frame")
 f:SetScript("OnEvent", function(self, event, ...) if f[event] then return f[event](f, ...) end end)
 local hooks = {}
 function f:RegisterAddonHook(addon, callback)
-    if IsAddOnLoaded(addon) then
+    if C_AddOns.IsAddOnLoaded(addon) then
         callback()
     else
         hooks[addon] = callback

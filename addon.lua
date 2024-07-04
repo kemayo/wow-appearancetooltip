@@ -1,5 +1,5 @@
 local myname, ns = ...
-local myfullname = GetAddOnMetadata(myname, "Title")
+local myfullname = C_AddOns.GetAddOnMetadata(myname, "Title")
 
 local GetScreenWidth = GetScreenWidth
 local GetScreenHeight = GetScreenHeight
@@ -355,7 +355,7 @@ function ns:ShowItem(link, for_tooltip)
         -- It's a set token! Replace the id.
         local found
         for _, itemid in LAT:IterateItemsForTokenAndClass(id, class) do
-            _, maybelink = GetItemInfo(itemid)
+            _, maybelink = C_Item.GetItemInfo(itemid)
             if maybelink then
                 id = itemid
                 link = maybelink
@@ -366,7 +366,7 @@ function ns:ShowItem(link, for_tooltip)
         if not found then
             for _, tokenclass in LAT:IterateClassesForToken(id) do
                 for _, itemid in LAT:IterateItemsForTokenAndClass(id, tokenclass) do
-                    _, maybelink = GetItemInfo(itemid)
+                    _, maybelink = C_Item.GetItemInfo(itemid)
                     if maybelink then
                         id = itemid
                         link = maybelink
@@ -383,7 +383,7 @@ function ns:ShowItem(link, for_tooltip)
         end
     end
 
-    local slot = select(9, GetItemInfo(id))
+    local slot = select(9, C_Item.GetItemInfo(id))
     if (not db.modifier or self.modifiers[db.modifier]()) and tooltip.item ~= id then
         tooltip.item = id
 
@@ -446,7 +446,7 @@ function ns:ShowItem(link, for_tooltip)
                 for _, slotid in ipairs(ns.slot_removals[slot]) do
                     if slotid == ns.SLOT_ROBE then
                         local chest_itemid = GetInventoryItemID("player", ns.SLOT_CHEST)
-                        if chest_itemid and select(4, GetItemInfoInstant(chest_itemid)) == 'INVTYPE_ROBE' then
+                        if chest_itemid and select(4, C_Item.GetItemInfoInstant(chest_itemid)) == 'INVTYPE_ROBE' then
                             slotid = ns.SLOT_CHEST
                         end
                     end
@@ -641,9 +641,9 @@ end
 
 -- Utility fun
 
---/dump C_Transmog.GetItemInfo(GetItemInfoInstant(""))
+--/dump C_Transmog.GetItemInfo(C_Item.GetItemInfoInstant(""))
 function ns.CanTransmogItem(itemLink)
-    local itemID = GetItemInfoInstant(itemLink)
+    local itemID = C_Item.GetItemInfoInstant(itemLink)
     if itemID then
         local canBeChanged, noChangeReason, canBeSource, noSourceReason = C_Transmog.CanTransmogItem(itemID)
         return canBeSource, noSourceReason
@@ -658,9 +658,9 @@ local brokenItems = {
 -- /dump C_TransmogCollection.GetAppearanceSourceInfo(select(2, C_TransmogCollection.GetItemInfo("")))
 function ns.PlayerHasAppearance(itemLinkOrID)
     -- hasAppearance, appearanceFromOtherItem
-    local itemID = GetItemInfoInstant(itemLinkOrID)
+    local itemID = C_Item.GetItemInfoInstant(itemLinkOrID)
     if not itemID then return end
-    local probablyEnsemble = IsDressableItem(itemID) and not IsEquippableItem(itemID)
+    local probablyEnsemble = IsDressableItem(itemID) and not C_Item.IsEquippableItem(itemID)
     if probablyEnsemble then
         -- *not* ERR_COSMETIC_KNOWN which is "Item Known"
         return ns.CheckTooltipFor(itemID, ITEM_SPELL_KNOWN), false, true

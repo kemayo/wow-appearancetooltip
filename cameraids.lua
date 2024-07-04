@@ -96,7 +96,7 @@ local slots_to_cameraids, slot_override
 -- gender: number genderid (0: male, 1: female)
 function ns:GetCameraID(itemLinkOrID, raceID, genderID)
     local key, itemcamera
-    local itemid, _, _, slot, _, class, subclass = GetItemInfoInstant(itemLinkOrID)
+    local itemid, _, _, slot, _, class, subclass = C_Item.GetItemInfoInstant(itemLinkOrID)
     if item_slots[slot] then
         itemcamera = true
         if item_slots[slot] == true then

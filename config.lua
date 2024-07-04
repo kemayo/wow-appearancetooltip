@@ -1,5 +1,4 @@
 local myname, ns = ...
-local myfullname = GetAddOnMetadata(myname, "Title")
 
 local function checkboxGetValue(self) return ns.db[self.key] end
 local function checkboxSetChecked(self) self:SetChecked(self:GetValue()) end
