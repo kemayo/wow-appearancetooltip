@@ -64,7 +64,7 @@ local function UpdateOverlay(button, link, ...)
         if button.appearancetooltipoverlay then
             button.appearancetooltipoverlay:Hide()
         end
-        return
+        return false
     end
     local hasAppearance, appearanceFromOtherItem, probablyEnsemble = ns.PlayerHasAppearance(link)
     local appropriateItem = LAI:IsAppropriate(link) or probablyEnsemble
@@ -96,6 +96,7 @@ local function UpdateOverlay(button, link, ...)
     elseif button.appearancetooltipoverlay then
         button.appearancetooltipoverlay:Hide()
     end
+    return false
 end
 
 local function UpdateButtonFromItem(button, item)
@@ -444,6 +445,7 @@ f:RegisterAddonHook("Baganator", function()
                 -- todo: a puchased ensemble will be bound and so won't show here...
                 return UpdateOverlay(cornerFrame, details.itemLink)
             end
+            return false
         end,
         -- onInit
         function(itemButton)
