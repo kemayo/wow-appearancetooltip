@@ -133,8 +133,6 @@ read_globals = {
     -- FrameXML API
     "CreateAtlasMarkup",
     "CreateFrame",
-    "InterfaceOptionsFrame_OpenToCategory",
-    "InterfaceOptions_AddCategory",
     "ToggleDropDownMenu",
     "UIDropDownMenu_AddButton",
     "UIDropDownMenu_CreateInfo",
@@ -150,6 +148,7 @@ read_globals = {
     "HybridScrollFrame_GetOffset",
     "TooltipDataProcessor",
     "TooltipUtil",
+    "Settings",
 
     -- FrameXML Constants
     "BACKPACK_CONTAINER",
