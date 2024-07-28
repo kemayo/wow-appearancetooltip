@@ -54,7 +54,7 @@ function tooltip:ADDON_LOADED(addon)
         encounterjournal = true,
         setjournal = true,
         appearances_known = {},
-        scan_delay = 0.2,
+        scan_delay = 0.3,
     })
     db = _G[myname.."DB"]
     ns.db = db
@@ -70,7 +70,7 @@ function tooltip:PLAYER_LOGIN()
     tooltip.modelZoomed:SetUnit("player")
     C_CVar.SetCVar("missingTransmogSourceInItemTooltips", "1")
 
-    ns.UpdateSources()
+    C_Timer.After(5, ns.UpdateSources)
 end
 
 function tooltip:PLAYER_REGEN_ENABLED()
