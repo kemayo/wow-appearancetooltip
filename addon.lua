@@ -119,11 +119,6 @@ tooltip.model = makeModel()
 tooltip.modelZoomed = makeModel()
 tooltip.modelWeapon = makeModel()
 
-tooltip.model:SetScript("OnShow", function(self)
-    -- Initial display will be off-center without this
-    ns:ResetModel(self)
-end)
-
 local known = tooltip:CreateFontString(nil, "OVERLAY", "GameFontNormal")
 known:SetWordWrap(true)
 known:SetTextColor(0.5333, 0.6666, 0.9999, 0.9999)
