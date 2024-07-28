@@ -54,7 +54,7 @@ function tooltip:ADDON_LOADED(addon)
         encounterjournal = true,
         setjournal = true,
         appearances_known = {},
-        scan_delay = 0.3,
+        scan_delay = 1.5,
     })
     db = _G[myname.."DB"]
     ns.db = db
