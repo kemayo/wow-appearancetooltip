@@ -54,7 +54,6 @@ function tooltip:ADDON_LOADED(addon)
         encounterjournal = true,
         setjournal = true,
         appearances_known = {},
-        scan_delay = 1.5,
     })
     db = _G[myname.."DB"]
     ns.db = db
@@ -69,8 +68,6 @@ function tooltip:PLAYER_LOGIN()
     tooltip.model:SetUnit("player")
     tooltip.modelZoomed:SetUnit("player")
     C_CVar.SetCVar("missingTransmogSourceInItemTooltips", "1")
-
-    C_Timer.After(5, ns.UpdateSources)
 end
 
 function tooltip:PLAYER_REGEN_ENABLED()
@@ -569,71 +566,6 @@ ns.modifiers = {
     None = function() return true end,
 }
 
----
-
-do
-    local categorySlots = {
-        -- [Enum.TransmogCollectionType.] = "",
-        [Enum.TransmogCollectionType.Head] = "HEADSLOT",
-        [Enum.TransmogCollectionType.Shoulder] = "SHOULDERSLOT",
-        [Enum.TransmogCollectionType.Back] = "BACKSLOT",
-        [Enum.TransmogCollectionType.Chest] = "CHESTSLOT",
-        [Enum.TransmogCollectionType.Shirt] = "SHIRTSLOT",
-        [Enum.TransmogCollectionType.Tabard] = "TABARDSLOT",
-        [Enum.TransmogCollectionType.Wrist] = "WRISTSLOT",
-        [Enum.TransmogCollectionType.Hands] = "HANDSSLOT",
-        [Enum.TransmogCollectionType.Waist] = "WAISTSLOT",
-        [Enum.TransmogCollectionType.Legs] = "LEGSSLOT",
-        [Enum.TransmogCollectionType.Feet] = "FEETSLOT",
-        [Enum.TransmogCollectionType.Wand] = "MAINHANDSLOT",
-        [Enum.TransmogCollectionType.OneHAxe] = "MAINHANDSLOT",
-        [Enum.TransmogCollectionType.OneHSword] = "MAINHANDSLOT",
-        [Enum.TransmogCollectionType.OneHMace] = "MAINHANDSLOT",
-        [Enum.TransmogCollectionType.Dagger] = "MAINHANDSLOT",
-        [Enum.TransmogCollectionType.Fist] = "MAINHANDSLOT",
-        [Enum.TransmogCollectionType.TwoHAxe] = "MAINHANDSLOT",
-        [Enum.TransmogCollectionType.TwoHSword] = "MAINHANDSLOT",
-        [Enum.TransmogCollectionType.TwoHMace] = "MAINHANDSLOT",
-        [Enum.TransmogCollectionType.Staff] = "MAINHANDSLOT",
-        [Enum.TransmogCollectionType.Polearm] = "MAINHANDSLOT",
-        [Enum.TransmogCollectionType.Bow] = "MAINHANDSLOT",
-        [Enum.TransmogCollectionType.Gun] = "MAINHANDSLOT",
-        [Enum.TransmogCollectionType.Crossbow] = "MAINHANDSLOT",
-        [Enum.TransmogCollectionType.Warglaives] = "MAINHANDSLOT",
-        [Enum.TransmogCollectionType.Paired] = "MAINHANDSLOT",
-        [Enum.TransmogCollectionType.Shield] = "SECONDARYHANDSLOT",
-        [Enum.TransmogCollectionType.Holdable] = "SECONDARYHANDSLOT",
-    }
-    local categoryID = 1
-    function ns.UpdateSources()
-        if categoryID > 28 then return ns.Debug("Done updating") end
-        local location = TransmogUtil.GetTransmogLocation(categorySlots[categoryID], Enum.TransmogType.Appearance, Enum.TransmogModification.Main)
-        local categoryAppearances = C_TransmogCollection.GetCategoryAppearances(categoryID, location)
-        local acount, scount = 0, 0
-        for _, categoryAppearance in pairs(categoryAppearances) do
-            acount = acount + 1
-            local appearanceSources = C_TransmogCollection.GetAppearanceSources(categoryAppearance.visualID, categoryID, location)
-            local known_any
-            for _, source in pairs(appearanceSources) do
-                if source.isCollected then
-                    scount = scount + 1
-                    -- it's only worth saving if we know the source
-                    known_any = true
-                end
-            end
-            if known_any then
-                ns.db.appearances_known[categoryAppearance.visualID] = true
-            else
-                -- cleaning up after unlearned appearances:
-                ns.db.appearances_known[categoryAppearance.visualID] = nil
-            end
-        end
-        ns.Debug("Updating sources in category", categoryID, "appearances", acount, "sources known", scount)
-        categoryID = categoryID + 1
-        C_Timer.After(db.scan_delay, ns.UpdateSources)
-    end
-end
-
 -- Utility fun
 
 --/dump C_Transmog.GetItemInfo(C_Item.GetItemInfoInstant(""))
@@ -651,6 +583,7 @@ local brokenItems = {
     [153316] = {25123, 90885}, -- Praetor's Ornamental Edge
 }
 -- /dump C_TransmogCollection.GetAppearanceSourceInfo(select(2, C_TransmogCollection.GetItemInfo("")))
+-- /dump C_TransmogCollection.GetAppearanceInfoBySource(select(2, C_TransmogCollection.GetItemInfo("")))
 function ns.PlayerHasAppearance(itemLinkOrID)
     -- hasAppearance, appearanceFromOtherItem
     local itemID = C_Item.GetItemInfoInstant(itemLinkOrID)
@@ -671,33 +604,29 @@ function ns.PlayerHasAppearance(itemLinkOrID)
         appearanceID, sourceID = unpack(brokenItems[itemID])
     end
     if not appearanceID then return end
-    if sourceID and ns.db.appearances_known[appearanceID] then
-        return true, not C_TransmogCollection.PlayerHasTransmogItemModifiedAppearance(sourceID)
+    -- /dump C_TransmogCollection.PlayerHasTransmogItemModifiedAppearance(C_TransmogCollection.GetItemInfo(""))
+    local fromCurrentItem = C_TransmogCollection.PlayerHasTransmogItemModifiedAppearance(sourceID)
+    if fromCurrentItem then
+        -- It might *also* be from another item, but we don't care or need to find out
+        return true, false
     end
-    -- Everything after this is a fallback. All know appearances *should* be in that table... but we run
-    -- this in case, we only know about unequippable items after you've logged in as a class which can use
-    -- them. (Also in case the scanning messed up somehow, I guess?)
-    if not LAI:IsAppropriate(itemID) then
-        -- This is a non-class item, so GetAppearanceSources won't work on it
-        -- We can tell whether the specific source is collected, but not the overall appearance
-        -- Fallback if you've not logged in to a class that can use this item in a while
-        -- TODO: check whether this is still true with GetAllAppearanceSources
-        return C_TransmogCollection.PlayerHasTransmogItemModifiedAppearance(sourceID), false
-    end
+    -- The current item isn't known, but do we know the appearance in general?
+    -- We can't use the direct functions for this, because they don't work
+    -- for cross-class items, so we just check all the possible sources. This
+    -- used to not work because you couldn't request the sources, but since
+    -- Warbands were added in 11.0.0 this is now possible.
     local sources = C_TransmogCollection.GetAllAppearanceSources(appearanceID)
     if sources then
         local known_any = false
         for _, sourceID2 in pairs(sources) do
             if C_TransmogCollection.PlayerHasTransmogItemModifiedAppearance(sourceID2) then
-                known_any = true
-                if itemID == C_TransmogCollection.GetSourceItemID(sourceID2) then
-                    return true, false
-                end
+                -- We know it, and it must be from a different source because of the above check
+                return true, true
             end
         end
-        return known_any, false
     end
-    return false
+    -- We don't know the appearance from any source
+    return false, false
 end
 
 function ns.CheckTooltipFor(itemInfo, text)
