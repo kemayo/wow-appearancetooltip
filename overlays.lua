@@ -269,6 +269,7 @@ f:RegisterAddonHook("Blizzard_Collections", function()
        return overlay
     end
     if WardrobeCollectionFrame.SetsCollectionFrame.ScrollFrame then
+        -- pre-dragonflight
         local function update(self)
             local offset = HybridScrollFrame_GetOffset(self)
             local buttons = self.buttons
@@ -295,7 +296,7 @@ f:RegisterAddonHook("Blizzard_Collections", function()
                 if not frame.appearancetooltipoverlay then
                     frame.appearancetooltipoverlay = makeOverlay(frame)
                 end
-                frame.appearancetooltipoverlay.text:SetText(buildSetText(setID))
+                frame.appearancetooltipoverlay.text:SetText(buildSetText(setID, " "))
             end
         end
         WardrobeCollectionFrame.SetsCollectionFrame.ListContainer.ScrollBox:RegisterCallback("OnUpdate", function(...)
