@@ -141,7 +141,8 @@ do
         return tip:GetItem()
     end
     local function OnTooltipSetItem(self)
-        ns:ShowItem(select(2, GetTooltipItem(self)), self)
+        local name, link, id = GetTooltipItem(self)
+        ns:ShowItem(link, self)
     end
     local function OnHide(self)
         ns:HideItem()
@@ -162,7 +163,7 @@ do
     if _G.TooltipDataProcessor then
         TooltipDataProcessor.AddTooltipPostCall(Enum.TooltipDataType.Item, function(self, data)
             if tooltips[self] then
-                ns:ShowItem(select(2, TooltipUtil.GetDisplayedItem(self)), self)
+                OnTooltipSetItem(self)
             end
         end)
     end
@@ -334,43 +335,63 @@ end)
 ----
 
 local _, class = UnitClass("player")
+local class_colored = RAID_CLASS_COLORS[class]:WrapTextInColorCode(class)
+local ATLAS_CHECK, ATLAS_CROSS = "common-icon-checkmark", "common-icon-redx"
+-- ATLAS_CHECK, ATLAS_CROSS = "Tracker-Check", "Objective-Fail" -- Classic
 
+local function AddItemToTooltip(itemInfo, for_tooltip, label)
+    local name, link, quality, _, _, _, _, _, _, icon = C_Item.GetItemInfo(itemInfo)
+    if name then
+        if ns.CanTransmogItem(link) then
+            name = name .. CreateAtlasMarkup(ns.PlayerHasAppearance(link) and ATLAS_CHECK or ATLAS_CROSS)
+        end
+        for_tooltip:AddDoubleLine(
+            label or ITEM_PURCHASED_COLON,
+            "|T" .. icon .. ":0|t " .. name,
+            1, 1, 0,
+            C_Item.GetItemQualityColor(quality)
+        )
+    else
+        for_tooltip:AddDoubleLine(ITEM_PURCHASED_COLON, SEARCH_LOADING_TEXT, 1, 1, 0, 0, 1, 1)
+    end
+end
 function ns:ShowItem(link, for_tooltip)
     if not link then return end
     for_tooltip = for_tooltip or GameTooltip
     local id = tonumber(link:match("item:(%d+)"))
     if not id or id == 0 then return end
     local token = db.tokens and LAT:ItemIsToken(id)
-    local maybelink, _
 
     if token then
         -- It's a set token! Replace the id.
+        -- Testing note: the absolute worst-case is Trophy of the Crusade (47242)
         local found
         for _, itemid in LAT:IterateItemsForTokenAndClass(id, class) do
-            _, maybelink = C_Item.GetItemInfo(itemid)
-            if maybelink then
-                id = itemid
-                link = maybelink
-                found = true
-                break
-            end
+            found = found or itemid
+            AddItemToTooltip(itemid, for_tooltip, class_colored)
         end
-        if not found then
-            for _, tokenclass in LAT:IterateClassesForToken(id) do
+        for _, tokenclass in LAT:IterateClassesForToken(id) do
+            if tokenclass ~= class then
+                local tokenclass_colored = RAID_CLASS_COLORS[tokenclass]:WrapTextInColorCode(tokenclass)
+                local count, knownCount = 0, 0
                 for _, itemid in LAT:IterateItemsForTokenAndClass(id, tokenclass) do
-                    _, maybelink = C_Item.GetItemInfo(itemid)
-                    if maybelink then
-                        id = itemid
-                        link = maybelink
-                        found = true
-                        break
-                    end
+                    count = count + 1
+                    knownCount = knownCount + (ns.PlayerHasAppearance(itemid) and 1 or 0)
+                    found = found or itemid
                 end
-                break
+                -- ITEM_PET_KNOWN = "Collected (%d/%d)"
+                for_tooltip:AddDoubleLine(tokenclass_colored, ITEM_PET_KNOWN:format(knownCount, count),
+                    1, 1, 1,
+                    knownCount == count and 0 or 1, knownCount == count and 1 or 0, 0
+                )
             end
         end
         if found then
-            for_tooltip:AddDoubleLine(ITEM_PURCHASED_COLON, link)
+            local _, maybelink = C_Item.GetItemInfo(found)
+            if maybelink then
+                link = maybelink
+                id = found
+            end
             for_tooltip:Show()
         end
     end
