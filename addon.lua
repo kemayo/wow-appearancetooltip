@@ -366,25 +366,25 @@ function ns:ShowItem(link, for_tooltip)
         -- It's a set token! Replace the id.
         -- Testing note: the absolute worst-case is Trophy of the Crusade (47242)
         local found
-        for _, itemid in LAT:IterateItemsForTokenAndClass(id, class) do
+        local counts = {}
+        local counts_known = {}
+        for itemid, tclass, relevant in LAT:IterateItemsForToken(id) do
             found = found or itemid
-            AddItemToTooltip(itemid, for_tooltip, class_colored)
-        end
-        for _, tokenclass in LAT:IterateClassesForToken(id) do
-            if tokenclass ~= class then
-                local tokenclass_colored = RAID_CLASS_COLORS[tokenclass]:WrapTextInColorCode(tokenclass)
-                local count, knownCount = 0, 0
-                for _, itemid in LAT:IterateItemsForTokenAndClass(id, tokenclass) do
-                    count = count + 1
-                    knownCount = knownCount + (ns.PlayerHasAppearance(itemid) and 1 or 0)
-                    found = found or itemid
-                end
-                -- ITEM_PET_KNOWN = "Collected (%d/%d)"
-                for_tooltip:AddDoubleLine(tokenclass_colored, ITEM_PET_KNOWN:format(knownCount, count),
-                    1, 1, 1,
-                    knownCount == count and 0 or 1, knownCount == count and 1 or 0, 0
-                )
+            if relevant then
+                AddItemToTooltip(itemid, for_tooltip, tclass == class and class_colored or tclass)
+            else
+                counts[tclass] = (counts[tclass] or 0) + 1
+                counts_known[tclass] = (counts_known[tclass] or 0) + (ns.PlayerHasAppearance(itemid) and 1 or 0)
             end
+        end
+        for tclass, count in pairs(counts) do
+            -- ITEM_PET_KNOWN = "Collected (%d/%d)"
+            local label = RAID_CLASS_COLORS[tclass] and RAID_CLASS_COLORS[tclass]:WrapTextInColorCode(tclass) or tclass
+            local complete = counts_known[tclass] == counts[tclass]
+            for_tooltip:AddDoubleLine(label, ITEM_PET_KNOWN:format(counts_known[tclass], counts[tclass]),
+                1, 1, 1,
+                complete and 0 or 1, complete and 1 or 0, 0
+            )
         end
         if found then
             local _, maybelink = C_Item.GetItemInfo(found)
