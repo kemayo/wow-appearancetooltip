@@ -47,6 +47,7 @@ function tooltip:ADDON_LOADED(addon)
         anchor = "vertical", -- vertical / horizontal
         byComparison = true, -- whether to show by the comparison, or fall back to vertical if needed
         tokens = true, -- try to preview tokens?
+        learnable = true, -- show for other learnable items (toys, mounts)
         bags = true,
         bags_unbound = true,
         merchant = true,
@@ -607,12 +608,21 @@ local brokenItems = {
 -- /dump C_TransmogCollection.GetAppearanceInfoBySource(select(2, C_TransmogCollection.GetItemInfo("")))
 function ns.PlayerHasAppearance(itemLinkOrID)
     -- hasAppearance, appearanceFromOtherItem
-    local itemID = C_Item.GetItemInfoInstant(itemLinkOrID)
+    local itemID, _, _, _, _, classID, subclassID = C_Item.GetItemInfoInstant(itemLinkOrID)
     if not itemID then return end
     local probablyEnsemble = IsDressableItem(itemID) and not C_Item.IsEquippableItem(itemID)
     if probablyEnsemble then
         -- *not* ERR_COSMETIC_KNOWN which is "Item Known"
         return ns.CheckTooltipFor(itemID, ITEM_SPELL_KNOWN), false, true
+    end
+    if db.learnable then
+        if C_MountJournal and classID == Enum.ItemClass.Miscellaneous and subclassID == Enum.ItemMiscellaneousSubclass.Mount then
+            local mountID = C_MountJournal.GetMountFromItem(itemID)
+            return mountID and (select(11, C_MountJournal.GetMountInfoByID(mountID))), false, true
+        end
+        if C_ToyBox and C_ToyBox.GetToyInfo(itemID)  then
+            return PlayerHasToy(itemID), false, true
+        end
     end
     local appearanceID, sourceID = C_TransmogCollection.GetItemInfo(itemLinkOrID)
     if not appearanceID then

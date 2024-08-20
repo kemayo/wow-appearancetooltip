@@ -59,6 +59,25 @@ local function PrepareItemButton(button, point, offsetx, offsety)
 
     overlayFrame:Hide()
 end
+local function IsRelevantItem(link)
+    if ns.db.learnable then
+        local itemID = C_Item.GetItemInfoInstant(link)
+        if C_ToyBox and C_ToyBox.GetToyInfo(itemID) then
+            return true
+        end
+        if C_MountJournal and C_MountJournal.GetMountFromItem(itemID) then
+            return true
+        end
+    end
+    return IsDressableItem(link)
+end
+local function OverlayShouldApplyToItem(link, hasAppearance, appearanceFromOtherItem, probablyEnsemble)
+    local appropriateItem = LAI:IsAppropriate(link) or probablyEnsemble
+    return (not hasAppearance or appearanceFromOtherItem) and
+        (not ns.db.currentClass or appropriateItem) and
+        IsRelevantItem(link) and
+        (ns.CanTransmogItem(link) or probablyEnsemble)
+end
 local function UpdateOverlay(button, link, ...)
     if not link then
         if button.appearancetooltipoverlay then
@@ -67,18 +86,12 @@ local function UpdateOverlay(button, link, ...)
         return false
     end
     local hasAppearance, appearanceFromOtherItem, probablyEnsemble = ns.PlayerHasAppearance(link)
-    local appropriateItem = LAI:IsAppropriate(link) or probablyEnsemble
     -- ns.Debug("Considering item", link, hasAppearance, appearanceFromOtherItem, appropriateItem, probablyEnsemble)
-    if
-        (not hasAppearance or appearanceFromOtherItem) and
-        (not ns.db.currentClass or appropriateItem) and
-        IsDressableItem(link) and
-        (ns.CanTransmogItem(link) or probablyEnsemble)
-    then
+    if OverlayShouldApplyToItem(link, hasAppearance, appearanceFromOtherItem, probablyEnsemble) then
         PrepareItemButton(button, ...)
         button.appearancetooltipoverlay.icon:Hide()
         button.appearancetooltipoverlay.iconInappropriate:Hide()
-        if appropriateItem then
+        if LAI:IsAppropriate(link) or probablyEnsemble then
             button.appearancetooltipoverlay.icon:Show()
             if appearanceFromOtherItem then
                 -- blue eye
