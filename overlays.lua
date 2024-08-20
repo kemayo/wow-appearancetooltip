@@ -60,13 +60,16 @@ local function PrepareItemButton(button, point, offsetx, offsety)
     overlayFrame:Hide()
 end
 local function IsRelevantItem(link)
+    if not link then return end
     if ns.db.learnable then
         local itemID = C_Item.GetItemInfoInstant(link)
-        if C_ToyBox and C_ToyBox.GetToyInfo(itemID) then
-            return true
-        end
-        if C_MountJournal and C_MountJournal.GetMountFromItem(itemID) then
-            return true
+        if itemID then
+            if C_ToyBox and C_ToyBox.GetToyInfo(itemID) then
+                return true
+            end
+            if C_MountJournal and C_MountJournal.GetMountFromItem(itemID) then
+                return true
+            end
         end
     end
     return IsDressableItem(link)
