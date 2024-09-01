@@ -6,7 +6,7 @@ local GetScreenHeight = GetScreenHeight
 
 local setDefaults, db
 
-local LAT = LibStub("LibArmorToken-1.0")
+local LAT = LibStub("LibArmorToken-1.0", true)
 local LAI = LibStub("LibAppropriateItems-1.0")
 
 -- minor compat:
@@ -136,7 +136,7 @@ classwarning:Show()
 -- Ye showing:
 do
     local function GetTooltipItem(tip)
-        if _G.TooltipDataProcessor then
+        if _G.C_TooltipInfo then
             return TooltipUtil.GetDisplayedItem(tip)
         end
         return tip:GetItem()
@@ -154,14 +154,15 @@ do
         if (not tip) or tooltips[tip] then
             return
         end
-        if not _G.TooltipDataProcessor then
+        if not _G.C_TooltipInfo then
             tip:HookScript("OnTooltipSetItem", OnTooltipSetItem)
         end
         tip:HookScript("OnHide", OnHide)
         tooltips[tip] = tip
     end
 
-    if _G.TooltipDataProcessor then
+    if _G.C_TooltipInfo then
+        -- Cata-classic has TooltipDataProcessor, but doesn't actually use the new tooltips
         TooltipDataProcessor.AddTooltipPostCall(Enum.TooltipDataType.Item, function(self, data)
             if tooltips[self] then
                 OnTooltipSetItem(self)
@@ -170,7 +171,9 @@ do
     end
 
     ns.RegisterTooltip(GameTooltip)
-    ns.RegisterTooltip(GameTooltip.ItemTooltip.Tooltip)
+    if GameTooltip.ItemTooltip then
+        ns.RegisterTooltip(GameTooltip.ItemTooltip.Tooltip)
+    end
 end
 
 ----
@@ -316,7 +319,7 @@ hider:Hide()
 local shouldHide = function(owner)
     if not owner then return true end
     if not owner:IsShown() then return true end
-    if _G.TooltipDataProcessor then
+    if _G.C_TooltipInfo then
         if not TooltipUtil.GetDisplayedItem(owner) then return true end
     else
         if not owner:GetItem() then return true end
@@ -338,7 +341,6 @@ end)
 local _, class = UnitClass("player")
 local class_colored = RAID_CLASS_COLORS[class]:WrapTextInColorCode(class)
 local ATLAS_CHECK, ATLAS_CROSS = "common-icon-checkmark", "common-icon-redx"
--- ATLAS_CHECK, ATLAS_CROSS = "Tracker-Check", "Objective-Fail" -- Classic
 
 local function AddItemToTooltip(itemInfo, for_tooltip, label)
     local name, link, quality, _, _, _, _, _, _, icon = C_Item.GetItemInfo(itemInfo)
@@ -361,7 +363,7 @@ function ns:ShowItem(link, for_tooltip)
     for_tooltip = for_tooltip or GameTooltip
     local id = tonumber(link:match("item:(%d+)"))
     if not id or id == 0 then return end
-    local token = db.tokens and LAT:ItemIsToken(id)
+    local token = db.tokens and LAT and LAT:ItemIsToken(id)
 
     if token then
         -- It's a set token! Replace the id.
