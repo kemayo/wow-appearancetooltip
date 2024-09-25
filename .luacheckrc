@@ -29,6 +29,7 @@ read_globals = {
     "max",
     "table", "tinsert", "wipe", "copy",
     "string", "tostringall", "strtrim", "strmatch",
+    "pcall", "xpcall", "geterrorhandler",
 
     -- our own globals
 

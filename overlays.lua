@@ -12,14 +12,14 @@ f:SetScript("OnEvent", function(self, event, ...) if f[event] then return f[even
 local hooks = {}
 function f:RegisterAddonHook(addon, callback)
     if C_AddOns.IsAddOnLoaded(addon) then
-        callback()
+        xpcall(callback, geterrorhandler())
     else
         hooks[addon] = callback
     end
 end
 function f:ADDON_LOADED(addon)
     if hooks[addon] then
-        hooks[addon]()
+        xpcall(hooks[addon], geterrorhandler())
         hooks[addon] = nil
     end
 end
