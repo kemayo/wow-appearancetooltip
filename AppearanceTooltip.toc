@@ -21,3 +21,4 @@ cameraids.lua
 config.lua
 
 overlays.lua
+alerts.lua

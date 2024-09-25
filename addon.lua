@@ -54,6 +54,7 @@ function tooltip:ADDON_LOADED(addon)
         loot = true,
         encounterjournal = true,
         setjournal = true,
+        alerts = true,
         appearances_known = {},
     })
     db = _G[myname.."DB"]

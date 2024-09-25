@@ -126,6 +126,7 @@ do
     local currentClass = newCheckbox(panel, 'currentClass', 'Current character only', "Only show previews on items that the current character can collect")
     local byComparison = newCheckbox(panel, 'byComparison', 'Show by comparison tooltip', "If the comparison tooltip is shown where the preview would want to be, show next to it (this makes it *much* less likely you'll have the preview overlap your cursor)")
     local tokens = newCheckbox(panel, 'tokens', 'Previews for tokens', "Show previews for the items which various tokens can be turned in for when mousing over the token")
+    local alerts = newCheckbox(panel, 'alerts', 'Alert when you learn a new appearance', "Show an alert popup for every new appearance that you learn (like the ones that otherwise only show when you buy something at the Trading Post)")
 
     local zoomWorn = newCheckbox(panel, 'zoomWorn', 'Zoom on worn items', "Zoom in on the part of your model which wears the item")
     local zoomHeld = newCheckbox(panel, 'zoomHeld', 'Zoom on held items', "Zoom in on the held item being previewed, without seeing your character")
@@ -189,7 +190,8 @@ do
     uncover:SetPoint("TOPLEFT", dressed, "BOTTOMLEFT", 0, -4)
     tokens:SetPoint("TOPLEFT", uncover, "BOTTOMLEFT", 0, -4)
     notifyKnown:SetPoint("TOPLEFT", tokens, "BOTTOMLEFT", 0, -4)
-    currentClass:SetPoint("TOPLEFT", notifyKnown, "BOTTOMLEFT", 0, -4)
+    alerts:SetPoint("TOPLEFT", notifyKnown, "BOTTOMLEFT", 0, -4)
+    currentClass:SetPoint("TOPLEFT", alerts, "BOTTOMLEFT", 0, -4)
     mousescroll:SetPoint("TOPLEFT", currentClass, "BOTTOMLEFT", 0, -4)
     spin:SetPoint("TOPLEFT", mousescroll, "BOTTOMLEFT", 0, -4)
 

@@ -132,6 +132,8 @@ read_globals = {
     "ContainerFrameContainer",
     "ContainerFrameCombinedBags",
     "EncounterJournal",
+    "PerksProgramFrame",
+    "NewCosmeticAlertFrameSystem",
 
     -- FrameXML API
     "CreateAtlasMarkup",
@@ -152,6 +154,8 @@ read_globals = {
     "TooltipDataProcessor",
     "TooltipUtil",
     "Settings",
+    "EventRegistry",
+    "EventUtil",
 
     -- FrameXML Constants
     "BACKPACK_CONTAINER",
