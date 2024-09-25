@@ -41,6 +41,7 @@ local fallback_races = {
     Vulpera = "Goblin", -- Vulpera -> Goblin
     ZandalariTroll = "Troll", -- Zandalari -> Troll
     DarkIronDwarf = "Dwarf", -- Dark Iron -> Dwarf
+    Earthen = "Dwarf", -- Earthen -> Dwarf
     Dracthyr = {"BloodElf", "Human"}, -- Dracthyr -> male Draenei / female Human
 }
 local genders = {
@@ -129,7 +130,7 @@ function ns:GetCameraID(itemLinkOrID, raceID, genderID)
     return slots_to_cameraids[key], itemcamera
 end
 
--- https://wow.tools/dbc/?dbc=uicamera
+-- https://wago.tools/db2/UiCamera
 -- Transmog-[race]-[gender]-[slot]
 slots_to_cameraids = {
     -- the 1h/2h have names altered to fit with the Enum.ItemWeaponSubclass names
@@ -243,6 +244,26 @@ slots_to_cameraids = {
     ["Dwarf-Male-Tabard"] = 368,
     ["Dwarf-Male-Waist"] = 371,
     ["Dwarf-Male-Wrist"] = 369,
+    ["Earthen-Female-Head"] = 1820,
+    ["Earthen-Female-Shoulder"] = 1821,
+    ["Earthen-Female-Shoulder-Alt"] = 1822,
+    ["Earthen-Female-Shirt"] = 1823,
+    ["Earthen-Female-Tabard"] = 1824,
+    ["Earthen-Female-Wrist"] = 1825,
+    ["Earthen-Female-Hands"] = 1826,
+    ["Earthen-Female-Back-Backpack"] = 1827,
+    ["Earthen-Female-Legs"] = 1828,
+    ["Earthen-Male-Head"] = 1829,
+    ["Earthen-Male-Shoulder"] = 1830,
+    ["Earthen-Male-Shoulder-Alt"] = 1831,
+    ["Earthen-Male-Back-Backpack"] = 1832,
+    ["Earthen-Male-Shirt"] = 1833,
+    ["Earthen-Male-Tabard"] = 1834,
+    ["Earthen-Male-Wrist"] = 1835,
+    ["Earthen-Male-Wrist-Alt"] = 1836,
+    ["Earthen-Male-Hands"] = 1837,
+    ["Earthen-Male-Legs"] = 1838,
+    ["Earthen-Male-Feet"] = 1839,
     ["Gnome-Female-Back"] = 401,
     ["Gnome-Female-Back-Backpack"] = 1496,
     ["Gnome-Female-Feet"] = 409,
