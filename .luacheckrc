@@ -42,6 +42,7 @@ read_globals = {
     -- API functions
     "C_AddOns",
     "C_CVar",
+    "C_ContentTracking",
     "C_EncounterJournal",
     "C_Item",
     "C_MountJournal",
