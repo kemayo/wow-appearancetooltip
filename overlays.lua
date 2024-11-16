@@ -168,15 +168,24 @@ end)
 -- Merchant frame
 
 hooksecurefunc("MerchantFrame_Update", function()
-    for i = 1, MERCHANT_ITEMS_PER_PAGE do
+    local limit, infoFunc
+    if MerchantFrame.selectedTab == 1 then
+        limit = MERCHANT_ITEMS_PER_PAGE
+        infoFunc = GetMerchantItemLink
+    else
+        limit = BUYBACK_ITEMS_PER_PAGE
+        infoFunc = GetBuybackItemLink
+    end
+    for i = 1, limit do
         local frame = _G["MerchantItem"..i.."ItemButton"]
         if frame then
             if frame.appearancetooltipoverlay then frame.appearancetooltipoverlay:Hide() end
             if not ns.db.merchant then
                 return
             end
-            if frame.link then
-                UpdateOverlay(frame, frame.link)
+            local link = infoFunc(frame:GetID())
+            if link then
+                UpdateOverlay(frame, link)
             end
         end
     end
