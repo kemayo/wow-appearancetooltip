@@ -23,8 +23,6 @@ tooltip:SetScript("OnEvent", function(self, event, ...)
 end)
 tooltip:RegisterEvent("ADDON_LOADED")
 tooltip:RegisterEvent("PLAYER_LOGIN")
-tooltip:RegisterEvent("PLAYER_REGEN_DISABLED")
-tooltip:RegisterEvent("PLAYER_REGEN_ENABLED")
 
 function tooltip:ADDON_LOADED(addon)
     if addon ~= myname then return end
