@@ -72,29 +72,39 @@ function tooltip:PLAYER_LOGIN()
     C_CVar.SetCVar("missingTransmogSourceInItemTooltips", "1")
 end
 
-function tooltip:PLAYER_REGEN_ENABLED()
-    if self:IsShown() and db.mousescroll then
-        SetOverrideBinding(tooltip, true, "MOUSEWHEELUP", "AppearanceKnown_TooltipScrollUp")
-        SetOverrideBinding(tooltip, true, "MOUSEWHEELDOWN", "AppearanceKnown_TooltipScrollDown")
+do
+    local scrollup = CreateFrame("Button", "AppearanceTooltipScrollUpButton", tooltip)
+    scrollup:SetScript("OnClick", function(self, button, down)
+        tooltip.activeModel:SetFacing(tooltip.activeModel:GetFacing() + 0.3)
+    end)
+    local scrolldown = CreateFrame("Button", "AppearanceTooltipScrollDownButton", tooltip)
+    scrolldown:SetScript("OnClick", function(self, button, down)
+        tooltip.activeModel:SetFacing(tooltip.activeModel:GetFacing() - 0.3)
+    end)
+
+    local function ClearBindings()
+        if InCombatLockdown() then return end
+        ClearOverrideBindings(tooltip)
     end
+
+    function tooltip:UpdateMouseBinding(event, unit)
+        if InCombatLockdown() then return end
+        if db.mousescroll and (event ~= "PLAYER_REGEN_DISABLED") and tooltip:IsVisible() then
+            SetOverrideBindingClick(tooltip, true, "MOUSEWHEELUP", scrollup:GetName())
+            SetOverrideBindingClick(tooltip, true, "MOUSEWHEELDOWN", scrolldown:GetName())
+        else
+            ClearOverrideBindings(tooltip)
+        end
+    end
+
+    local frame = CreateFrame("Frame", nil, tooltip)
+    frame:SetScript("OnShow", tooltip.UpdateMouseBinding)
+    frame:SetScript("OnHide", ClearBindings)
+
+    frame:SetScript("OnEvent", tooltip.UpdateMouseBinding)
+    frame:RegisterEvent("PLAYER_REGEN_ENABLED")
+    frame:RegisterEvent("PLAYER_REGEN_DISABLED")
 end
-
-function tooltip:PLAYER_REGEN_DISABLED()
-    ClearOverrideBindings(tooltip)
-end
-
-tooltip:SetScript("OnShow", function(self)
-    if db.mousescroll and not InCombatLockdown() then
-        SetOverrideBinding(tooltip, true, "MOUSEWHEELUP", "AppearanceKnown_TooltipScrollUp")
-        SetOverrideBinding(tooltip, true, "MOUSEWHEELDOWN", "AppearanceKnown_TooltipScrollDown")
-    end
-end);
-
-tooltip:SetScript("OnHide",function(self)
-    if not InCombatLockdown() then
-        ClearOverrideBindings(tooltip);
-    end
-end)
 
 local function makeModel()
     local model = CreateFrame("DressUpModel", nil, tooltip)

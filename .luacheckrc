@@ -110,6 +110,7 @@ read_globals = {
     "PlaySound",
     "QueryGuildBankTab",
     "SetOverrideBinding",
+    "SetOverrideBindingClick",
     "SplitContainerItem",
     "SplitGuildBankItem",
     "UnitClass",
