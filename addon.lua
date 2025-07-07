@@ -417,22 +417,21 @@ function ns:ShowItem(link, for_tooltip)
         local appropriateItem = LAI:IsAppropriate(id)
 
         if self.slot_facings[slot] and IsDressableItem(id) and (not db.currentClass or appropriateItem) then
-            local model
-            local cameraID, itemCamera
-            if db.zoomWorn or db.zoomHeld then
-                cameraID, itemCamera = self:GetCameraID(id, db.customModel and db.modelRace, db.customModel and db.modelGender)
-            end
+            local model, cameraID
+            local isHeld = self.slot_held[slot]
+            local appearanceID = C_TransmogCollection.GetItemInfo(link) or C_TransmogCollection.GetItemInfo(id)
 
             tooltip.model:Hide()
             tooltip.modelZoomed:Hide()
             tooltip.modelWeapon:Hide()
 
-            local shouldZoom = (db.zoomHeld and cameraID and itemCamera) or (db.zoomWorn and cameraID and not itemCamera)
+            if (db.zoomWorn and not isHeld) or (db.zoomHeld and isHeld) then
+                cameraID = appearanceID and C_TransmogCollection.GetAppearanceCameraID(appearanceID)
+            end
 
-            if shouldZoom then
-                if itemCamera then
+            if cameraID then
+                if isHeld then
                     model = tooltip.modelWeapon
-                    local appearanceID = C_TransmogCollection.GetItemInfo(link)
                     if appearanceID then
                         model:SetItemAppearance(appearanceID)
                     else
@@ -592,6 +591,17 @@ ns.slot_facings = {
     INVTYPE_BODY = 0,
     -- for ensembles, which are dressable but non-equipable
     INVTYPE_NON_EQUIP_IGNORE = 0,
+}
+
+ns.slot_held = {
+    INVTYPE_2HWEAPON = true,
+    INVTYPE_WEAPON = true,
+    INVTYPE_WEAPONMAINHAND = true,
+    INVTYPE_WEAPONOFFHAND = true,
+    INVTYPE_RANGED = true,
+    INVTYPE_RANGEDRIGHT = true,
+    INVTYPE_HOLDABLE = true,
+    INVTYPE_SHIELD = true,
 }
 
 ns.modifiers = {
