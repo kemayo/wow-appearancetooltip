@@ -20,7 +20,7 @@ local function checkboxOnEnter(self)
 end
 
 local function newCheckbox(parent, key, label, description, getValue, setValue)
-    local check = CreateFrame("CheckButton", "AppearanceTooltipOptionsCheck" .. key, parent, "InterfaceOptionsCheckButtonTemplate")
+    local check = CreateFrame("CheckButton", "AppearanceTooltipOptionsCheck" .. key, parent, "OptionsBaseCheckButtonTemplate")
 
     check.key = key
     check.GetValue = getValue or checkboxGetValue
@@ -131,6 +131,13 @@ do
     local zoomWorn = newCheckbox(panel, 'zoomWorn', 'Zoom on worn items', "Zoom in on the part of your model which wears the item")
     local zoomHeld = newCheckbox(panel, 'zoomHeld', 'Zoom on held items', "Zoom in on the held item being previewed, without seeing your character")
     local zoomMasked = newCheckbox(panel, 'zoomMasked', 'Mask out model while zoomed', "Hide the details of your player model while you're zoomed (like the transmog wardrobe does)")
+
+    if WOW_PROJECT_ID == WOW_PROJECT_CLASSIC then
+        -- C_TransmogCollection.GetAppearanceCameraID doesn't return anything useful in Classic Era
+        zoomWorn:SetEnabled(false)
+        zoomHeld:SetEnabled(false)
+        zoomMasked:SetEnabled(false)
+    end
 
     local modifier = newDropdown(panel, 'modifier', "Show preview with modifier key", {
         Alt = "Alt",

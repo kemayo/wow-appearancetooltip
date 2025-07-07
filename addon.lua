@@ -427,6 +427,8 @@ function ns:ShowItem(link, for_tooltip)
 
             if (db.zoomWorn and not isHeld) or (db.zoomHeld and isHeld) then
                 cameraID = appearanceID and C_TransmogCollection.GetAppearanceCameraID(appearanceID)
+                -- Classic Era always returns 0, in which case a non-truthy value gets better results:
+                if cameraID == 0 then cameraID = nil end
             end
 
             if cameraID then
