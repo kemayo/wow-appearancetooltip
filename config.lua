@@ -135,7 +135,6 @@ do
     if WOW_PROJECT_ID == WOW_PROJECT_CLASSIC then
         -- C_TransmogCollection.GetAppearanceCameraID doesn't return anything useful in Classic Era
         zoomWorn:SetEnabled(false)
-        zoomHeld:SetEnabled(false)
         zoomMasked:SetEnabled(false)
     end
 
