@@ -383,6 +383,7 @@ function ns:ShowItem(link, for_tooltip)
         for itemid, tclass, relevant in LAT:IterateItemsForToken(id) do
             found = found or itemid
             if relevant then
+                found = itemid -- make *sure* the item shown is a relevant one, if one exists
                 AddItemToTooltip(itemid, for_tooltip, tclass == class and class_colored or tclass)
             else
                 counts[tclass] = (counts[tclass] or 0) + 1
