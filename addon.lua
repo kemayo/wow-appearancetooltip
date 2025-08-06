@@ -53,7 +53,6 @@ function tooltip:ADDON_LOADED(addon)
         encounterjournal = true,
         setjournal = true,
         alerts = true,
-        appearances_known = {},
     })
     db = _G[myname.."DB"]
     ns.db = db
