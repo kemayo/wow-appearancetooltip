@@ -159,12 +159,31 @@ else
     end
 end
 
+-- Main bank frame, bankbags are covered by containerframe above
 if _G.BankFrameItemButton_Update then
+    -- pre-11.2.0 bank
     hooksecurefunc("BankFrameItemButton_Update", function(button)
         if not button.isBag then
             UpdateContainerButton(button, -1)
         end
     end)
+end
+
+do
+    local function hookBankPanel(panel)
+        if not panel then return end
+        local update = function(frame)
+            for itemButton in frame:EnumerateValidItems() do
+                UpdateContainerButton(itemButton, itemButton:GetBankTabID(), itemButton:GetContainerSlotID())
+            end
+        end
+        -- Initial load and switching tabs
+        hooksecurefunc(panel, "GenerateItemSlotsForSelectedTab", update)
+        -- Moving items
+        hooksecurefunc(panel, "RefreshAllItemsForSelectedTab", update)
+    end
+    hookBankPanel(_G.BankPanel) -- added in 11.2.0
+    hookBankPanel(_G.AccountBankPanel) -- removed in 11.2.0
 end
 
 -- Merchant frame
