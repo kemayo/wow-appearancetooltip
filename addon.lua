@@ -12,6 +12,9 @@ local LAI = LibStub("LibAppropriateItems-1.0")
 -- minor compat:
 local IsDressableItem = _G.IsDressableItem or C_Item.IsDressableItemByID
 
+ns.CLASSIC = WOW_PROJECT_ID ~= WOW_PROJECT_MAINLINE -- rolls forward
+ns.CLASSICERA = WOW_PROJECT_ID == WOW_PROJECT_CLASSIC -- forever vanilla
+
 local tooltip = CreateFrame("Frame", "AppearanceTooltipTooltip", UIParent, "TooltipBorderedFrameTemplate")
 tooltip:SetClampedToScreen(true)
 tooltip:SetFrameStrata("TOOLTIP")
@@ -45,7 +48,7 @@ function tooltip:ADDON_LOADED(addon)
         anchor = "vertical", -- vertical / horizontal
         byComparison = true, -- whether to show by the comparison, or fall back to vertical if needed
         tokens = true, -- try to preview tokens?
-        learnable = true, -- show for other learnable items (toys, mounts)
+        learnable = true, -- show for other learnable items (toys, mounts, pets)
         bags = true,
         bags_unbound = true,
         merchant = true,
@@ -617,7 +620,7 @@ ns.modifiers = {
 
 -- Utility fun
 
---/dump C_Transmog.GetItemInfo(C_Item.GetItemInfoInstant(""))
+--/dump C_Transmog.CanTransmogItem(C_Item.GetItemInfoInstant(""))
 function ns.CanTransmogItem(itemLink)
     local itemID = C_Item.GetItemInfoInstant(itemLink)
     if itemID then
@@ -643,12 +646,18 @@ function ns.PlayerHasAppearance(itemLinkOrID)
         return ns.CheckTooltipFor(itemID, ITEM_SPELL_KNOWN), false, true
     end
     if db.learnable then
-        if C_MountJournal and classID == Enum.ItemClass.Miscellaneous and subclassID == Enum.ItemMiscellaneousSubclass.Mount then
-            local mountID = C_MountJournal.GetMountFromItem(itemID)
+        if classID == Enum.ItemClass.Miscellaneous and subclassID == Enum.ItemMiscellaneousSubclass.Mount then
+            if ns.CLASSICERA then return GetItemCount(itemID, true) > 0 end
+            local mountID = C_MountJournal and C_MountJournal.GetMountFromItem(itemID)
             return mountID and (select(11, C_MountJournal.GetMountInfoByID(mountID))), false, true
         end
         if C_ToyBox and C_ToyBox.GetToyInfo(itemID)  then
             return PlayerHasToy(itemID), false, true
+        end
+        if classID == Enum.ItemClass.Miscellaneous and subclassID == Enum.ItemMiscellaneousSubclass.CompanionPet then
+            if ns.CLASSICERA then return GetItemCount(itemID, true) > 0 end
+            local petID = C_PetJournal and select(13, C_PetJournal.GetPetInfoByItemID(itemID))
+            return petID and C_PetJournal.GetNumCollectedInfo(petID) > 0, false, true
         end
     end
     local appearanceID, sourceID = C_TransmogCollection.GetItemInfo(itemLinkOrID)

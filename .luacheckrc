@@ -46,6 +46,7 @@ read_globals = {
     "C_EncounterJournal",
     "C_Item",
     "C_MountJournal",
+    "C_PetJournal",
     "C_PlayerInfo",
     "C_Timer",
     "C_TooltipInfo",
@@ -86,6 +87,7 @@ read_globals = {
     "GetInventoryItemQuality",
     "GetInventorySlotInfo",
     "GetItemClassInfo",
+    "GetItemCount",
     "GetItemFamily",
     "GetItemInfo",
     "GetItemInfoInstant",
@@ -218,4 +220,5 @@ read_globals = {
     "YES",
     "WOW_PROJECT_ID",
     "WOW_PROJECT_CLASSIC",
+    "WOW_PROJECT_MAINLINE",
 }

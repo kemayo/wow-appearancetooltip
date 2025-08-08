@@ -70,6 +70,10 @@ local function IsRelevantItem(link)
             if C_MountJournal and C_MountJournal.GetMountFromItem(itemID) then
                 return true
             end
+            local petID = C_PetJournal and select(13, C_PetJournal.GetPetInfoByItemID(itemID))
+            if petID then
+                return true
+            end
         end
     end
     return IsDressableItem(link)
