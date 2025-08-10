@@ -50,7 +50,7 @@ function tooltip:ADDON_LOADED(addon)
         tokens = true, -- try to preview tokens?
         learnable = true, -- show for other learnable items (toys, mounts, pets)
         bags = true,
-        bags_unbound = true,
+        bags_unbound = ns.CLASSIC,
         merchant = true,
         loot = true,
         encounterjournal = true,
