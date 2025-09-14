@@ -1,7 +1,11 @@
 local myname, ns = ...
 local myfullname = C_AddOns.GetAddOnMetadata(myname, "Title")
 
+
 EventRegistry:RegisterFrameEventAndCallback("TRANSMOG_COLLECTION_SOURCE_ADDED", function(_, itemModifiedAppearanceID)
+    if not _G.NewCosmeticAlertFrameSystem then
+        return
+    end
     -- print("TRANSMOG_COLLECTION_SOURCE_ADDED", itemModifiedAppearanceID, C_ContentTracking.IsTracking(Enum.ContentTrackingType.Appearance, itemModifiedAppearanceID))
     if not ns.db.alerts then
         return
