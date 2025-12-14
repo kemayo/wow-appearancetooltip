@@ -624,8 +624,17 @@ ns.modifiers = {
 function ns.CanTransmogItem(itemLink)
     local itemID = C_Item.GetItemInfoInstant(itemLink)
     if itemID then
-        local canBeChanged, noChangeReason, canBeSource, noSourceReason = C_Transmog.CanTransmogItem(itemID)
-        return canBeSource, noSourceReason
+        if C_Transmog.CanTransmogItem then
+            local canBeChanged, noChangeReason, canBeSource, noSourceReason = C_Transmog.CanTransmogItem(itemID)
+            return canBeSource, noSourceReason
+        else
+            -- Midnight
+            local appearanceID, sourceID = C_TransmogCollection.GetItemInfo(itemLink)
+            if sourceID then
+                local info = C_TransmogCollection.GetSourceInfo(sourceID)
+                return info and info.playerCanCollect -- info.isValidSourceForPlayer also exists, seems to be whether the player could actually transmog it
+            end
+        end
     end
 end
 
