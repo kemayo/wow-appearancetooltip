@@ -11,6 +11,7 @@ local LAI = LibStub("LibAppropriateItems-1.0")
 
 -- minor compat:
 local IsDressableItem = _G.IsDressableItem or C_Item.IsDressableItemByID
+local issecretvalue = _G.issecretvalue or function() return false end
 
 ns.CLASSIC = WOW_PROJECT_ID ~= WOW_PROJECT_MAINLINE -- rolls forward
 ns.CLASSICERA = WOW_PROJECT_ID == WOW_PROJECT_CLASSIC -- forever vanilla
@@ -236,7 +237,7 @@ do
         -- If comparison tooltips are shown, we shouldn't overlap them
         local originalOwner = owner
         local x, y = owner:GetCenter()
-        if not (x and y) then
+        if not (x and y) or issecretvalue(x) then
             return
         end
         x = x * owner:GetEffectiveScale()
