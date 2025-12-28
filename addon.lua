@@ -107,27 +107,34 @@ do
     frame:RegisterEvent("PLAYER_REGEN_DISABLED")
 end
 
-local function makeModel()
-    local model = CreateFrame("DressUpModel", nil, tooltip)
-    model:SetFrameLevel(1)
-    model:SetPoint("TOPLEFT", tooltip, "TOPLEFT", 5, -5)
-    model:SetPoint("BOTTOMRIGHT", tooltip, "BOTTOMRIGHT", -5, 5)
-    model:SetKeepModelOnHide(true)
-    model:SetScript("OnModelLoaded", function(self, ...)
-        -- Makes sure the zoomed camera is correct, if the model isn't loaded right away
-        if self.cameraID then
-            Model_ApplyUICamera(self, self.cameraID)
-        end
-    end)
-    -- Use the blacked-out model:
-    -- model:SetUseTransmogSkin(true)
-    -- Display in combat pose:
-    -- model:FreezeAnimation(1)
-    return model
+do
+    local function makeModel(frameType, template)
+        local model = CreateFrame(frameType, nil, tooltip, template)
+        model:SetFrameLevel(1)
+        model:SetPoint("TOPLEFT", tooltip, "TOPLEFT", 5, -5)
+        model:SetPoint("BOTTOMRIGHT", tooltip, "BOTTOMRIGHT", -5, 5)
+        return model
+    end
+    local function makeDressUpModel()
+        local model = makeModel("DressUpModel")
+        model:SetKeepModelOnHide(true)
+        model:SetScript("OnModelLoaded", function(self, ...)
+            -- Makes sure the zoomed camera is correct, if the model isn't loaded right away
+            if self.cameraID then
+                Model_ApplyUICamera(self, self.cameraID)
+            end
+        end)
+        -- Use the blacked-out model:
+        -- model:SetUseTransmogSkin(true)
+        -- Display in combat pose:
+        -- model:FreezeAnimation(1)
+        return model
+    end
+    tooltip.model = makeDressUpModel()
+    tooltip.modelZoomed = makeDressUpModel()
+    tooltip.modelWeapon = makeDressUpModel()
+    tooltip.modelScene = makeModel("ModelScene", "PanningModelSceneMixinTemplate")
 end
-tooltip.model = makeModel()
-tooltip.modelZoomed = makeModel()
-tooltip.modelWeapon = makeModel()
 
 local known = tooltip:CreateFontString(nil, "OVERLAY", "GameFontNormal")
 known:SetWordWrap(true)
@@ -412,51 +419,102 @@ function ns:ShowItem(link, for_tooltip)
         end
     end
 
-    local slot = select(9, C_Item.GetItemInfo(id))
-    if (not db.modifier or self.modifiers[db.modifier]()) and tooltip.item ~= id then
-        tooltip.item = id
+    if tooltip.item == id or (db.modifier and not self.modifiers[db.modifier]()) then
+        return
+    end
+    local slot, _, _, classID, subclassID, _, _, setID = select(9, C_Item.GetItemInfo(id))
+    tooltip.item = id
 
-        local appropriateItem = LAI:IsAppropriate(id)
+    local appropriateItem = LAI:IsAppropriate(id)
 
-        if self.slot_facings[slot] and IsDressableItem(id) and (not db.currentClass or appropriateItem) then
-            local model, cameraID
-            local isHeld = self.slot_held[slot]
-            local shouldZoom = (db.zoomWorn and not isHeld) or (db.zoomHeld and isHeld)
-            local appearanceID = C_TransmogCollection.GetItemInfo(link) or C_TransmogCollection.GetItemInfo(id)
+    tooltip.model:Hide()
+    tooltip.modelZoomed:Hide()
+    tooltip.modelWeapon:Hide()
+    tooltip.modelScene:Hide()
 
-            tooltip.model:Hide()
-            tooltip.modelZoomed:Hide()
-            tooltip.modelWeapon:Hide()
+    if self.slot_facings[slot] and IsDressableItem(id) and (not db.currentClass or appropriateItem) then
+        local model, cameraID
+        local isHeld = self.slot_held[slot]
+        local shouldZoom = (db.zoomWorn and not isHeld) or (db.zoomHeld and isHeld)
+        local appearanceID = C_TransmogCollection.GetItemInfo(link) or C_TransmogCollection.GetItemInfo(id)
 
-            if shouldZoom then
-                cameraID = appearanceID and C_TransmogCollection.GetAppearanceCameraID(appearanceID)
-                -- Classic Era always returns 0, in which case a non-truthy value gets better results:
-                if cameraID == 0 then cameraID = nil end
-            end
+        if shouldZoom then
+            cameraID = appearanceID and C_TransmogCollection.GetAppearanceCameraID(appearanceID)
+            -- Classic Era always returns 0, in which case a non-truthy value gets better results:
+            if cameraID == 0 then cameraID = nil end
+        end
 
-            if cameraID then
-                if isHeld then
-                    model = tooltip.modelWeapon
-                else
-                    model = tooltip.modelZoomed
-                    model:SetUseTransmogSkin(db.zoomMasked and slot ~= "INVTYPE_HEAD")
-                    self:ResetModel(model)
-                end
-                model.cameraID = cameraID
-                Model_ApplyUICamera(model, cameraID)
-                -- ApplyUICamera locks the animation, but...
-                model:SetAnimation(0, 0)
+        if cameraID then
+            if isHeld then
+                model = tooltip.modelWeapon
             else
-                model = tooltip.model
-
+                model = tooltip.modelZoomed
+                model:SetUseTransmogSkin(db.zoomMasked and slot ~= "INVTYPE_HEAD")
                 self:ResetModel(model)
             end
-            tooltip.activeModel = model
-            model:Show()
+            model.cameraID = cameraID
+            Model_ApplyUICamera(model, cameraID)
+            -- ApplyUICamera locks the animation, but...
+            model:SetAnimation(0, 0)
+        else
+            model = tooltip.model
 
-            if not cameraID then
-                model:SetFacing(self.slot_facings[slot] - (db.rotate and 0.5 or 0))
+            self:ResetModel(model)
+        end
+        tooltip.activeModel = model
+        model:Show()
+
+        if not cameraID then
+            model:SetFacing(self.slot_facings[slot] - (db.rotate and 0.5 or 0))
+        end
+
+        tooltip:SetParent(for_tooltip)
+        tooltip:Show()
+        tooltip.owner = for_tooltip
+
+        positioner:Show()
+        spinner:SetShown(db.spin)
+
+        if ns.slot_removals[slot] and (ns.always_remove[slot] or db.uncover) then
+            -- 1. If this is a weapon, force-remove the item in the main-hand slot! Otherwise it'll get dressed into the
+            --    off-hand, maybe, depending on things which are more hassle than it's worth to work out.
+            -- 2. Other slots will be entirely covered, making for a useless preview. e.g. shirts.
+            for _, slotid in ipairs(ns.slot_removals[slot]) do
+                if slotid == ns.SLOT_ROBE then
+                    local chest_itemid = GetInventoryItemID("player", ns.SLOT_CHEST)
+                    if chest_itemid and select(4, C_Item.GetItemInfoInstant(chest_itemid)) == 'INVTYPE_ROBE' then
+                        slotid = ns.SLOT_CHEST
+                    end
+                end
+                if slotid > 0 then
+                    model:UndressSlot(slotid)
+                end
             end
+        end
+
+        -- Finally set the item onto the model
+        if isHeld and shouldZoom then
+            if appearanceID then
+                model:SetItemAppearance(appearanceID)
+            else
+                model:SetItem(id)
+            end
+        else
+            model:TryOn(link)
+        end
+    elseif _G.HOUSING_DECOR_OWNED_COUNT_FORMAT and classID == Enum.ItemClass.Housing and subclassID == Enum.ItemHousingSubclass.Decor then
+        -- see: Blizzard_HousingModelPreview
+        local decorInfo = C_HousingCatalog.GetCatalogEntryInfoByItem(id, true)
+        if decorInfo and decorInfo.asset then
+            local modelSceneID = decorInfo.uiModelSceneID or Constants.HousingCatalogConsts.HOUSING_CATALOG_DECOR_MODELSCENEID_DEFAULT
+            local forceSceneChange = true
+            tooltip.modelScene:TransitionToModelSceneID(modelSceneID, CAMERA_TRANSITION_TYPE_IMMEDIATE, CAMERA_MODIFICATION_TYPE_DISCARD, forceSceneChange)
+            local actor = tooltip.modelScene:GetActorByTag("decor");
+            if actor then
+                actor:SetPreferModelCollisionBounds(true)
+                actor:SetModelByFileID(decorInfo.asset)
+            end
+            tooltip.modelScene:Show()
 
             tooltip:SetParent(for_tooltip)
             tooltip:Show()
@@ -464,62 +522,34 @@ function ns:ShowItem(link, for_tooltip)
 
             positioner:Show()
             spinner:SetShown(db.spin)
+        end
+    else
+        tooltip:Hide()
+    end
 
-            if ns.slot_removals[slot] and (ns.always_remove[slot] or db.uncover) then
-                -- 1. If this is a weapon, force-remove the item in the main-hand slot! Otherwise it'll get dressed into the
-                --    off-hand, maybe, depending on things which are more hassle than it's worth to work out.
-                -- 2. Other slots will be entirely covered, making for a useless preview. e.g. shirts.
-                for _, slotid in ipairs(ns.slot_removals[slot]) do
-                    if slotid == ns.SLOT_ROBE then
-                        local chest_itemid = GetInventoryItemID("player", ns.SLOT_CHEST)
-                        if chest_itemid and select(4, C_Item.GetItemInfoInstant(chest_itemid)) == 'INVTYPE_ROBE' then
-                            slotid = ns.SLOT_CHEST
-                        end
-                    end
-                    if slotid > 0 then
-                        model:UndressSlot(slotid)
-                    end
-                end
-            end
+    classwarning:Hide()
+    known:Hide()
 
-            -- Finally set the item onto the model
-            if isHeld and shouldZoom then
-                if appearanceID then
-                    model:SetItemAppearance(appearanceID)
-                else
-                    model:SetItem(id)
-                end
-            else
-                model:TryOn(link)
-            end
+    if db.notifyKnown then
+        local hasAppearance, appearanceFromOtherItem, probablyEnsemble = ns.PlayerHasAppearance(link)
+
+        local label
+        if not ns.CanTransmogItem(link) and not probablyEnsemble then
+            label = "|c00ffff00" .. TRANSMOGRIFY_INVALID_DESTINATION
         else
-            tooltip:Hide()
-        end
-
-        classwarning:Hide()
-        known:Hide()
-
-        if db.notifyKnown then
-            local hasAppearance, appearanceFromOtherItem, probablyEnsemble = ns.PlayerHasAppearance(link)
-
-            local label
-            if not ns.CanTransmogItem(link) and not probablyEnsemble then
-                label = "|c00ffff00" .. TRANSMOGRIFY_INVALID_DESTINATION
-            else
-                if hasAppearance then
-                    if appearanceFromOtherItem then
-                        label = "|TInterface\\RaidFrame\\ReadyCheck-Ready:0|t " .. (TRANSMOGRIFY_TOOLTIP_ITEM_UNKNOWN_APPEARANCE_KNOWN):gsub(', ', ',\n')
-                    else
-                        label = "|TInterface\\RaidFrame\\ReadyCheck-Ready:0|t " .. TRANSMOGRIFY_TOOLTIP_APPEARANCE_KNOWN
-                    end
+            if hasAppearance then
+                if appearanceFromOtherItem then
+                    label = "|TInterface\\RaidFrame\\ReadyCheck-Ready:0|t " .. (TRANSMOGRIFY_TOOLTIP_ITEM_UNKNOWN_APPEARANCE_KNOWN):gsub(', ', ',\n')
                 else
-                    label = "|TInterface\\RaidFrame\\ReadyCheck-NotReady:0|t |cffff0000" .. TRANSMOGRIFY_TOOLTIP_APPEARANCE_UNKNOWN
+                    label = "|TInterface\\RaidFrame\\ReadyCheck-Ready:0|t " .. TRANSMOGRIFY_TOOLTIP_APPEARANCE_KNOWN
                 end
-                classwarning:SetShown(not appropriateItem and not probablyEnsemble)
+            else
+                label = "|TInterface\\RaidFrame\\ReadyCheck-NotReady:0|t |cffff0000" .. TRANSMOGRIFY_TOOLTIP_APPEARANCE_UNKNOWN
             end
-            known:SetText(label)
-            known:Show()
+            classwarning:SetShown(not appropriateItem and not probablyEnsemble)
         end
+        known:SetText(label)
+        known:Show()
     end
 end
 
@@ -668,6 +698,20 @@ function ns.PlayerHasAppearance(itemLinkOrID)
             if ns.CLASSICERA then return GetItemCount(itemID, true) > 0 end
             local petID = C_PetJournal and select(13, C_PetJournal.GetPetInfoByItemID(itemID))
             return petID and C_PetJournal.GetNumCollectedInfo(petID) > 0, false, true
+        end
+        if _G.HOUSING_DECOR_OWNED_COUNT_FORMAT and classID == Enum.ItemClass.Housing and subclassID == Enum.ItemHousingSubclass.Decor then
+            -- not that this should be possible, but:
+            if ns.CLASSICERA then return GetItemCount(itemID, true) > 0 end
+            local pattern = HOUSING_DECOR_OWNED_COUNT_FORMAT:gsub("([%(%)])", "%%%1"):gsub("%%d", "(%%d+)")
+            local info = C_TooltipInfo.GetItemByID(itemID)
+            if info then
+                for _, line in ipairs(info.lines) do
+                    if line.type == Enum.TooltipDataLineType.None and line.leftText and string.match(line.leftText, pattern) then
+                        return true, false, true
+                    end
+                end
+            end
+            return false, false, true
         end
     end
     local appearanceID, sourceID = C_TransmogCollection.GetItemInfo(itemLinkOrID)

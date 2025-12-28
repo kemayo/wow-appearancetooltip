@@ -86,16 +86,21 @@ end
 local function IsRelevantItem(link)
     if not link then return end
     if ns.db.learnable then
-        local itemID = C_Item.GetItemInfoInstant(link)
+        local itemID, _, _, _, _, classID, subclassID = C_Item.GetItemInfoInstant(link)
         if itemID then
             if C_ToyBox and C_ToyBox.GetToyInfo(itemID) then
                 return true
             end
-            if C_MountJournal and C_MountJournal.GetMountFromItem(itemID) then
+            if classID == Enum.ItemClass.Miscellaneous and subclassID == Enum.ItemMiscellaneousSubclass.Mount then
+                -- if C_MountJournal and C_MountJournal.GetMountFromItem(itemID) then
                 return true
             end
-            local petID = C_PetJournal and C_PetJournal.GetPetInfoByItemID and select(13, C_PetJournal.GetPetInfoByItemID(itemID))
-            if petID then
+            if classID == Enum.ItemClass.Miscellaneous and subclassID == Enum.ItemMiscellaneousSubclass.CompanionPet then
+                -- local petID = C_PetJournal and C_PetJournal.GetPetInfoByItemID and select(13, C_PetJournal.GetPetInfoByItemID(itemID))
+                -- if petID then
+                return true
+            end
+            if _G.HOUSING_DECOR_OWNED_COUNT_FORMAT and classID == Enum.ItemClass.Housing and subclassID == Enum.ItemHousingSubclass.Decor then
                 return true
             end
         end
