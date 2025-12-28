@@ -468,12 +468,7 @@ function ns:ShowItem(link, for_tooltip)
             model:SetFacing(self.slot_facings[slot] - (db.rotate and 0.5 or 0))
         end
 
-        tooltip:SetParent(for_tooltip)
-        tooltip:Show()
-        tooltip.owner = for_tooltip
-
-        positioner:Show()
-        spinner:SetShown(db.spin)
+        self:ShowTooltip(for_tooltip)
 
         if ns.slot_removals[slot] and (ns.always_remove[slot] or db.uncover) then
             -- 1. If this is a weapon, force-remove the item in the main-hand slot! Otherwise it'll get dressed into the
@@ -516,12 +511,35 @@ function ns:ShowItem(link, for_tooltip)
             end
             tooltip.modelScene:Show()
 
-            tooltip:SetParent(for_tooltip)
-            tooltip:Show()
-            tooltip.owner = for_tooltip
+            self:ShowTooltip(for_tooltip)
+        end
+    elseif C_MountJournal and classID == Enum.ItemClass.Miscellaneous and subclassID == Enum.ItemMiscellaneousSubclass.Mount then
+        -- see: DressUpFrames.lua
+        local mountID = C_MountJournal.GetMountFromItem(id)
+        if mountID then
+            local creatureDisplayID, _, _, isSelfMount, _, modelSceneID, animID, spellVisualKitID, disablePlayerMountPreview = C_MountJournal.GetMountInfoExtraByID(mountID)
+            if creatureDisplayID then
+                tooltip.modelScene:ClearScene()
+                tooltip.modelScene:SetViewInsets(0, 0, 0, 0)
+                local forceEvenIfSame = true
+                tooltip.modelScene:TransitionToModelSceneID(modelSceneID, CAMERA_TRANSITION_TYPE_IMMEDIATE, CAMERA_MODIFICATION_TYPE_DISCARD, forceEvenIfSame)
 
-            positioner:Show()
-            spinner:SetShown(db.spin)
+                local mountActor = tooltip.modelScene:GetActorByTag("unwrapped")
+                if mountActor then
+                    mountActor:SetModelByCreatureDisplayID(creatureDisplayID)
+                end
+                if (isSelfMount) then
+                    mountActor:SetAnimationBlendOperation(Enum.ModelBlendOperation.None)
+                    mountActor:SetAnimation(618) -- MountSelfIdle
+                else
+                    mountActor:SetAnimationBlendOperation(Enum.ModelBlendOperation.Anim)
+                    mountActor:SetAnimation(0)
+                end
+                tooltip.modelScene:AttachPlayerToMount(mountActor, animID, isSelfMount, disablePlayerMountPreview)
+                tooltip.modelScene:Show()
+
+                self:ShowTooltip(for_tooltip)
+            end
         end
     else
         tooltip:Hide()
@@ -551,6 +569,14 @@ function ns:ShowItem(link, for_tooltip)
         known:SetText(label)
         known:Show()
     end
+end
+function ns:ShowTooltip(for_tooltip)
+    tooltip:SetParent(for_tooltip)
+    tooltip:Show()
+    tooltip.owner = for_tooltip
+
+    positioner:Show()
+    spinner:SetShown(db.spin)
 end
 
 function ns:HideItem()
