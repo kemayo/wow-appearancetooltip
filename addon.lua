@@ -513,7 +513,7 @@ function ns:ShowItem(link, for_tooltip)
 
             self:ShowTooltip(for_tooltip)
         end
-    elseif C_MountJournal and classID == Enum.ItemClass.Miscellaneous and subclassID == Enum.ItemMiscellaneousSubclass.Mount then
+    elseif C_MountJournal and C_MountJournal.GetMountFromItem and classID == Enum.ItemClass.Miscellaneous and subclassID == Enum.ItemMiscellaneousSubclass.Mount then
         -- see: DressUpFrames.lua
         local mountID = C_MountJournal.GetMountFromItem(id)
         if mountID then
@@ -540,6 +540,24 @@ function ns:ShowItem(link, for_tooltip)
 
                 self:ShowTooltip(for_tooltip)
             end
+        end
+    elseif C_PetJournal and C_PetJournal.GetPetInfoByItemID and classID == Enum.ItemClass.Miscellaneous and subclassID == Enum.ItemMiscellaneousSubclass.CompanionPet then
+        -- see: DressUpFrames.lua
+        local displayID, petID = select(12, C_PetJournal.GetPetInfoByItemID(id))
+        if displayID and petID then
+            local _, loadoutModelSceneID = C_PetJournal.GetPetModelSceneInfoBySpeciesID(petID)
+            tooltip.modelScene:ClearScene()
+            tooltip.modelScene:SetViewInsets(0, 0, 50, 0)
+            tooltip.modelScene:TransitionToModelSceneID(loadoutModelSceneID, CAMERA_TRANSITION_TYPE_IMMEDIATE, CAMERA_MODIFICATION_TYPE_DISCARD, true)
+
+            local battlePetActor = tooltip.modelScene:GetActorByTag("pet")
+            if battlePetActor then
+                battlePetActor:SetModelByCreatureDisplayID(displayID, true)
+                battlePetActor:SetAnimationBlendOperation(Enum.ModelBlendOperation.None)
+            end
+
+            tooltip.modelScene:Show()
+            self:ShowTooltip(for_tooltip)
         end
     else
         tooltip:Hide()
