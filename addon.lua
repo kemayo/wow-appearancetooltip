@@ -713,7 +713,7 @@ function ns.CanTransmogItem(itemLink)
             local appearanceID, sourceID = C_TransmogCollection.GetItemInfo(itemLink)
             if sourceID then
                 local info = C_TransmogCollection.GetSourceInfo(sourceID)
-                return info and info.playerCanCollect -- info.isValidSourceForPlayer also exists, seems to be whether the player could actually transmog it
+                return info and (info.playerCanCollect or info.isCollected or info.canDisplayOnPlayer) -- info.isValidSourceForPlayer also exists, seems to be whether the player could actually transmog it
             end
         end
     end
