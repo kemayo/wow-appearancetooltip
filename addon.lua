@@ -273,17 +273,19 @@ do
                 else
                     outermostComparisonShown = comparisonTooltip1:IsShown() and comparisonTooltip1 or comparisonTooltip2
                 end
-                local outerx = outermostComparisonShown:GetCenter() * outermostComparisonShown:GetEffectiveScale()
-                local ownerx = owner:GetCenter() * owner:GetEffectiveScale()
-                if
-                    -- outermost is right of owner while we're biasing left
-                    (biasLeft and outerx > ownerx)
-                    or
-                    -- outermost is left of owner while we're biasing right
-                    ((not biasLeft) and outerx < ownerx)
-                then
-                    -- the comparison won't be in the way, so ignore it
-                    outermostComparisonShown = nil
+                if outermostComparisonShown then
+                    local outerx = outermostComparisonShown:GetCenter() * outermostComparisonShown:GetEffectiveScale()
+                    local ownerx = owner:GetCenter() * owner:GetEffectiveScale()
+                    if
+                        -- outermost is right of owner while we're biasing left
+                        (biasLeft and outerx > ownerx)
+                        or
+                        -- outermost is left of owner while we're biasing right
+                        ((not biasLeft) and outerx < ownerx)
+                    then
+                        -- the comparison won't be in the way, so ignore it
+                        outermostComparisonShown = nil
+                    end
                 end
             end
         end
