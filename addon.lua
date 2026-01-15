@@ -263,7 +263,10 @@ do
             local comparisonTooltip1, comparisonTooltip2 = unpack( owner.shoppingTooltips )
             if comparisonTooltip1:IsShown() or comparisonTooltip2:IsShown() then
                 if comparisonTooltip1:IsShown() and comparisonTooltip2:IsShown() then
-                    if comparisonTooltip1:GetCenter() > comparisonTooltip2:GetCenter() then
+                    local c1x, c2x = comparisonTooltip1:GetCenter(), comparisonTooltip2:GetCenter()
+                    if issecretvalue(c1x) then
+                        outermostComparisonShown = nil
+                    elseif c1x > c2x then
                         -- 1 is right of 2
                         outermostComparisonShown = biasLeft and comparisonTooltip2 or comparisonTooltip1
                     else
