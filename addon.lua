@@ -726,6 +726,8 @@ end
 
 local brokenItems = {
     -- itemid : {appearanceid, sourceid}
+    [253520] = {21670, 298859}, -- Enclave Aspirant's Hatchet
+    [153267] = {21670, 90806}, -- Enclave Aspirant's Hatchet
     [153268] = {25124, 90807}, -- Enclave Aspirant's Axe
     [153316] = {25123, 90885}, -- Praetor's Ornamental Edge
 }
@@ -737,6 +739,7 @@ function ns.PlayerHasAppearance(itemLinkOrID)
     if not itemID then return end
     local probablyEnsemble = IsDressableItem(itemID) and not C_Item.IsEquippableItem(itemID)
     if probablyEnsemble then
+        -- TODO: Enum.TooltipDataLineType.LearnTransmogSet  is Coming Soon ("with setID arg")
         -- *not* ERR_COSMETIC_KNOWN which is "Item Known"
         return ns.CheckTooltipFor(itemID, ITEM_SPELL_KNOWN), false, true
     end
