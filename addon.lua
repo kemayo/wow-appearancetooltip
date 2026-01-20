@@ -277,8 +277,8 @@ do
                     outermostComparisonShown = comparisonTooltip1:IsShown() and comparisonTooltip1 or comparisonTooltip2
                 end
                 if outermostComparisonShown then
-                    local outerx = outermostComparisonShown:GetCenter() * outermostComparisonShown:GetEffectiveScale()
-                    local ownerx = owner:GetCenter() * owner:GetEffectiveScale()
+                    local outerx = (outermostComparisonShown:GetCenter() or 0) * (outermostComparisonShown:GetEffectiveScale() or 1)
+                    local ownerx = (owner:GetCenter() or 0) * (owner:GetEffectiveScale() or 1)
                     if
                         -- outermost is right of owner while we're biasing left
                         (biasLeft and outerx > ownerx)
