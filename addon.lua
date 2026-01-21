@@ -153,13 +153,20 @@ classwarning:SetText("Your class can't transmogrify this item")
 classwarning:Show()
 
 -- Ye showing:
-do
-    local function GetTooltipItem(tip)
-        if _G.C_TooltipInfo then
-            return TooltipUtil.GetDisplayedItem(tip)
+local function GetTooltipItem(tip)
+    if _G.C_TooltipInfo then
+        if issecretvalue then
+            -- getdisplayeditem attempts this comparison...
+            local primaryInfo = tip:GetPrimaryTooltipInfo();
+            if issecretvalue(primaryInfo and primaryInfo.tooltipData and primaryInfo.tooltipData.type and primaryInfo.tooltipData.type) then
+                return
+            end
         end
-        return tip:GetItem()
+        return TooltipUtil.GetDisplayedItem(tip)
     end
+    return tip:GetItem()
+end
+do
     local function OnTooltipSetItem(self)
         local name, link, id = GetTooltipItem(self)
         ns:ShowItem(link, self)
@@ -318,9 +325,12 @@ do
             end
         end
         if
-            -- would we be pushing against the edge of the screen?
-            (primary == "left" and (owner:GetLeft() - tooltip:GetWidth()) < 0)
-            or (primary == "right" and (owner:GetRight() + tooltip:GetWidth() > GetScreenWidth()))
+            (not issecretvalue or (not issecretvalue(owner:GetLeft()) and issecretvalue(tooltip:GetWidth()))) and
+            (
+                -- would we be pushing against the edge of the screen?
+                (primary == "left" and (owner:GetLeft() - tooltip:GetWidth()) < 0)
+                or (primary == "right" and (owner:GetRight() + tooltip:GetWidth() > GetScreenWidth()))
+            )
         then
             return self:ComputeTooltipAnchors(originalOwner, "vertical")
         end
@@ -343,11 +353,7 @@ hider:Hide()
 local shouldHide = function(owner)
     if not owner then return true end
     if not owner:IsShown() then return true end
-    if _G.C_TooltipInfo then
-        if not TooltipUtil.GetDisplayedItem(owner) then return true end
-    else
-        if not owner:GetItem() then return true end
-    end
+    if not GetTooltipItem(owner) then return true end
     return false
 end
 hider:SetScript("OnUpdate", function(self)
