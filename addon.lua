@@ -329,7 +329,7 @@ do
                 end
             end
         end
-        if 
+        if
             anchor ~= "vertical" and
             not isanyvaluesecret(owner:GetLeft(), tooltip:GetWidth()) and (
                 (primary == "left" and (owner:GetLeft() - tooltip:GetWidth()) < 0)
