@@ -12,6 +12,14 @@ local LAI = LibStub("LibAppropriateItems-1.0")
 -- minor compat:
 local IsDressableItem = _G.IsDressableItem or C_Item.IsDressableItemByID
 local issecretvalue = _G.issecretvalue or function() return false end
+local isanyvaluesecret = function(...)
+    for i=1, select("#", ...) do
+        if issecretvalue((select(i, ...))) then
+            return true
+        end
+    end
+    return false
+end
 
 ns.CLASSIC = WOW_PROJECT_ID ~= WOW_PROJECT_MAINLINE -- rolls forward
 ns.CLASSICERA = WOW_PROJECT_ID == WOW_PROJECT_CLASSIC -- forever vanilla
@@ -155,14 +163,11 @@ classwarning:Show()
 -- Ye showing:
 local function GetTooltipItem(tip)
     if _G.C_TooltipInfo then
-        if issecretvalue then
-            -- getdisplayeditem attempts this comparison...
-            local primaryInfo = tip:GetPrimaryTooltipInfo();
-            if issecretvalue(primaryInfo and primaryInfo.tooltipData and primaryInfo.tooltipData.type and primaryInfo.tooltipData.type) then
-                return
-            end
+        -- getdisplayeditem attempts this comparison...
+        local primaryInfo = tip:GetPrimaryTooltipInfo();
+        if issecretvalue(primaryInfo and primaryInfo.tooltipData and primaryInfo.tooltipData.type and primaryInfo.tooltipData.type) then
+            return
         end
-        return TooltipUtil.GetDisplayedItem(tip)
     end
     return tip:GetItem()
 end
@@ -324,10 +329,9 @@ do
                 end
             end
         end
-        if
-            (not issecretvalue or (not issecretvalue(owner:GetLeft()) and issecretvalue(tooltip:GetWidth()))) and
-            (
-                -- would we be pushing against the edge of the screen?
+        if 
+            anchor ~= "vertical" and
+            not isanyvaluesecret(owner:GetLeft(), tooltip:GetWidth()) and (
                 (primary == "left" and (owner:GetLeft() - tooltip:GetWidth()) < 0)
                 or (primary == "right" and (owner:GetRight() + tooltip:GetWidth() > GetScreenWidth()))
             )
