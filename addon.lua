@@ -144,12 +144,12 @@ do
     tooltip.modelScene = makeModel("ModelScene", "PanningModelSceneMixinTemplate")
 end
 
-local known = tooltip:CreateFontString(nil, "OVERLAY", "GameFontNormal")
-known:SetWordWrap(true)
-known:SetTextColor(0.5333, 0.6666, 0.9999, 0.9999)
-known:SetPoint("BOTTOMLEFT", tooltip, "BOTTOMLEFT", 6, 12)
-known:SetPoint("BOTTOMRIGHT", tooltip, "BOTTOMRIGHT", -6, 12)
-known:Show()
+local modelLabel = tooltip:CreateFontString(nil, "OVERLAY", "GameFontNormal")
+modelLabel:SetWordWrap(true)
+modelLabel:SetTextColor(0.5333, 0.6666, 0.9999, 0.9999)
+modelLabel:SetPoint("BOTTOMLEFT", tooltip, "BOTTOMLEFT", 6, 12)
+modelLabel:SetPoint("BOTTOMRIGHT", tooltip, "BOTTOMRIGHT", -6, 12)
+modelLabel:Show()
 
 local classwarning = tooltip:CreateFontString(nil, "OVERLAY", "GameFontRed")
 classwarning:SetWordWrap(true)
@@ -584,14 +584,14 @@ function ns:ShowItem(link, for_tooltip)
     end
 
     classwarning:Hide()
-    known:Hide()
+    modelLabel:Hide()
 
+    local label
     if db.notifyKnown then
         local hasAppearance, appearanceFromOtherItem, probablyEnsemble = ns.PlayerHasAppearance(link)
 
-        local label
         if not ns.CanTransmogItem(link) and not probablyEnsemble then
-            label = "|c00ffff00" .. TRANSMOGRIFY_INVALID_DESTINATION
+            label = "|c00ffff00" .. TRANSMOGRIFY_INVALID_DESTINATION .. "|r"
         else
             if hasAppearance then
                 if appearanceFromOtherItem then
@@ -600,18 +600,23 @@ function ns:ShowItem(link, for_tooltip)
                     label = "|TInterface\\RaidFrame\\ReadyCheck-Ready:0|t " .. TRANSMOGRIFY_TOOLTIP_APPEARANCE_KNOWN
                 end
             else
-                label = "|TInterface\\RaidFrame\\ReadyCheck-NotReady:0|t |cffff0000" .. TRANSMOGRIFY_TOOLTIP_APPEARANCE_UNKNOWN
+                label = "|TInterface\\RaidFrame\\ReadyCheck-NotReady:0|t |cffff0000" .. TRANSMOGRIFY_TOOLTIP_APPEARANCE_UNKNOWN .. "|r"
             end
             classwarning:SetShown(not appropriateItem and not probablyEnsemble)
         end
-        if setID then
-            local setName = C_Item.GetItemSetInfo(setID)
-            if setName then
-                label = label .. '|r\n' .. ITEM_SET_BONUS:format(setName)
-            end
+    end
+    if token then
+        label = label .. "\n" .. string.gsub(link, "[%[%]]", "")
+    end
+    if setID then
+        local setName = C_Item.GetItemSetInfo(setID)
+        if setName then
+            label = label .. '\n' .. ITEM_SET_BONUS:format(setName)
         end
-        known:SetText(label)
-        known:Show()
+    end
+    if label then
+        modelLabel:SetText(label)
+        modelLabel:Show()
     end
 end
 function ns:ShowTooltip(for_tooltip)
