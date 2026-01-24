@@ -451,7 +451,7 @@ function ns:ShowItem(link, for_tooltip)
         local model, cameraID
         local isHeld = self.slot_held[slot]
         local shouldZoom = (db.zoomWorn and not isHeld) or (db.zoomHeld and isHeld)
-        local appearanceID = C_TransmogCollection.GetItemInfo(link) or C_TransmogCollection.GetItemInfo(id)
+        local appearanceID = ns.GetTransmogInfo(link)
 
         if shouldZoom then
             cameraID = appearanceID and C_TransmogCollection.GetAppearanceCameraID(appearanceID)
@@ -741,6 +741,25 @@ local brokenItems = {
     [153268] = {25124, 90807}, -- Enclave Aspirant's Axe
     [153316] = {25123, 90885}, -- Praetor's Ornamental Edge
 }
+function ns.GetTransmogInfo(itemLinkOrID)
+    local appearanceID, sourceID = C_TransmogCollection.GetItemInfo(itemLinkOrID)
+    if appearanceID then
+        return appearanceID, sourceID
+    end
+    local itemID = C_Item.GetItemInfoInstant(itemLinkOrID)
+    if itemID then
+        -- sometimes the link won't actually give us an appearance, but itemID will
+        -- e.g. mythic Drape of Iron Sutures from Shadowmoon Burial Grounds
+        appearanceID, sourceID = C_TransmogCollection.GetItemInfo(itemLinkOrID)
+        if appearanceID then
+            return appearanceID, sourceID
+        end
+        if brokenItems[itemID] then
+            -- ...and there's a few that just need to be hardcoded
+            return unpack(brokenItems[itemID])
+        end
+    end
+end
 -- /dump C_TransmogCollection.GetAppearanceSourceInfo(select(2, C_TransmogCollection.GetItemInfo("")))
 -- /dump C_TransmogCollection.GetAppearanceInfoBySource(select(2, C_TransmogCollection.GetItemInfo("")))
 function ns.PlayerHasAppearance(itemLinkOrID)
@@ -782,16 +801,7 @@ function ns.PlayerHasAppearance(itemLinkOrID)
             return false, false, true
         end
     end
-    local appearanceID, sourceID = C_TransmogCollection.GetItemInfo(itemLinkOrID)
-    if not appearanceID then
-        -- sometimes the link won't actually give us an appearance, but itemID will
-        -- e.g. mythic Drape of Iron Sutures from Shadowmoon Burial Grounds
-        appearanceID, sourceID = C_TransmogCollection.GetItemInfo(itemID)
-    end
-    if not appearanceID and brokenItems[itemID] then
-        -- ...and there's a few that just need to be hardcoded
-        appearanceID, sourceID = unpack(brokenItems[itemID])
-    end
+    local appearanceID, sourceID = ns.GetTransmogInfo(itemLinkOrID)
     if not appearanceID then return end
     -- /dump C_TransmogCollection.PlayerHasTransmogItemModifiedAppearance(C_TransmogCollection.GetItemInfo(""))
     local fromCurrentItem = C_TransmogCollection.PlayerHasTransmogItemModifiedAppearance(sourceID)
