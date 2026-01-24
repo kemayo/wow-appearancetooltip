@@ -20,6 +20,18 @@ local isanyvaluesecret = function(...)
     end
     return false
 end
+local function PlayerHasTransmogByItemInfo(itemLinkOrID)
+    -- Cata classic is specifically missing C_TransmogCollection.PlayerHasTransmogByItemInfo
+    if C_TransmogCollection.PlayerHasTransmogByItemInfo then
+        return C_TransmogCollection.PlayerHasTransmogByItemInfo(itemLinkOrID)
+    end
+    local itemID = C_Item.GetItemInfoInstant(itemLinkOrID)
+    if itemID then
+        -- this is a bit worse, because of items with varying appearances based on the link-details
+        -- but because this path should only be hit in classic, we should be fine
+        return C_TransmogCollection.PlayerHasTransmog(itemID)
+    end
+end
 
 ns.CLASSIC = WOW_PROJECT_ID ~= WOW_PROJECT_MAINLINE -- rolls forward
 ns.CLASSICERA = WOW_PROJECT_ID == WOW_PROJECT_CLASSIC -- forever vanilla
@@ -740,9 +752,17 @@ function ns.CanTransmogItem(itemLink)
             -- Warglaive of Azzinoth (32837) which returns nil.
             -- 2026/1/23: Apart from Legion artifacts, but they've always been
             -- weird and might be bugged at the moment anyway.
-            return ns.GetTransmogInfo(itemLink)
+            if ns.GetTransmogInfo(itemLink) then
+                return true
+            end
+            -- sometimes this doesn't return info for valid items, but
+            -- anything you have the transmog for *must* be transmoggable...
+            if PlayerHasTransmogByItemInfo(itemLink) then
+                return true
+            end
         end
     end
+    return nil, 'NO_ITEM'
 end
 
 local brokenItems = {
@@ -811,6 +831,10 @@ function ns.PlayerHasAppearance(itemLinkOrID)
             end
             return false, false, true
         end
+    end
+    if PlayerHasTransmogByItemInfo(itemLinkOrID) then
+        -- avoid more detailed checks if possible
+        return true, false
     end
     local appearanceID, sourceID = ns.GetTransmogInfo(itemLinkOrID)
     if not appearanceID then return end
