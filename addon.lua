@@ -405,14 +405,19 @@ function ns:ShowItem(link, for_tooltip)
         local found
         local counts = {}
         local counts_known = {}
-        for itemid, tclass, relevant in LAT:IterateItemsForToken(id) do
-            found = found or itemid
+        for itemid, tclass, relevant, bonus in LAT:IterateItemsForToken(link) do
+            local itemLinkOrID = itemid
+            if bonus then
+                itemLinkOrID = LAT:GetBareLinkForItem(itemid, bonus)
+            end
+            found = found or itemLinkOrID
             if relevant then
-                found = itemid -- make *sure* the item shown is a relevant one, if one exists
-                AddItemToTooltip(itemid, for_tooltip, tclass == class and class_colored or tclass)
+                found = itemLinkOrID -- make *sure* the item shown is a relevant one, if one exists
+
+                AddItemToTooltip(itemLinkOrID, for_tooltip, tclass == class and class_colored or tclass)
             else
                 counts[tclass] = (counts[tclass] or 0) + 1
-                counts_known[tclass] = (counts_known[tclass] or 0) + (ns.PlayerHasAppearance(itemid) and 1 or 0)
+                counts_known[tclass] = (counts_known[tclass] or 0) + (ns.PlayerHasAppearance(itemLinkOrID) and 1 or 0)
             end
         end
         for tclass, count in pairs(counts) do
