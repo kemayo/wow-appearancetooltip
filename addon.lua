@@ -834,12 +834,16 @@ function ns.PlayerHasAppearance(itemLinkOrID)
             return false, false, true
         end
     end
-    if PlayerHasTransmogByItemInfo(itemLinkOrID) then
-        -- avoid more detailed checks if possible
-        return true, false
-    end
     local appearanceID, sourceID = ns.GetTransmogInfo(itemLinkOrID)
-    if not appearanceID then return end
+    if not appearanceID then
+        if PlayerHasTransmogByItemInfo(itemLinkOrID) then
+            -- avoid more detailed checks if possible; we don't do
+            -- this *first* because it sometimes gets it wrong with items
+            -- that have variants based on link bonuses
+            return true, false
+        end
+        return
+    end
     -- /dump C_TransmogCollection.PlayerHasTransmogItemModifiedAppearance(C_TransmogCollection.GetItemInfo(""))
     local fromCurrentItem = C_TransmogCollection.PlayerHasTransmogItemModifiedAppearance(sourceID)
     if fromCurrentItem then
