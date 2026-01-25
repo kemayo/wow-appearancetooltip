@@ -783,7 +783,7 @@ function ns.GetTransmogInfo(itemLinkOrID)
     if itemID then
         -- sometimes the link won't actually give us an appearance, but itemID will
         -- e.g. mythic Drape of Iron Sutures from Shadowmoon Burial Grounds
-        appearanceID, sourceID = C_TransmogCollection.GetItemInfo(itemLinkOrID)
+        appearanceID, sourceID = C_TransmogCollection.GetItemInfo(itemID)
         if appearanceID then
             return appearanceID, sourceID
         end
