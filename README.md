@@ -11,6 +11,10 @@ It can also show an icon in various places to let you know whether you know this
 
 The icon will be violet if you can learn the appearance on the current character, blue if you know the appearance but from a different item, and yellow if you don't know it but it's for another class.
 
+The previews and item-icons will also appear for mounts, pets, and decor.
+
+Set token items will show some information about what they'll turn into, and how many of those possible appearances you've collected.
+
 Less importantly, it also improves the default UI so that the "You don't know this appearance" messages will appear on items which don't apply directly to your class! This means you'll be able to log into your Warrior, and tell that your Priest doesn't yet know this cool BoE appearance that just dropped.
 
 Config is in the Interface Options, or type `/aptip`
