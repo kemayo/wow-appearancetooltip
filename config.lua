@@ -121,6 +121,7 @@ do
     subText:SetText("These options let you control how the appearance tooltip is shown")
 
     local dressed = newCheckbox(panel, 'dressed', 'Wear your clothes', "Show the model wearing your current outfit, apart from the previewed item")
+    local dressed_ensemble = newCheckbox(panel, 'dressed_ensemble', 'Wear your clothes (ensembles)', "As above, but specifically for ensembles")
     local uncover = newCheckbox(panel, 'uncover', 'Uncover previewed item', "Remove clothes that would hide the item you're trying to preview")
     local mousescroll = newCheckbox(panel, 'mousescroll', 'Rotate with mousewheel', "Use the mousewheel to rotate the model in the tooltip")
     local spin = newCheckbox(panel, 'spin', 'Spin model', "Constantly spin the model while it's displayed")
@@ -195,7 +196,8 @@ do
     zoomMasked:SetPoint("TOPLEFT", zoomHeld, "BOTTOMLEFT", 0, -4)
 
     dressed:SetPoint("TOPLEFT", zoomMasked, "BOTTOMLEFT", 0, -4)
-    uncover:SetPoint("TOPLEFT", dressed, "BOTTOMLEFT", 0, -4)
+    dressed_ensemble:SetPoint("TOPLEFT", dressed, "BOTTOMLEFT", 0, -4)
+    uncover:SetPoint("TOPLEFT", dressed_ensemble, "BOTTOMLEFT", 0, -4)
     tokens:SetPoint("TOPLEFT", uncover, "BOTTOMLEFT", 0, -4)
     notifyKnown:SetPoint("TOPLEFT", tokens, "BOTTOMLEFT", 0, -4)
     alerts:SetPoint("TOPLEFT", notifyKnown, "BOTTOMLEFT", 0, -4)

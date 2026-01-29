@@ -60,6 +60,7 @@ function tooltip:ADDON_LOADED(addon)
         zoomHeld = true, -- zoom in on weapons
         zoomMasked = false, -- use the transmog mask while zoomed
         dressed = true, -- whether the model should be wearing your current outfit, or be naked
+        dressed_ensemble = false, -- as above, but specifically for ensembles
         uncover = true, -- remove clothing to expose the previewed item
         customModel = false, -- use a model other than your current class, and if so:
         modelRace = 7, -- raceid (1:human)
@@ -470,6 +471,10 @@ function ns:ShowItem(link, for_tooltip)
         local model, cameraID
         local isHeld = self.slot_held[slot]
         local shouldZoom = (db.zoomWorn and not isHeld) or (db.zoomHeld and isHeld)
+        local dressed = db.dressed
+        if slot == "INVTYPE_NON_EQUIP_IGNORE" then
+            dressed = db.dressed_ensemble
+        end
         local appearanceID = ns.GetTransmogInfo(link)
 
         if shouldZoom then
@@ -484,7 +489,7 @@ function ns:ShowItem(link, for_tooltip)
             else
                 model = tooltip.modelZoomed
                 model:SetUseTransmogSkin(db.zoomMasked and slot ~= "INVTYPE_HEAD")
-                self:ResetModel(model)
+                self:ResetModel(model, dressed)
             end
             model.cameraID = cameraID
             Model_ApplyUICamera(model, cameraID)
@@ -493,7 +498,7 @@ function ns:ShowItem(link, for_tooltip)
         else
             model = tooltip.model
 
-            self:ResetModel(model)
+            self:ResetModel(model, dressed)
         end
         tooltip.activeModel = model
         model:Show()
@@ -646,7 +651,7 @@ function ns:HideItem()
     hider:Show()
 end
 
-function ns:ResetModel(model)
+function ns:ResetModel(model, dressed)
     -- This sort of works, but with a custom model it keeps some items (shoulders, belt...)
     -- model:SetAutoDress(db.dressed)
     -- So instead, more complicated:
@@ -657,11 +662,7 @@ function ns:ResetModel(model)
         model:SetUnit("player")
     end
     model:RefreshCamera()
-    if db.dressed then
-        model:Dress()
-    else
-        model:Undress()
-    end
+    model[dressed and "Dress" or "Undress"](model)
 end
 
 ns.SLOT_MAINHAND = GetInventorySlotInfo("MainHandSlot")
