@@ -97,14 +97,30 @@ function tooltip:PLAYER_LOGIN()
     C_CVar.SetCVar("missingTransmogSourceInItemTooltips", "1")
 end
 
+local function scrollActiveModel(amount)
+    if not (tooltip.activeModel and tooltip.activeModel:IsVisible()) then
+        return
+    end
+    if tooltip.activeModel.GetActiveCamera then
+        local camera = tooltip.activeModel:GetActiveCamera()
+        local mode = ORBIT_CAMERA_MOUSE_MODE_YAW_ROTATION
+        local snapToValue = false
+        camera:HandleMouseMovement(mode, amount, snapToValue)
+    else
+        tooltip.activeModel:SetFacing(tooltip.activeModel:GetFacing() + amount)
+    end
+    return true
+end
+
 do
     local scrollup = CreateFrame("Button", "AppearanceTooltipScrollUpButton", tooltip)
     scrollup:SetScript("OnClick", function(self, button, down)
-        tooltip.activeModel:SetFacing(tooltip.activeModel:GetFacing() + 0.3)
+        scrollActiveModel(0.3)
     end)
+    scrollup:RegisterForClicks("AnyDown", "AnyUp")
     local scrolldown = CreateFrame("Button", "AppearanceTooltipScrollDownButton", tooltip)
     scrolldown:SetScript("OnClick", function(self, button, down)
-        tooltip.activeModel:SetFacing(tooltip.activeModel:GetFacing() - 0.3)
+        scrollActiveModel(-0.3)
     end)
 
     local function ClearBindings()
@@ -370,10 +386,9 @@ end
 local spinner = CreateFrame("Frame", nil, tooltip);
 spinner:Hide()
 spinner:SetScript("OnUpdate", function(self, elapsed)
-    if not (tooltip.activeModel and tooltip.activeModel:IsVisible()) then
-        return self:Hide()
+    if not scrollActiveModel(elapsed) then
+        self:Hide()
     end
-    tooltip.activeModel:SetFacing(tooltip.activeModel:GetFacing() + elapsed)
 end)
 
 local hider = CreateFrame("Frame")
@@ -561,6 +576,8 @@ function ns:ShowItem(link, for_tooltip)
             end
             modelScene:Show()
 
+            tooltip.activeModel = modelScene
+
             self:ShowTooltip(for_tooltip)
         end
     elseif C_MountJournal and C_MountJournal.GetMountFromItem and classID == Enum.ItemClass.Miscellaneous and subclassID == Enum.ItemMiscellaneousSubclass.Mount then
@@ -589,6 +606,8 @@ function ns:ShowItem(link, for_tooltip)
                 modelScene:AttachPlayerToMount(mountActor, animID, isSelfMount, disablePlayerMountPreview)
                 modelScene:Show()
 
+                tooltip.activeModel = modelScene
+
                 self:ShowTooltip(for_tooltip)
             end
         end
@@ -607,6 +626,8 @@ function ns:ShowItem(link, for_tooltip)
                 battlePetActor:SetModelByCreatureDisplayID(displayID, true)
                 battlePetActor:SetAnimationBlendOperation(Enum.ModelBlendOperation.None)
             end
+
+            tooltip.activeModel = modelScene
 
             modelScene:Show()
             self:ShowTooltip(for_tooltip)
