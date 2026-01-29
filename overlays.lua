@@ -25,6 +25,14 @@ function f:ADDON_LOADED(addon)
 end
 f:RegisterEvent("ADDON_LOADED")
 
+ns.overlayFrames = {}
+
+function ns.RefreshOverlayFrames()
+    for button in pairs(ns.overlayFrames) do
+        ns.PrepareItemButton(button)
+    end
+end
+
 function ns:SetIconAppearance(icon, link, hasAppearance, appearanceFromOtherItem, probablyEnsemble)
     if LAI:IsAppropriate(link) or probablyEnsemble then
         -- this character can use it
@@ -57,6 +65,7 @@ local function PrepareItemButton(button, point, offsetx, offsety)
     end
 
     local overlayFrame = CreateFrame("FRAME", nil, button)
+    ns.overlayFrames[button] = overlayFrame
     overlayFrame:SetAllPoints()
     button.appearancetooltipoverlay = overlayFrame
 
@@ -83,6 +92,8 @@ local function PrepareItemButton(button, point, offsetx, offsety)
 
     overlayFrame:Hide()
 end
+ns.PrepareItemButton = PrepareItemButton
+
 local function IsRelevantItem(link)
     if not link then return end
     if ns.db.learnable then
@@ -150,6 +161,7 @@ local function UpdateButtonFromItem(button, item)
         end
     end)
 end
+ns.UpdateButtonFromItem = UpdateButtonFromItem
 
 local function UpdateContainerButton(button, bag, slot)
     local item = Item:CreateFromBagAndSlot(bag, slot or button:GetID())

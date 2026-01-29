@@ -165,6 +165,8 @@ read_globals = {
     "Settings",
     "EventRegistry",
     "EventUtil",
+    "ContainerFrameItemButton_CalculateItemTooltipAnchors",
+    "SetItemButtonTexture",
 
     -- FrameXML Constants
     "BACKPACK_CONTAINER",
@@ -211,6 +213,7 @@ read_globals = {
     "REAGENT_BANK",
     "REAGENTBANK_CONTAINER",
     "REAGENTBANK_DEPOSIT",
+    "RETRIEVING_ITEM_INFO",
     "REMOVE",
     "SEARCH_LOADING_TEXT",
     "SHOW_ITEM_LEVEL",

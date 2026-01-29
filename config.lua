@@ -97,9 +97,54 @@ local function newBox(parent, title, height)
     return box
 end
 
+local function button_onenter(self)
+    GameTooltip:SetOwner(self, "ANCHOR_NONE")
+    ContainerFrameItemButton_CalculateItemTooltipAnchors(self, GameTooltip)
+
+    local link = self:GetItemLink()
+    if link then
+        GameTooltip:SetHyperlink(self:GetItemLink())
+    else
+        GameTooltip:AddLine(RETRIEVING_ITEM_INFO, 1, 0, 0)
+    end
+
+    GameTooltip:Show()
+end
+local function makeItemButton(parent)
+    local button = CreateFrame(ns.CLASSIC and "BUTTON" or "ItemButton", nil, parent, ns.CLASSIC and "ItemButtonTemplate" or nil)
+    -- classic
+    if not button.SetItem then
+        function button:SetItem(item)
+            local itemID, itemType, itemSubType, itemEquipLoc, icon, classID, subclassID = C_Item.GetItemInfoInstant(item)
+            if itemID then
+                self.itemID = itemID
+                SetItemButtonTexture(button, icon)
+            end
+        end
+        function button:GetItemID()
+            return self.itemID
+        end
+        function button:GetItemLink()
+            return select(2, C_Item.GetItemInfo(self.itemID))
+        end
+    end
+    button:SetScript("OnEnter", button_onenter)
+    button:SetScript("OnLeave", GameTooltip_Hide)
+    return button
+end
+
 -- and the actual config now
 
 local categoryID
+
+-- local demoButtons = {}
+local function refresh(_, value)
+    ns.RefreshOverlayFrames()
+    -- for itemID, button in pairs(demoButtons) do
+    --     ns.CleanButton(button)
+    --     ns.UpdateButtonFromItem(button, Item:CreateFromItemID(itemID), "character")
+    -- end
+end
 
 do
     local panel = CreateFrame("Frame", nil, InterfaceOptionsFramePanelContainer)
@@ -217,6 +262,33 @@ do
     -- customModel:SetPoint("LEFT", modelBox, 12, 0)
     -- customRaceDropdown:SetPoint("LEFT", customModel.Text, "RIGHT", 12, -2)
     -- customGenderDropdown:SetPoint("TOPLEFT", customRaceDropdown, "TOPRIGHT", 4, 0)
+
+    local demo = CreateFrame("Frame", nil, panel)
+    demo:SetPoint("TOPRIGHT", panel, 0, -20)
+    demo:SetPoint("RIGHT", panel)
+    demo:SetWidth(43)
+    demo:SetScript("OnShow", function(self)
+        local previousButton
+        for _, itemLinkOrID in ipairs(ns.CLASSIC and {19019, 19364, 10328, 11122, 23192, 7997, 14047} or {120978, 185060, 253346, 260411, 86079, 257547, 44168, 93031, 248934}) do
+            local button = makeItemButton(self)
+            if not previousButton then
+                button:SetPoint("TOPRIGHT")
+            else
+                button:SetPoint("TOPRIGHT", previousButton, "BOTTOMRIGHT", 0, 2)
+            end
+            button:SetItem(itemLinkOrID)
+            local item
+            if type(itemLinkOrID) == "string" then
+                item = Item:CreateFromItemLink(itemLinkOrID)
+            else
+                item = Item:CreateFromItemID(itemLinkOrID)
+            end
+            ns.UpdateButtonFromItem(button, item)
+            -- demoButtons[itemLinkOrID] = button
+            previousButton = button
+        end
+        self:SetScript("OnShow", nil)
+    end)
 
     local category, layout = Settings.RegisterCanvasLayoutCategory(panel, panel.name, panel.name)
     Settings.RegisterAddOnCategory(category)
