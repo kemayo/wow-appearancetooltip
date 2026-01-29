@@ -89,8 +89,11 @@ function tooltip:ADDON_LOADED(addon)
 end
 
 function tooltip:PLAYER_LOGIN()
-    tooltip.model:SetUnit("player")
-    tooltip.modelZoomed:SetUnit("player")
+    for _, model in pairs(tooltip.models) do
+        if model.SetUnit then
+            model:SetUnit("player")
+        end
+    end
     C_CVar.SetCVar("missingTransmogSourceInItemTooltips", "1")
 end
 
@@ -134,6 +137,7 @@ do
         model:SetFrameLevel(1)
         model:SetPoint("TOPLEFT", tooltip, "TOPLEFT", 5, -5)
         model:SetPoint("BOTTOMRIGHT", tooltip, "BOTTOMRIGHT", -5, 5)
+
         return model
     end
     local function makeDressUpModel()
@@ -151,10 +155,17 @@ do
         -- model:FreezeAnimation(1)
         return model
     end
-    tooltip.model = makeDressUpModel()
-    tooltip.modelZoomed = makeDressUpModel()
-    tooltip.modelWeapon = makeDressUpModel()
-    tooltip.modelScene = makeModel("ModelScene", "PanningModelSceneMixinTemplate")
+    local function makeModelScene()
+        return makeModel("ModelScene", "NoCameraControlModelSceneMixinTemplate")
+    end
+    tooltip.models = {
+        FullBody = makeDressUpModel(),
+        Zoomed = makeDressUpModel(),
+        Weapon = makeDressUpModel(),
+        Mount = makeModelScene(),
+        Pet = makeModelScene(),
+        Decor = makeModelScene(),
+    }
 end
 
 local modelLabel = tooltip:CreateFontString(nil, "OVERLAY", "GameFontNormal")
@@ -462,10 +473,9 @@ function ns:ShowItem(link, for_tooltip)
 
     local appropriateItem = LAI:IsAppropriate(id)
 
-    tooltip.model:Hide()
-    tooltip.modelZoomed:Hide()
-    tooltip.modelWeapon:Hide()
-    tooltip.modelScene:Hide()
+    for _, model in pairs(tooltip.models) do
+        model:Hide()
+    end
 
     if self.slot_facings[slot] and IsDressableItem(id) and (not db.currentClass or appropriateItem) then
         local model, cameraID
@@ -485,9 +495,9 @@ function ns:ShowItem(link, for_tooltip)
 
         if cameraID then
             if isHeld then
-                model = tooltip.modelWeapon
+                model = tooltip.models.Weapon
             else
-                model = tooltip.modelZoomed
+                model = tooltip.models.Zoomed
                 model:SetUseTransmogSkin(db.zoomMasked and slot ~= "INVTYPE_HEAD")
                 self:ResetModel(model, dressed)
             end
@@ -496,7 +506,7 @@ function ns:ShowItem(link, for_tooltip)
             -- ApplyUICamera locks the animation, but...
             model:SetAnimation(0, 0)
         else
-            model = tooltip.model
+            model = tooltip.models.FullBody
 
             self:ResetModel(model, dressed)
         end
@@ -540,15 +550,16 @@ function ns:ShowItem(link, for_tooltip)
         -- see: Blizzard_HousingModelPreview
         local decorInfo = C_HousingCatalog.GetCatalogEntryInfoByItem(id, true)
         if decorInfo and decorInfo.asset then
+            local modelScene = tooltip.models.Decor
             local modelSceneID = decorInfo.uiModelSceneID or Constants.HousingCatalogConsts.HOUSING_CATALOG_DECOR_MODELSCENEID_DEFAULT
             local forceSceneChange = true
-            tooltip.modelScene:TransitionToModelSceneID(modelSceneID, CAMERA_TRANSITION_TYPE_IMMEDIATE, CAMERA_MODIFICATION_TYPE_DISCARD, forceSceneChange)
-            local actor = tooltip.modelScene:GetActorByTag("decor");
+            modelScene:TransitionToModelSceneID(modelSceneID, CAMERA_TRANSITION_TYPE_IMMEDIATE, CAMERA_MODIFICATION_TYPE_DISCARD, forceSceneChange)
+            local actor = modelScene:GetActorByTag("decor");
             if actor then
                 actor:SetPreferModelCollisionBounds(true)
                 actor:SetModelByFileID(decorInfo.asset)
             end
-            tooltip.modelScene:Show()
+            modelScene:Show()
 
             self:ShowTooltip(for_tooltip)
         end
@@ -558,12 +569,13 @@ function ns:ShowItem(link, for_tooltip)
         if mountID then
             local creatureDisplayID, _, _, isSelfMount, _, modelSceneID, animID, spellVisualKitID, disablePlayerMountPreview = C_MountJournal.GetMountInfoExtraByID(mountID)
             if creatureDisplayID then
-                tooltip.modelScene:ClearScene()
-                tooltip.modelScene:SetViewInsets(0, 0, 0, 0)
+                local modelScene = tooltip.models.Mount
+                modelScene:ClearScene()
+                modelScene:SetViewInsets(0, 0, 0, 0)
                 local forceEvenIfSame = true
-                tooltip.modelScene:TransitionToModelSceneID(modelSceneID, CAMERA_TRANSITION_TYPE_IMMEDIATE, CAMERA_MODIFICATION_TYPE_DISCARD, forceEvenIfSame)
+                modelScene:TransitionToModelSceneID(modelSceneID, CAMERA_TRANSITION_TYPE_IMMEDIATE, CAMERA_MODIFICATION_TYPE_DISCARD, forceEvenIfSame)
 
-                local mountActor = tooltip.modelScene:GetActorByTag("unwrapped")
+                local mountActor = modelScene:GetActorByTag("unwrapped")
                 if mountActor then
                     mountActor:SetModelByCreatureDisplayID(creatureDisplayID)
                 end
@@ -574,8 +586,8 @@ function ns:ShowItem(link, for_tooltip)
                     mountActor:SetAnimationBlendOperation(Enum.ModelBlendOperation.Anim)
                     mountActor:SetAnimation(0)
                 end
-                tooltip.modelScene:AttachPlayerToMount(mountActor, animID, isSelfMount, disablePlayerMountPreview)
-                tooltip.modelScene:Show()
+                modelScene:AttachPlayerToMount(mountActor, animID, isSelfMount, disablePlayerMountPreview)
+                modelScene:Show()
 
                 self:ShowTooltip(for_tooltip)
             end
@@ -584,18 +596,19 @@ function ns:ShowItem(link, for_tooltip)
         -- see: DressUpFrames.lua
         local displayID, petID = select(12, C_PetJournal.GetPetInfoByItemID(id))
         if displayID and petID then
+            local modelScene = tooltip.models.Pet
             local _, loadoutModelSceneID = C_PetJournal.GetPetModelSceneInfoBySpeciesID(petID)
-            tooltip.modelScene:ClearScene()
-            tooltip.modelScene:SetViewInsets(0, 0, 50, 0)
-            tooltip.modelScene:TransitionToModelSceneID(loadoutModelSceneID, CAMERA_TRANSITION_TYPE_IMMEDIATE, CAMERA_MODIFICATION_TYPE_DISCARD, true)
+            modelScene:ClearScene()
+            modelScene:SetViewInsets(0, 0, 50, 0)
+            modelScene:TransitionToModelSceneID(loadoutModelSceneID, CAMERA_TRANSITION_TYPE_IMMEDIATE, CAMERA_MODIFICATION_TYPE_DISCARD, true)
 
-            local battlePetActor = tooltip.modelScene:GetActorByTag("pet")
+            local battlePetActor = modelScene:GetActorByTag("pet")
             if battlePetActor then
                 battlePetActor:SetModelByCreatureDisplayID(displayID, true)
                 battlePetActor:SetAnimationBlendOperation(Enum.ModelBlendOperation.None)
             end
 
-            tooltip.modelScene:Show()
+            modelScene:Show()
             self:ShowTooltip(for_tooltip)
         end
     else
