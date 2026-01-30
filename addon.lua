@@ -151,8 +151,12 @@ do
     local function makeModel(frameType, template)
         local model = CreateFrame(frameType, nil, tooltip, template)
         model:SetFrameLevel(1)
-        model:SetPoint("TOPLEFT", tooltip, "TOPLEFT", 5, -5)
-        model:SetPoint("BOTTOMRIGHT", tooltip, "BOTTOMRIGHT", -5, 5)
+        model:SetScript("OnShow", function()
+            -- This is mostly in service of avoiding secret-spread
+            model:ClearAllPoints()
+            model:SetPoint("TOPLEFT", tooltip, "TOPLEFT", 5, -5)
+            model:SetPoint("BOTTOMRIGHT", tooltip, "BOTTOMRIGHT", -5, 5)
+        end)
 
         return model
     end
@@ -263,9 +267,11 @@ positioner:SetScript("OnUpdate", function(self, elapsed)
     self.elapsed = 0
 
     local owner, our_point, owner_point = ns:ComputeTooltipAnchors(tooltip.owner, db.anchor)
+    tooltip:ClearAllPoints()
     if our_point and owner_point then
-        tooltip:ClearAllPoints()
         tooltip:SetPoint(our_point, owner, owner_point)
+    else
+        tooltip:Hide()
     end
 end)
 
