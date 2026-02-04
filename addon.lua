@@ -271,6 +271,7 @@ positioner:SetScript("OnUpdate", function(self, elapsed)
     if our_point and owner_point then
         tooltip:SetPoint(our_point, owner, owner_point)
     else
+        -- TODO: could fall back somewhere instead?
         tooltip:Hide()
     end
 end)
@@ -645,36 +646,36 @@ function ns:ShowItem(link, for_tooltip)
     classwarning:Hide()
     modelLabel:Hide()
 
-    local label
+    local label = {}
     if db.notifyKnown then
         local hasAppearance, appearanceFromOtherItem, probablyEnsemble = ns.PlayerHasAppearance(link)
 
         if not ns.CanTransmogItem(link) and not probablyEnsemble then
-            label = "|c00ffff00" .. TRANSMOGRIFY_INVALID_DESTINATION .. "|r"
+            table.insert(label, "|c00ffff00" .. TRANSMOGRIFY_INVALID_DESTINATION .. "|r")
         else
             if hasAppearance then
                 if appearanceFromOtherItem then
-                    label = "|TInterface\\RaidFrame\\ReadyCheck-Ready:0|t " .. (TRANSMOGRIFY_TOOLTIP_ITEM_UNKNOWN_APPEARANCE_KNOWN):gsub(', ', ',\n')
+                    table.insert(label, "|TInterface\\RaidFrame\\ReadyCheck-Ready:0|t " .. (TRANSMOGRIFY_TOOLTIP_ITEM_UNKNOWN_APPEARANCE_KNOWN):gsub(', ', ',\n'))
                 else
-                    label = "|TInterface\\RaidFrame\\ReadyCheck-Ready:0|t " .. TRANSMOGRIFY_TOOLTIP_APPEARANCE_KNOWN
+                    table.insert(label, "|TInterface\\RaidFrame\\ReadyCheck-Ready:0|t " .. TRANSMOGRIFY_TOOLTIP_APPEARANCE_KNOWN)
                 end
             else
-                label = "|TInterface\\RaidFrame\\ReadyCheck-NotReady:0|t |cffff0000" .. TRANSMOGRIFY_TOOLTIP_APPEARANCE_UNKNOWN .. "|r"
+                table.insert(label, "|TInterface\\RaidFrame\\ReadyCheck-NotReady:0|t |cffff0000" .. TRANSMOGRIFY_TOOLTIP_APPEARANCE_UNKNOWN .. "|r")
             end
             classwarning:SetShown(not appropriateItem and not probablyEnsemble)
         end
     end
     if token then
-        label = label .. "\n" .. string.gsub(link, "[%[%]]", "")
+        table.insert(label, (string.gsub(link, "[%[%]]", "")))
     end
     if setID then
         local setName = C_Item.GetItemSetInfo(setID)
         if setName then
-            label = label .. '\n' .. ITEM_SET_BONUS:format(setName)
+            table.insert(label, ITEM_SET_BONUS:format(setName))
         end
     end
-    if label then
-        modelLabel:SetText(label)
+    if #label > 0 then
+        modelLabel:SetText(string.join("\n", unpack(label)))
         modelLabel:Show()
     end
 end
