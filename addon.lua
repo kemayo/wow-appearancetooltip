@@ -259,8 +259,23 @@ positioner:SetScript("OnUpdate", function(self, elapsed)
     tooltip:ClearAllPoints()
     if our_point and owner_point then
         tooltip:SetPoint(our_point, owner, owner_point)
+        --[[
+        -- TODO: this scales the tooltip to match its owner, but the model scale gets weird when this happens...
+        if anchor == "vertical" then
+            local ownerWidth = owner:GetWidth()
+            if not issecretvalue(ownerWidth) then
+                tooltip:SetScale(ownerWidth / tooltip:GetWidth())
+            end
+        else
+            local ownerHeight = owner:GetHeight()
+            if not issecretvalue(ownerHeight) then
+                tooltip:SetScale(ownerHeight / tooltip:GetHeight())
+            end
+        end
+        --]]
     else
         -- TODO: could fall back somewhere instead?
+        -- tooltip:SetPoint("CENTER", UIParent)
         tooltip:Hide()
     end
 end)
