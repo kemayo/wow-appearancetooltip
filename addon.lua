@@ -20,6 +20,16 @@ local isanyvaluesecret = function(...)
     end
     return false
 end
+local issecretframe = function(frame, aspect)
+    if frame.IsAnchoringSecret then
+        if aspect then
+            return frame:HasSecretAspect(aspect)
+        end
+        return frame:IsAnchoringSecret()
+    end
+    return false
+end
+
 local function PlayerHasTransmogByItemInfo(itemLinkOrID)
     -- Cata classic is specifically missing C_TransmogCollection.PlayerHasTransmogByItemInfo
     if C_TransmogCollection.PlayerHasTransmogByItemInfo then
@@ -150,14 +160,6 @@ end
 do
     local function makeModel(frameType, template)
         local model = CreateFrame(frameType, nil, tooltip, template)
-        model:SetFrameLevel(1)
-        model:SetScript("OnShow", function()
-            -- This is mostly in service of avoiding secret-spread
-            model:ClearAllPoints()
-            model:SetPoint("TOPLEFT", tooltip, "TOPLEFT", 5, -5)
-            model:SetPoint("BOTTOMRIGHT", tooltip, "BOTTOMRIGHT", -5, 5)
-        end)
-
         return model
     end
     local function makeDressUpModel()
@@ -169,10 +171,6 @@ do
                 Model_ApplyUICamera(self, self.cameraID)
             end
         end)
-        -- Use the blacked-out model:
-        -- model:SetUseTransmogSkin(true)
-        -- Display in combat pose:
-        -- model:FreezeAnimation(1)
         return model
     end
     local function makeModelScene()
@@ -205,19 +203,9 @@ classwarning:SetText("Your class can't transmogrify this item")
 classwarning:Show()
 
 -- Ye showing:
-local function GetTooltipItem(tip)
-    if _G.C_TooltipInfo then
-        -- getdisplayeditem attempts this comparison...
-        local primaryInfo = tip:GetPrimaryTooltipInfo();
-        if issecretvalue(primaryInfo and primaryInfo.tooltipData and primaryInfo.tooltipData.type and primaryInfo.tooltipData.type) then
-            return
-        end
-    end
-    return tip:GetItem()
-end
 do
     local function OnTooltipSetItem(self)
-        local name, link, id = GetTooltipItem(self)
+        local name, link, id = self:GetItem()
         ns:ShowItem(link, self)
     end
     local function OnHide(self)
@@ -240,7 +228,8 @@ do
         -- Cata-classic has TooltipDataProcessor, but doesn't actually use the new tooltips
         TooltipDataProcessor.AddTooltipPostCall(Enum.TooltipDataType.Item, function(self, data)
             if tooltips[self] then
-                OnTooltipSetItem(self)
+                local link = data.guid and C_Item.GetItemLinkByGUID(data.guid) or data.hyperlink
+                ns:ShowItem(link, self)
             end
         end)
     end
@@ -297,13 +286,24 @@ do
             bottom = {"TOPLEFT", "TOPRIGHT"},
         },
     }
+    local safecenterscale = function(frame)
+        local scale = frame:GetEffectiveScale()
+        local x, y = frame:GetCenter()
+        if isanyvaluesecret(x, y) then
+            return
+        end
+        if issecretvalue(scale) then
+            return x, y
+        end
+        return x * scale, y * scale
+    end
     function ns:ComputeTooltipAnchors(owner, anchor)
         -- Because I always forget: x is left-right, y is bottom-top
         -- Logic here: our tooltip should trend towards the center of the screen, unless something is stopping it.
         -- If comparison tooltips are shown, we shouldn't overlap them
         local originalOwner = owner
         local x, y = owner:GetCenter()
-        if not (x and y) or issecretvalue(x) then
+        if not (x and y) or issecretvalue(x) or issecretframe(owner) then
             return
         end
         x = x * owner:GetEffectiveScale()
@@ -323,7 +323,7 @@ do
             if comparisonTooltip1:IsShown() or comparisonTooltip2:IsShown() then
                 if comparisonTooltip1:IsShown() and comparisonTooltip2:IsShown() then
                     local c1x, c2x = comparisonTooltip1:GetCenter(), comparisonTooltip2:GetCenter()
-                    if issecretvalue(c1x) then
+                    if isanyvaluesecret(c1x, c2x) then
                         outermostComparisonShown = nil
                     elseif c1x > c2x then
                         -- 1 is right of 2
@@ -336,9 +336,11 @@ do
                     outermostComparisonShown = comparisonTooltip1:IsShown() and comparisonTooltip1 or comparisonTooltip2
                 end
                 if outermostComparisonShown then
-                    local outerx = (outermostComparisonShown:GetCenter() or 0) * (outermostComparisonShown:GetEffectiveScale() or 1)
-                    local ownerx = (owner:GetCenter() or 0) * (owner:GetEffectiveScale() or 1)
-                    if
+                    local outerx = safecenterscale(outermostComparisonShown)
+                    local ownerx = safecenterscale(owner)
+                    if not (outerx and ownerx) then
+                        anchor = "vertical"
+                    elseif
                         -- outermost is right of owner while we're biasing left
                         (biasLeft and outerx > ownerx)
                         or
@@ -403,7 +405,16 @@ hider:Hide()
 local shouldHide = function(owner)
     if not owner then return true end
     if not owner:IsShown() then return true end
-    if not GetTooltipItem(owner) then return true end
+    if _G.C_TooltipInfo then
+        -- GetDisplayedItem compares this:
+        local primaryInfo = owner:GetPrimaryTooltipInfo()
+        if issecretvalue(primaryInfo and primaryInfo.tooltipData and primaryInfo.tooltipData.type) then
+            return true
+        end
+        if not TooltipUtil.GetDisplayedItem(owner) then return true end
+    else
+        if not owner:GetItem() then return true end
+    end
     return false
 end
 hider:SetScript("OnUpdate", function(self)
@@ -441,6 +452,10 @@ end
 function ns:ShowItem(link, for_tooltip)
     if not link then return end
     for_tooltip = for_tooltip or GameTooltip
+    if issecretframe(for_tooltip) then
+        ns.Debug("Suppressed display because of secret", link, for_tooltip:GetName())
+        return
+    end
     local id = tonumber(link:match("item:(%d+)"))
     if not id or id == 0 then return end
     local token = db.tokens and LAT and LAT:ItemIsToken(id)
@@ -518,6 +533,7 @@ function ns:ShowItem(link, for_tooltip)
         if cameraID then
             if isHeld then
                 model = tooltip.models.Weapon
+                self:ResetModel(model)
             else
                 model = tooltip.models.Zoomed
                 model:SetUseTransmogSkin(db.zoomMasked and slot ~= "INVTYPE_HEAD")
@@ -573,6 +589,7 @@ function ns:ShowItem(link, for_tooltip)
         local decorInfo = C_HousingCatalog.GetCatalogEntryInfoByItem(id, true)
         if decorInfo and decorInfo.asset then
             local modelScene = tooltip.models.Decor
+            self:ResetModelScene(modelScene)
             local modelSceneID = decorInfo.uiModelSceneID or Constants.HousingCatalogConsts.HOUSING_CATALOG_DECOR_MODELSCENEID_DEFAULT
             local forceSceneChange = true
             modelScene:TransitionToModelSceneID(modelSceneID, CAMERA_TRANSITION_TYPE_IMMEDIATE, CAMERA_MODIFICATION_TYPE_DISCARD, forceSceneChange)
@@ -594,7 +611,7 @@ function ns:ShowItem(link, for_tooltip)
             local creatureDisplayID, _, _, isSelfMount, _, modelSceneID, animID, spellVisualKitID, disablePlayerMountPreview = C_MountJournal.GetMountInfoExtraByID(mountID)
             if creatureDisplayID then
                 local modelScene = tooltip.models.Mount
-                modelScene:ClearScene()
+                self:ResetModelScene(modelScene)
                 modelScene:SetViewInsets(0, 0, 0, 0)
                 local forceEvenIfSame = true
                 modelScene:TransitionToModelSceneID(modelSceneID, CAMERA_TRANSITION_TYPE_IMMEDIATE, CAMERA_MODIFICATION_TYPE_DISCARD, forceEvenIfSame)
@@ -624,7 +641,7 @@ function ns:ShowItem(link, for_tooltip)
         if displayID and petID then
             local modelScene = tooltip.models.Pet
             local _, loadoutModelSceneID = C_PetJournal.GetPetModelSceneInfoBySpeciesID(petID)
-            modelScene:ClearScene()
+            self:ResetModelScene(modelScene)
             modelScene:SetViewInsets(0, 0, 50, 0)
             modelScene:TransitionToModelSceneID(loadoutModelSceneID, CAMERA_TRANSITION_TYPE_IMMEDIATE, CAMERA_MODIFICATION_TYPE_DISCARD, true)
 
@@ -692,18 +709,42 @@ function ns:HideItem()
     hider:Show()
 end
 
-function ns:ResetModel(model, dressed)
-    -- This sort of works, but with a custom model it keeps some items (shoulders, belt...)
-    -- model:SetAutoDress(db.dressed)
-    -- So instead, more complicated:
-    if db.customModel then
-        model:SetUnit("none")
-        model:SetCustomRace(db.modelRace, db.modelGender)
-    else
-        model:SetUnit("player")
+do
+    local function ResetModelFrame(frame)
+        -- This is mostly in service of avoiding secret-spread
+        -- frame:SetToDefaults() -- this would be best, but is too destructive
+        frame:SetParent(tooltip)
+        frame:SetFrameLevel(tooltip:GetFrameLevel()) -- so the label overlays cover it
+        frame:ClearAllPoints()
+        frame:SetPoint("TOPLEFT", tooltip, "TOPLEFT", 5, -5)
+        frame:SetPoint("BOTTOMRIGHT", tooltip, "BOTTOMRIGHT", -5, 5)
     end
-    model:RefreshCamera()
-    model[dressed and "Dress" or "Undress"](model)
+
+    function ns:ResetModel(model, dressed)
+        ResetModelFrame(model)
+        -- Use the blacked-out model:
+        -- model:SetUseTransmogSkin(true)
+        -- Display in combat pose:
+        -- model:FreezeAnimation(1)
+        -- This sort of works, but with a custom model it keeps some items (shoulders, belt...)
+        -- model:SetAutoDress(db.dressed)
+        -- So instead, more complicated:
+        if db.customModel then
+            model:SetUnit("none")
+            model:SetCustomRace(db.modelRace, db.modelGender)
+        else
+            model:SetUnit("player")
+        end
+        model:RefreshCamera()
+        model[dressed and "Dress" or "Undress"](model)
+    end
+
+    function ns:ResetModelScene(modelScene)
+        ResetModelFrame(modelScene)
+
+        modelScene:ClearScene()
+        modelScene:SetViewInsets(0, 0, 0, 0)
+    end
 end
 
 ns.SLOT_MAINHAND = GetInventorySlotInfo("MainHandSlot")
