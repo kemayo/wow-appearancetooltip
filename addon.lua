@@ -255,7 +255,7 @@ positioner:SetScript("OnUpdate", function(self, elapsed)
     end
     self.elapsed = 0
 
-    local owner, our_point, owner_point = ns:ComputeTooltipAnchors(tooltip.owner, db.anchor)
+    local anchor, owner, our_point, owner_point = ns:ComputeTooltipAnchors(tooltip.owner, db.anchor)
     tooltip:ClearAllPoints()
     if our_point and owner_point then
         tooltip:SetPoint(our_point, owner, owner_point)
@@ -388,7 +388,7 @@ do
             return self:ComputeTooltipAnchors(originalOwner, "vertical")
         end
         -- ns.Debug("ComputeTooltipAnchors", owner:GetName(), primary, secondary)
-        return owner, unpack(points[primary][secondary])
+        return anchor, owner, unpack(points[primary][secondary])
     end
 end
 
