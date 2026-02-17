@@ -269,7 +269,7 @@ do
     demo:SetWidth(43)
     demo:SetScript("OnShow", function(self)
         local previousButton
-        for _, itemLinkOrID in ipairs(ns.CLASSIC and {19019, 19364, 10328, 11122, 23192, 7997, 14047} or {120978, 185060, 253346, 260411, 86079, 257547, 44168, 93031, 248934}) do
+        for _, itemLinkOrID in ipairs(ns.CLASSIC and {19019, 19364, 10328, 11122, 23192, 7997, 14047} or {120978, 185060, 253346, 260411, 86079, 244145, 44168, 93031, 248934}) do
             local button = makeItemButton(self)
             if not previousButton then
                 button:SetPoint("TOPRIGHT")
