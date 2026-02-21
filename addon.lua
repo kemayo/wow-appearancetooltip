@@ -318,10 +318,13 @@ do
         -- If comparison tooltips are shown, we shouldn't overlap them
         local originalOwner = owner
         local x, y = owner:GetCenter()
-        if not (x and y) or issecretvalue(x) or issecretframe(owner) then
+        if not (x and y) or isanyvaluesecret(x, y) or issecretframe(owner) then
             return
         end
-        x = x * owner:GetEffectiveScale()
+        local ownerScale = owner:GetEffectiveScale()
+        if not issecretvalue(ownerScale) then
+            x = x * ownerScale
+        end
         -- the y comparison doesn't need this:
         -- y = y * owner:GetEffectiveScale()
 
@@ -329,8 +332,13 @@ do
         -- we want to follow the direction the tooltip is going, relative to the cursor
         -- print("biasLeft check", x ,"<", GetCursorPosition())
         -- print("biasDown check", y, ">", GetScreenHeight() / 2)
-        biasLeft = x < GetCursorPosition()
-        biasDown = y > GetScreenHeight() / 2
+        local cursorX = GetCursorPosition()
+        local screenHeight = GetScreenHeight()
+        if isanyvaluesecret(cursorX, screenHeight) then
+            return
+        end
+        biasLeft = x < cursorX
+        biasDown = y > screenHeight / 2
 
         local outermostComparisonShown
         if owner.shoppingTooltips then
@@ -393,14 +401,18 @@ do
                 end
             end
         end
-        if
-            anchor ~= "vertical" and
-            not isanyvaluesecret(owner:GetLeft(), tooltip:GetWidth()) and (
-                (primary == "left" and (owner:GetLeft() - tooltip:GetWidth()) < 0)
-                or (primary == "right" and (owner:GetRight() + tooltip:GetWidth() > GetScreenWidth()))
-            )
-        then
-            return self:ComputeTooltipAnchors(originalOwner, "vertical")
+        if anchor ~= "vertical" then
+            local ownerLeft, ownerRight = owner:GetLeft(), owner:GetRight()
+            local tooltipWidth = tooltip:GetWidth()
+            local screenWidth = GetScreenWidth()
+            if not isanyvaluesecret(ownerLeft, ownerRight, tooltipWidth, screenWidth) then
+                if
+                    (primary == "left" and (ownerLeft - tooltipWidth) < 0)
+                    or (primary == "right" and (ownerRight + tooltipWidth > screenWidth))
+                then
+                    return self:ComputeTooltipAnchors(originalOwner, "vertical")
+                end
+            end
         end
         -- ns.Debug("ComputeTooltipAnchors", owner:GetName(), primary, secondary)
         return anchor, owner, unpack(points[primary][secondary])
