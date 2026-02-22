@@ -19,6 +19,14 @@ EventRegistry:RegisterFrameEventAndCallback("TRANSMOG_COLLECTION_SOURCE_ADDED", 
         -- print("Blocked toast: contenttracking")
         return
     end
+    if C_Item.IsCosmeticItem then
+        local itemID = C_Transmog.GetItemIDForSource(itemModifiedAppearanceID)
+        if itemID and C_Item.IsCosmeticItem(itemID) then
+            -- Covered by TRANSMOG_COSMETIC_COLLECTION_SOURCE_ADDED which Blizzard always alerts for
+            -- print("Blocked toast: cosmetic")
+            return
+        end
+    end
     NewCosmeticAlertFrameSystem:AddAlert(itemModifiedAppearanceID)
 end, myname)
 
