@@ -467,10 +467,6 @@ end
 function ns:ShowItem(link, for_tooltip)
     if not link then return end
     for_tooltip = for_tooltip or GameTooltip
-    if issecretframe(for_tooltip) then
-        ns.Debug("Suppressed display because of secret", link, for_tooltip:GetName())
-        return
-    end
     local id = tonumber(link:match("item:(%d+)"))
     if not id or id == 0 then return end
     local token = db.tokens and LAT and LAT:ItemIsToken(id)
@@ -525,6 +521,8 @@ function ns:ShowItem(link, for_tooltip)
 
     local appropriateItem = LAI:IsAppropriate(id)
 
+    -- Get us back to an unattached state
+    tooltip:ClearAllPoints()
     for _, model in pairs(tooltip.models) do
         model:Hide()
     end
