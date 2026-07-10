@@ -302,6 +302,11 @@ do
         },
     }
     local safecenterscale = function(frame)
+        if not frame:IsRectValid() then
+            -- calling GetCenter on a dirty rect forces a layout pass, which can run
+            -- Blizzard OnSizeChanged handlers in our insecure context (secret value errors)
+            return
+        end
         local scale = frame:GetEffectiveScale()
         local x, y = frame:GetCenter()
         if isanyvaluesecret(x, y) then
@@ -317,6 +322,10 @@ do
         -- Logic here: our tooltip should trend towards the center of the screen, unless something is stopping it.
         -- If comparison tooltips are shown, we shouldn't overlap them
         local originalOwner = owner
+        if not owner:IsRectValid() then
+            -- see safecenterscale; retry on the positioner's next update instead
+            return
+        end
         local x, y = owner:GetCenter()
         if not (x and y) or issecretvalue(x) or issecretframe(owner) then
             return
@@ -337,8 +346,9 @@ do
             local comparisonTooltip1, comparisonTooltip2 = unpack( owner.shoppingTooltips )
             if comparisonTooltip1:IsShown() or comparisonTooltip2:IsShown() then
                 if comparisonTooltip1:IsShown() and comparisonTooltip2:IsShown() then
-                    local c1x, c2x = comparisonTooltip1:GetCenter(), comparisonTooltip2:GetCenter()
-                    if isanyvaluesecret(c1x, c2x) then
+                    local c1x = comparisonTooltip1:IsRectValid() and comparisonTooltip1:GetCenter()
+                    local c2x = comparisonTooltip2:IsRectValid() and comparisonTooltip2:GetCenter()
+                    if not (c1x and c2x) or isanyvaluesecret(c1x, c2x) then
                         outermostComparisonShown = nil
                     elseif c1x > c2x then
                         -- 1 is right of 2
