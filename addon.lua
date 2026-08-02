@@ -253,6 +253,10 @@ positioner:SetScript("OnUpdate", function(self, elapsed)
     if self.elapsed < TOOLTIP_UPDATE_TIME then
         return
     end
+    if not tooltip.owner:IsRectValid() then
+        -- The owner isn't laid out yet, so we can't anchor to it
+        return
+    end
     self.elapsed = 0
 
     local anchor, owner, our_point, owner_point = ns:ComputeTooltipAnchors(tooltip.owner, db.anchor)
@@ -322,10 +326,6 @@ do
         -- Logic here: our tooltip should trend towards the center of the screen, unless something is stopping it.
         -- If comparison tooltips are shown, we shouldn't overlap them
         local originalOwner = owner
-        if not owner:IsRectValid() then
-            -- see safecenterscale; retry on the positioner's next update instead
-            return
-        end
         local x, y = owner:GetCenter()
         if not (x and y) or issecretvalue(x) or issecretframe(owner) then
             return
