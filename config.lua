@@ -1,8 +1,20 @@
 local myname, ns = ...
 
+-- local demoButtons = {}
+local function refresh()
+    ns.RefreshOverlayFrames()
+    -- for itemID, button in pairs(demoButtons) do
+    --     ns.CleanButton(button)
+    --     ns.UpdateButtonFromItem(button, Item:CreateFromItemID(itemID), "character")
+    -- end
+end
+
 local function checkboxGetValue(self) return ns.db[self.key] end
 local function checkboxSetChecked(self) self:SetChecked(self:GetValue()) end
-local function checkboxSetValue(self, checked) ns.db[self.key] = checked end
+local function checkboxSetValue(self, checked)
+    ns.db[self.key] = checked
+    refresh()
+end
 local function checkboxOnClick(self)
     local checked = self:GetChecked()
     PlaySound(checked and SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON or SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_OFF)
@@ -136,15 +148,6 @@ end
 -- and the actual config now
 
 local categoryID
-
--- local demoButtons = {}
-local function refresh(_, value)
-    ns.RefreshOverlayFrames()
-    -- for itemID, button in pairs(demoButtons) do
-    --     ns.CleanButton(button)
-    --     ns.UpdateButtonFromItem(button, Item:CreateFromItemID(itemID), "character")
-    -- end
-end
 
 do
     local panel = CreateFrame("Frame", nil, InterfaceOptionsFramePanelContainer)

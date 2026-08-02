@@ -25,14 +25,6 @@ function f:ADDON_LOADED(addon)
 end
 f:RegisterEvent("ADDON_LOADED")
 
-ns.overlayFrames = {}
-
-function ns.RefreshOverlayFrames()
-    for button in pairs(ns.overlayFrames) do
-        ns.PrepareItemButton(button)
-    end
-end
-
 function ns:SetIconAppearance(icon, link, hasAppearance, appearanceFromOtherItem, probablyEnsemble)
     if LAI:IsAppropriate(link) or probablyEnsemble then
         -- this character can use it
@@ -65,7 +57,6 @@ local function PrepareItemButton(button, point, offsetx, offsety)
     end
 
     local overlayFrame = CreateFrame("FRAME", nil, button)
-    ns.overlayFrames[button] = overlayFrame
     overlayFrame:SetAllPoints()
     button.appearancetooltipoverlay = overlayFrame
 
@@ -125,8 +116,23 @@ local function OverlayShouldApplyToItem(link, hasAppearance, appearanceFromOther
         IsRelevantItem(link) and
         (ns.CanTransmogItem(link) or probablyEnsemble)
 end
-local function UpdateOverlay(button, link, ...)
-    if not link then
+-- Every button we've been asked about, with the last item we saw on it, so the
+-- options can be re-applied without waiting for the host UI to redraw.
+local overlayState = {}
+
+-- context is the db key gating this part of the UI ("bags", "loot", ...), or
+-- nil for callers that are always shown. Pass link as nil for an empty slot;
+-- the state is recorded either way so a refresh can bring the overlay back.
+local function UpdateOverlay(button, link, context, ...)
+    local state = overlayState[button]
+    if not state then
+        state = {}
+        overlayState[button] = state
+    end
+    state.link, state.context = link, context
+    state.point, state.offsetx, state.offsety = ...
+
+    if (not link) or (context and not ns.db[context]) then
         if button.appearancetooltipoverlay then
             button.appearancetooltipoverlay:Hide()
         end
@@ -135,7 +141,7 @@ local function UpdateOverlay(button, link, ...)
     local hasAppearance, appearanceFromOtherItem, probablyEnsemble = ns.PlayerHasAppearance(link)
     -- ns.Debug("Considering item", link, hasAppearance, appearanceFromOtherItem, appropriateItem, probablyEnsemble)
     if OverlayShouldApplyToItem(link, hasAppearance, appearanceFromOtherItem, probablyEnsemble) then
-        PrepareItemButton(button, ...)
+        PrepareItemButton(button, state.point, state.offsetx, state.offsety)
         ns:SetIconAppearance(button.appearancetooltipoverlay.icon, link, hasAppearance, appearanceFromOtherItem, probablyEnsemble)
         button.appearancetooltipoverlay:Show()
         return true
@@ -145,20 +151,27 @@ local function UpdateOverlay(button, link, ...)
     return false
 end
 
-local function UpdateButtonFromItem(button, item)
-    if button.appearancetooltipoverlay then button.appearancetooltipoverlay:Hide() end
-    if not ns.db.bags then
-        return
+function ns.RefreshOverlayFrames()
+    for button, state in pairs(overlayState) do
+        UpdateOverlay(button, state.link, state.context, state.point, state.offsetx, state.offsety)
     end
+end
+
+local function UpdateButtonFromItem(button, item)
     if (not item) or item:IsItemEmpty() then
+        UpdateOverlay(button, nil, "bags")
         return
     end
     item:ContinueOnItemLoad(function()
         local link = item:GetItemLink()
         local isBound = item:IsItemInPlayersControl() and C_Item.IsBound(item:GetItemLocation())
-        if not ns.db.bags_unbound or not isBound then
-            UpdateOverlay(button, link)
+        if ns.db.bags_unbound and isBound then
+            -- bags_unbound is applied here rather than in UpdateOverlay because
+            -- it needs the item location, so toggling it only takes effect as
+            -- the bags redraw
+            link = nil
         end
+        UpdateOverlay(button, link, "bags")
     end)
 end
 ns.UpdateButtonFromItem = UpdateButtonFromItem
@@ -231,13 +244,7 @@ hooksecurefunc("MerchantFrame_Update", function()
     for i = 1, limit do
         local frame = _G["MerchantItem"..i.."ItemButton"]
         if frame then
-            if frame.appearancetooltipoverlay then frame.appearancetooltipoverlay:Hide() end
-            if ns.db.merchant then
-                local link = infoFunc(frame:GetID())
-                if link then
-                    UpdateOverlay(frame, link)
-                end
-            end
+            UpdateOverlay(frame, infoFunc(frame:GetID()), "merchant")
         end
     end
 end)
@@ -248,27 +255,19 @@ if _G.LootFrame_UpdateButton then
     hooksecurefunc("LootFrame_UpdateButton", function(index)
         local button = _G["LootButton"..index]
         if not button then return end
-        if button.appearancetooltipoverlay then button.appearancetooltipoverlay:Hide() end
-        if not ns.db.loot then return end
         -- ns.Debug("LootFrame_UpdateButton", button:IsEnabled(), button.slot, button.slot and GetLootSlotLink(button.slot))
+        local link
         if button:IsEnabled() and button.slot then
-            local link = GetLootSlotLink(button.slot)
-            if link then
-                UpdateOverlay(button, link)
-            end
+            link = GetLootSlotLink(button.slot)
         end
+        UpdateOverlay(button, link, "loot")
     end)
 else
     local function handleSlot(frame)
         if not frame.Item then return end
-        if frame.Item.appearancetooltipoverlay then frame.Item.appearancetooltipoverlay:Hide() end
-        if not ns.db.loot then return end
         local data = frame:GetElementData()
-        if not (data and data.slotIndex) then return end
-        local link = GetLootSlotLink(data.slotIndex)
-        if link then
-            UpdateOverlay(frame.Item, link)
-        end
+        local link = data and data.slotIndex and GetLootSlotLink(data.slotIndex)
+        UpdateOverlay(frame.Item, link or nil, "loot")
     end
     LootFrame.ScrollBox:RegisterCallback("OnUpdate", function(...)
         LootFrame.ScrollBox:ForEachFrame(handleSlot)
@@ -279,16 +278,14 @@ end
 
 f:RegisterAddonHook("Blizzard_EncounterJournal", function()
     local function handleSlot(frame)
-        if frame.appearancetooltipoverlay then frame.appearancetooltipoverlay:Hide() end
-        if not ns.db.encounterjournal then return end
+        local link
         if frame:IsShown() then
             local data = frame:GetElementData()
             local itemInfo = data.index and C_EncounterJournal.GetLootInfoByIndex(data.index)
             -- DevTools_Dump(itemInfo)
-            if itemInfo then
-                UpdateOverlay(frame, itemInfo.link, "TOPLEFT", 5, -4)
-            end
+            link = itemInfo and itemInfo.link
         end
+        UpdateOverlay(frame, link, "encounterjournal", "TOPLEFT", 5, -4)
     end
     EncounterJournal.encounter.info.LootContainer.ScrollBox:RegisterCallback("OnUpdate", function(...)
         EncounterJournal.encounter.info.LootContainer.ScrollBox:ForEachFrame(handleSlot)
@@ -419,14 +416,10 @@ end)
 --Bagnon:
 f:RegisterAddonHook("Bagnon", function()
     hooksecurefunc(Bagnon.Item, "Update", function(button)
-        if button and button.appearancetooltipoverlay then button.appearancetooltipoverlay:Hide() end
         local bag = button:GetBag()
         if type(bag) ~= "number" or button:GetClassName() ~= "BagnonContainerItem" then
             local info = button:GetInfo()
-            if info and info.hyperlink then
-                local item = Item:CreateFromItemLink(info.hyperlink)
-                UpdateButtonFromItem(button, item, "bags")
-            end
+            UpdateButtonFromItem(button, info and info.hyperlink and Item:CreateFromItemLink(info.hyperlink))
             return
         end
         UpdateContainerButton(button, bag)
@@ -441,12 +434,8 @@ f:RegisterAddonHook("Butsu", function()
         if items > 0 then
             for i=1, items do
                 local slot = _G["ButsuSlot" .. i]
-                if slot and slot.appearancetooltipoverlay then slot.appearancetooltipoverlay:Hide() end
-                if ns.db.loot then
-                    local link = GetLootSlotLink(i)
-                    if slot and link then
-                        UpdateOverlay(slot, link, "RIGHT", -6)
-                    end
+                if slot then
+                    UpdateOverlay(slot, GetLootSlotLink(i), "loot", "RIGHT", -6)
                 end
             end
         end
@@ -524,11 +513,12 @@ f:RegisterAddonHook("Baganator", function()
     Baganator.API.RegisterCornerWidget(myfullname, "appearancetooltip",
         -- onUpdate
         function(cornerFrame, details)
-            if details.itemLink and (not ns.db.bags_unbound or not details.isBound) then
-                -- todo: a puchased ensemble will be bound and so won't show here...
-                return UpdateOverlay(cornerFrame, details.itemLink)
+            -- todo: a puchased ensemble will be bound and so won't show here...
+            local link = details.itemLink
+            if ns.db.bags_unbound and details.isBound then
+                link = nil
             end
-            return false
+            return UpdateOverlay(cornerFrame, link, "bags")
         end,
         -- onInit
         function(itemButton)
