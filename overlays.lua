@@ -333,7 +333,7 @@ f:RegisterAddonHook("Blizzard_Collections", function()
             local have, need = setCompletion(set.setID)
             text = text .. ns.ColorTextByCompletion((GENERIC_FRACTION_STRING):format(have, need), have / need) .. separator
         end
-        return string.sub(text, 1, -#separator)
+        return string.sub(text, 1, -#separator - 1)
     end
     local function makeOverlay(parent)
        local overlay = CreateFrame("Frame", nil, parent)
