@@ -232,12 +232,11 @@ hooksecurefunc("MerchantFrame_Update", function()
         local frame = _G["MerchantItem"..i.."ItemButton"]
         if frame then
             if frame.appearancetooltipoverlay then frame.appearancetooltipoverlay:Hide() end
-            if not ns.db.merchant then
-                return
-            end
-            local link = infoFunc(frame:GetID())
-            if link then
-                UpdateOverlay(frame, link)
+            if ns.db.merchant then
+                local link = infoFunc(frame:GetID())
+                if link then
+                    UpdateOverlay(frame, link)
+                end
             end
         end
     end
