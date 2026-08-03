@@ -994,7 +994,6 @@ function ns.PlayerHasAppearance(itemLinkOrID)
     -- Warbands were added in 11.0.0 this is now possible.
     local sources = C_TransmogCollection.GetAllAppearanceSources(appearanceID)
     if sources then
-        local known_any = false
         for _, sourceID2 in pairs(sources) do
             if C_TransmogCollection.PlayerHasTransmogItemModifiedAppearance(sourceID2) then
                 -- We know it, and it must be from a different source because of the above check

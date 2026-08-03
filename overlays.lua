@@ -504,7 +504,7 @@ f:RegisterAddonHook("SilverDragon", function()
     end
     SilverDragon.RegisterCallback("AppearanceTooltip", "LootWindowOpened", function(_, window)
         ns.RegisterTooltip(_G["SilverDragonLootTooltip"])
-        if window and window.buttons and #window.buttons then
+        if window and window.buttons then
             for i, button in ipairs(window.buttons) do
                 UpdateOverlay(button, button:GetItem())
             end
