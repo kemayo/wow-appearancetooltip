@@ -522,9 +522,12 @@ function ns:ShowItem(link, for_tooltip)
         end
         if found then
             local _, maybelink = C_Item.GetItemInfo(found)
-            if maybelink then
+            -- found is a bare link when the token has difficulty variants, but
+            -- the model and journal calls below all want a plain itemID
+            local foundID = C_Item.GetItemInfoInstant(found)
+            if maybelink and foundID then
                 link = maybelink
-                id = found
+                id = foundID
             end
             for_tooltip:Show()
         end
@@ -538,11 +541,13 @@ function ns:ShowItem(link, for_tooltip)
         tooltip.item = nil
         return
     end
-    if tooltip.item == id then
+    -- Keyed on the link, not the id: the same item can have different
+    -- appearances depending on its bonuses, e.g. mythic Drape of Iron Sutures
+    if tooltip.item == link then
         return
     end
     local slot, _, _, classID, subclassID, _, _, setID = select(9, C_Item.GetItemInfo(id))
-    tooltip.item = id
+    tooltip.item = link
 
     local appropriateItem = LAI:IsAppropriate(id)
 
