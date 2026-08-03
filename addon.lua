@@ -132,6 +132,7 @@ do
     scrolldown:SetScript("OnClick", function(self, button, down)
         scrollActiveModel(-0.3)
     end)
+    scrolldown:RegisterForClicks("AnyDown", "AnyUp")
 
     local function ClearBindings()
         if InCombatLockdown() then return end
