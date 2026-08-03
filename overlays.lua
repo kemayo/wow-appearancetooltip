@@ -328,7 +328,11 @@ f:RegisterAddonHook("Blizzard_Collections", function()
         local text = ""
         for _, set in ipairs(variants) do
             local have, need = setCompletion(set.setID)
-            text = text .. ns.ColorTextByCompletion((GENERIC_FRACTION_STRING):format(have, need), have / need) .. separator
+            -- a set with no primary appearances has no completion to show, and
+            -- the 0/0 would divide out to a nan that errors in ColorGradient
+            if need > 0 then
+                text = text .. ns.ColorTextByCompletion((GENERIC_FRACTION_STRING):format(have, need), have / need) .. separator
+            end
         end
         return string.sub(text, 1, -#separator - 1)
     end
