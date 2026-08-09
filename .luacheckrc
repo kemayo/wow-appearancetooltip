@@ -47,6 +47,7 @@ read_globals = {
     "C_HousingCatalog",
     "C_Item",
     "C_MountJournal",
+    "C_PaperDollInfo",
     "C_PetJournal",
     "C_PlayerInfo",
     "C_Timer",

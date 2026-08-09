@@ -11,6 +11,8 @@ local LAI = LibStub("LibAppropriateItems-1.0")
 
 -- minor compat:
 local IsDressableItem = _G.IsDressableItem or C_Item.IsDressableItemByID
+-- the bare global only survives behind the loadDeprecationFallbacks cvar
+local GetInventorySlotInfo = C_PaperDollInfo and C_PaperDollInfo.GetInventorySlotInfo or _G.GetInventorySlotInfo
 local issecretvalue = _G.issecretvalue or function() return false end
 local isanyvaluesecret = function(...)
     for i=1, select("#", ...) do
